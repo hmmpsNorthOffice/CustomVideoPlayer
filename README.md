@@ -61,9 +61,7 @@ CVP was tested on an Odyssey Plus HMD in WMR and on a Quest2 using Virtual Deskt
 
 **The UI:**
 
-![](C:\Users\zechm\Pictures\Saved%20Pictures\CV20%20Menu\MenuPic1.jpg)
-
-<!-- ![](Resources/MenuPic1.jpg) -->
+![]((VideoPlayer/Resources/MenuPic1.jpg)
 
 These are the necessary steps needed to configure this mod:  (*Essential steps in bold*)
 
@@ -89,7 +87,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
    
     (note:  If using MSP A or B, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
    
-   ![](C:\Users\zechm\Pictures\Saved%20Pictures\CV20%20Menu\MenuPic2.jpg)
+   ![](VideoPlayer/Resources/MenuPic2.jpg)
 
 <!-- ![](Resources/MenuPic2.jpg) -->
 
