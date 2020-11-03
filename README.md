@@ -278,7 +278,7 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 - Add a screen placement editor in game and make more screen position values customizable and persistant.
 
-- Add user customization of an MSP preset using CustomVideo.ini.
+- Add user customization of an MSP presets in CustomVideoPlayer.ini.
 
 - Add 180 video capability.
 
