@@ -1,0 +1,1163 @@
+﻿#pragma warning disable 649
+// using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.GameplaySetup;
+using BeatSaberMarkupLanguage.MenuButtons;
+using BeatSaberMarkupLanguage.Parser;
+using BS_Utils.Utilities;
+using BS_Utils.Gameplay;
+// using IPA.Utilities;
+using HMUI;
+// using IPA.Utilities;
+using MusicVideoPlayer.UI;
+using MusicVideoPlayer.Util;
+using MusicVideoPlayer.YT;
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+// using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
+using Image = UnityEngine.UI.Image;
+
+namespace MusicVideoPlayer
+{
+    public class VideoMenu : PersistentSingleton<VideoMenu>
+    {
+        #region Fields
+        [UIObject("root-object")]
+        private GameObject root;
+
+        #region Rect Transform
+        [UIComponent("video-details")]
+        private RectTransform videoDetailsViewRect;
+
+        [UIComponent("video-search-results")]
+        private RectTransform videoSearchResultsViewRect;
+        #endregion
+
+        #region Text Mesh Pro
+        [UIComponent("current-video-title")]
+        private TextMeshProUGUI currentVideoTitleText;
+
+        [UIComponent("general-info-message")]
+        private TextMeshProUGUI generalInfoMessageText;
+
+        [UIComponent("no-video-message")]
+        private TextMeshProUGUI noVideoMessageText;
+
+        [UIComponent("current-video-offset")]
+        private TextMeshProUGUI currentVideoOffsetText;
+
+        [UIComponent("current-video-speed")]
+        private TextMeshProUGUI currentVideoSpeedText;
+
+        [UIComponent("preview-button")]
+        private TextMeshProUGUI previewButtonText;
+
+        [UIComponent("delete-button")]
+        private TextMeshProUGUI deleteButtonText;
+
+        [UIComponent("rolling-video-queue-button")]
+        private TextMeshProUGUI rollingVideoQueueEnableButtonText;
+
+        [UIComponent("search-button")]
+        private TextMeshProUGUI searchButtonText;
+
+        [UIComponent("enable-mvp-button")]
+        private TextMeshProUGUI enableMVPButtonText;
+
+        [UIComponent("search-results-loading")]
+        private TextMeshProUGUI searchResultsLoadingText;
+
+        [UIComponent("looping-button")]
+        private TextMeshProUGUI loopingButtonText;
+
+        [UIComponent("video-source-priority-button")]
+        private TextMeshProUGUI vidSourceButtonText;
+
+        [UIComponent("multi-video-button")]
+        private TextMeshProUGUI multiVideoButtonText;
+
+        [UIComponent("rolling-offset-button")]
+        private TextMeshProUGUI rollingOffsetEnableButtonText;
+
+    //    [UIComponent("download-state-text")]                         // merged with delete button
+    //    private TextMeshProUGUI downloadStateText;
+
+        [UIComponent("offset-magnitude-button")]
+        private TextMeshProUGUI offsetMagnitudeButtonText;
+
+        [UIComponent("speed-magnitude-button")]
+        private TextMeshProUGUI speedMagnitudeButtonText;
+        #endregion
+
+        #region Buttons
+        [UIComponent("video-list")]
+        private CustomListTableData customListTableData;
+
+        [UIComponent("offset-decrease-button")]
+        private Button offsetDecreaseButton;
+
+        [UIComponent("offset-increase-button")]
+        private Button offsetIncreaseButton;
+
+        [UIComponent("next-video-button")]
+        private Button nextVideoButton;
+
+        [UIComponent("previous-video-button")]
+        private Button previousVideoButton;
+       
+        [UIComponent("rolling-offset-button")]
+        private Button rollingOffsetEnableButton; 
+
+        [UIComponent("rolling-video-queue-button")]
+        private Button rollingVideoQueueEnableButton;
+
+        [UIComponent("video-source-priority-button")]
+        private Button videoSourcePriorityButton;
+
+        [UIComponent("multi-video-button")]
+        private Button multiVideoButton;
+
+        [UIComponent("delete-button")]
+        private Button deleteButton;
+
+        [UIComponent("download-button")]
+        private Button downloadButton;
+
+        [UIComponent("refine-button")]
+        private Button refineButton;
+
+        [UIComponent("preview-button")]
+        private Button previewButton;
+
+        [UIComponent("looping-button")]
+        private Button loopingButton;
+
+        [UIComponent("search-button")]
+        private Button searchButton;
+        #endregion
+
+        [UIComponent("search-keyboard")]
+        private ModalKeyboard searchKeyboard;
+
+        [UIParams]
+        private BSMLParserParams parserParams;
+
+        private Vector3 videoPlayerDetailScale = new Vector3(0.57f, 0.57f, 1f);
+
+        private Vector3 videoPlayerDetailPosition = new Vector3(-2.35f, 1.7f, 1.3f);
+
+        private VideoData selectedVideo;
+
+        private SongPreviewPlayer songPreviewPlayer;
+
+        private VideoMenuStatus statusViewer;
+
+        private bool isPreviewing = false;
+
+        private enum manualOffsetDeltaEnum { tenth, one, ten, onehundred };
+
+        
+
+        public enum MultiVideoModes { Single, Cloned, Ninety, ThreeSixty };
+
+        public static MultiVideoModes multiVideoMode = MultiVideoModes.Single;
+
+        private manualOffsetDeltaEnum manualOffsetDelta = manualOffsetDeltaEnum.tenth;
+
+        private bool isSpeedDeltaOne = true;
+
+        private bool isActive = false;
+
+        private IPreviewBeatmapLevel selectedLevel;
+
+        private IEnumerator updateSearchResultsCoroutine = null;
+
+        private int selectedCell;
+
+        //Make sure your GameObject has an AudioSource component first
+      //  AudioSource m_AudioSource;
+
+        //Make sure to set an Audio Clip in the AudioSource component
+     //   AudioClip m_AudioClip;
+
+        private bool VMdebugOn = false;
+        #endregion
+
+        public void OnLoad()
+        {
+            Setup();
+        }
+
+        internal void Setup()
+        {
+            YouTubeDownloader.Instance.downloadProgress += VideoDownloaderDownloadProgress;
+            BSEvents.levelSelected += HandleDidSelectLevel;
+            BSEvents.gameSceneLoaded += GameSceneLoaded;
+            songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().First();
+
+            videoDetailsViewRect.gameObject.SetActive(true);
+            videoSearchResultsViewRect.gameObject.SetActive(false);
+
+            statusViewer = root.AddComponent<VideoMenuStatus>();
+            statusViewer.DidEnable += StatusViewerDidEnable;
+            statusViewer.DidDisable += StatusViewerDidDisable;
+
+            Resources.FindObjectsOfTypeAll<MissionSelectionMapViewController>().FirstOrDefault().didActivateEvent += MissionSelectionDidActivate;
+
+        }
+
+        #region Public Methods
+
+        public void LoadVideoSettings(VideoData videoData)
+        {
+            if (isPreviewing)
+            {
+                ScreenManager.Instance.ShowScreen();
+            }
+
+         //   ScreenManager.Instance.HideScreen(true);  // hide all but preview screen
+
+            //   StopPreview(false);  // with this enabled, no more quick preview switching ... might add later to other button actions                            
+
+
+            string tempVideoTitle = "";
+            selectedVideo = (videoData == null) ? VideoLoader.Instance.GetVideo(selectedLevel) : videoData;
+
+            LoadVideoDownloadState();   // also updates delete button text.
+            if (selectedVideo.downloadState == DownloadState.Downloading) return;   // not sure why I was getting crashes during download??
+            // it could be I was changing dl progress/cancel/delete button text or toggling active/inactive ???
+
+            UpdateUseRollingVideoQueueEnableButton();  // also calls UpdateGeneralInfoMessageText();   
+            UpdateVideoSourcePriorityButtonText();
+            UpdateUseRollingOffset();
+            UpdateCloneVideoButton();
+
+            if (selectedVideo != null)         
+            {
+                currentVideoSpeedText.text = String.Format("{0:0.0}", VideoLoader.videoPlaybackSpeed);                          
+                     
+                UpdateOffset(true, true);
+                UpdateEnableMVPButton();
+                UpdateLooping();
+
+                if (selectedVideo.title == "CustomVideo Video")   
+                {
+                    tempVideoTitle = ((VideoLoader.nextVideoNumber + 1) + " of " + VideoLoader.customVideos.Count + "  " + VideoLoader.customVideos[VideoLoader.nextVideoNumber].filename);
+                       
+                    nextVideoButton.gameObject.SetActive(true);
+                    previousVideoButton.gameObject.SetActive(true);
+                    UpdateUseRollingOffset();
+
+                    deleteButton.interactable = false;            
+                    previewButton.interactable = true;
+                }
+                else { 
+
+                    nextVideoButton.gameObject.SetActive(false);
+                    previousVideoButton.gameObject.SetActive(false);
+
+                    if (selectedVideo.downloadState == DownloadState.Downloaded)
+                    {
+                        tempVideoTitle = $"[{selectedVideo.duration}] {selectedVideo.title} by {selectedVideo.author}";
+                        deleteButton.interactable = true;
+                        previewButton.interactable = true;
+                    }
+                }
+            }
+            else
+            {
+
+                deleteButton.interactable = false;
+                loopingButton.interactable = false;
+                previewButton.interactable = false;
+                tempVideoTitle = "No Video Found";
+                
+                StopPreview(false);
+            }
+
+            if (VideoLoader.numberOfCustomVideos == 0)   
+            {
+
+                VideoLoader.rollingVideoQueueEnable = false;
+                VideoLoader.loadLocalVideosFirst = true;
+                nextVideoButton.gameObject.SetActive(false);
+                previousVideoButton.gameObject.SetActive(false);
+                videoSourcePriorityButton.gameObject.SetActive(false);
+            }
+
+            currentVideoTitleText.text = TruncateAtWord(tempVideoTitle, 50);
+
+        }
+
+        public void Activate()
+        {
+            isActive = true;
+            ScreenManager.Instance.ShowScreen();       
+            ChangeView(false);
+        }
+
+        public void Deactivate()
+        {
+            StopPreview(false);
+
+            isActive = false;
+            selectedVideo = null;
+
+            ScreenManager.Instance.SetPlacement(MVPSettings.instance.PlacementMode);
+
+        }
+        #endregion
+
+        #region Private Methods
+
+        private void SetPreviewState()
+        {
+            if (isPreviewing)
+            {
+                previewButtonText.text = "Stop";
+            }
+            else
+            {
+                previewButtonText.text = "Preview";
+            }
+        }
+
+        private void StopPreview(bool stopPreviewMusic)
+        {
+            isPreviewing = false;
+            ScreenManager.Instance.PrepareVideo(selectedVideo);   
+
+            if(stopPreviewMusic)
+            {
+                songPreviewPlayer.FadeOut();
+            }
+
+            SetPreviewState();
+        }
+
+        private void ChangeView(bool searchView)
+        {
+            StopPreview(false);    
+            ResetSearchView();
+            videoDetailsViewRect.gameObject.SetActive(!searchView);
+            videoSearchResultsViewRect.gameObject.SetActive(searchView);
+
+            
+            if (!searchView)
+            {
+                parserParams.EmitEvent("hide-keyboard");
+
+                if(isActive)
+                {
+                    ScreenManager.Instance.SetScale(videoPlayerDetailScale);
+                    ScreenManager.Instance.SetPosition(videoPlayerDetailPosition);
+                    ScreenManager.Instance.SetRotation(videoDetailsViewRect.transform.eulerAngles);
+                }
+
+                LoadVideoSettings(selectedVideo);
+            }
+            else
+            {
+                ScreenManager.Instance.SetPlacement(MVPSettings.instance.PlacementMode);
+            }
+        }
+
+        private void ResetSearchView()
+        {
+            if (updateSearchResultsCoroutine != null)
+            {
+                StopCoroutine(updateSearchResultsCoroutine);
+            }
+
+            StopCoroutine(SearchLoading());
+
+            if (customListTableData.data != null || customListTableData.data.Count > 0)
+            {
+                customListTableData.data.Clear();
+                customListTableData.tableView.ReloadData();
+            }
+
+            selectedCell = -1;
+        }
+        
+        private void UpdateUseRollingOffset()
+        {
+            if (VideoLoader.rollingOffsetEnable)
+            {
+                rollingOffsetEnableButtonText.text = "Rolling Offset"; 
+            }
+            else 
+            {          
+                rollingOffsetEnableButtonText.text = "Fixed Offset";
+            }
+        }
+
+        private void UpdateLooping()
+        {
+            // looping is always enabled when using rolling offset
+
+            if (selectedVideo != null)
+            {
+                if (selectedVideo.loop || VideoLoader.rollingOffsetEnable)
+                {
+                    loopingButtonText.text = "Loop";
+                }
+                else
+                {
+                    loopingButtonText.text = "Once";
+                }
+            }
+
+            loopingButton.interactable = !VideoLoader.rollingOffsetEnable;
+        }
+
+        private void UpdateVideoSourcePriorityButtonText()
+        {
+            vidSourceButtonText.text = VideoLoader.loadLocalVideosFirst ? "Local First" : "Custom First";
+
+        }
+
+        private void UpdateCloneVideoButton()
+        {
+
+            switch (multiVideoMode)
+            {
+                case MultiVideoModes.Single:
+                    multiVideoButtonText.text = "One Video";
+                    break;
+                case MultiVideoModes.Cloned:
+                    multiVideoButtonText.text = "Two Videos";
+                    break;
+                case MultiVideoModes.Ninety:
+                    multiVideoButtonText.text = "Ninety";
+                    break;
+                case MultiVideoModes.ThreeSixty:
+                    multiVideoButtonText.text = "360";
+                    break;
+
+            }
+        }
+
+        public void ResetOffset()
+        {
+            if(VideoLoader.rollingOffsetEnable)
+            {
+                VideoLoader.globalRollingOffset = 0;
+                MVPSettings.instance.RollingOffset = 0;  // resets the value in mvp.ini
+            }
+            else
+            {
+                selectedVideo.offset = 0;
+
+                if (selectedVideo.title != "CustomVideo Video")
+                {
+                    Save();    // save to video.json
+                }
+                else
+                {
+                    VideoLoader.customVideos[VideoLoader.nextVideoNumber].customVidOffset = selectedVideo.offset;
+                }
+            }
+        
+            UpdateOffset(true, true);
+        }
+        
+        public void UpdateOffset(bool isDecreasing, bool updateOffsetDisplayOnly)
+        {
+            int magnitude = 0;  // if updateOffsetDisplayOnly, this will remain the multiplier
+
+            if(!updateOffsetDisplayOnly)
+            { 
+                switch(manualOffsetDelta) 
+                {                           
+                    case manualOffsetDeltaEnum.tenth:
+                        magnitude = 100;
+                        break;
+                    case manualOffsetDeltaEnum.one:
+                    magnitude = 1000;
+                        break;
+                    case manualOffsetDeltaEnum.ten:
+                    magnitude = 10000;
+                        break;
+                    case manualOffsetDeltaEnum.onehundred:
+                    magnitude = 100000;
+                        break;
+                }
+            }
+
+            magnitude = isDecreasing ? magnitude * -1 : magnitude;
+          
+            if(VideoLoader.rollingOffsetEnable)    // *vz* global offset conditional
+            {
+                VideoLoader.globalRollingOffset += magnitude;
+                currentVideoOffsetText.text = (String.Format("{0:0.0}", (VideoLoader.globalRollingOffset / 1000f)) + "*");
+            }
+            else 
+            {
+                selectedVideo.offset += magnitude;
+                currentVideoOffsetText.text = String.Format("{0:0.0}", (selectedVideo.offset / 1000f));
+                if(!updateOffsetDisplayOnly)
+                { 
+                    if (selectedVideo.title != "CustomVideo Video")
+                        {
+                            Save();    // save to video.json
+                        }
+                        else
+                        {
+                            // save offset for CustomVideo in list ... not currently saved between sessions
+                            VideoLoader.customVideos[VideoLoader.nextVideoNumber].customVidOffset = selectedVideo.offset;
+                        }
+                    }
+            }             
+        }
+        
+        public void UpdateSpeed(bool isDecreasing)
+        {
+            float magnitude = isSpeedDeltaOne ? 1f : 0.1f;   
+            magnitude = isDecreasing ? magnitude * -1f : magnitude;
+
+            float speedDelta = VideoLoader.videoPlaybackSpeed + magnitude;
+            if(speedDelta >= 0.1f) VideoLoader.videoPlaybackSpeed = speedDelta;   // only change value when it creates valid result
+
+         //   if(VideoLoader.videoPlaybackSpeed < 0.1f) VideoLoader.videoPlaybackSpeed = 0.1f;   // set minnimum value
+            MVPSettings.instance.VideoPlaybackSpeed = VideoLoader.videoPlaybackSpeed;          // save to mvp.ini
+               
+            currentVideoSpeedText.text = String.Format("{0:0.0}", VideoLoader.videoPlaybackSpeed);
+            UpdateGeneralInfoMessageText();
+
+
+        }
+
+        private void Save()
+        {
+            if (selectedVideo != null && selectedVideo.title != "CustomVideo Video")
+            {
+                StopPreview(false);   
+                VideoLoader.SaveVideoToDisk(selectedVideo);
+            }
+        }
+        
+        private void UpdateEnableMVPButton()
+        {
+            if(ScreenManager.showVideo)
+            {
+                enableMVPButtonText.SetText("MVP On");
+            }
+            else 
+            {
+                enableMVPButtonText.SetText("MVP Off");
+            }
+        }
+
+        private void UpdateUseRollingVideoQueueEnableButton()
+        {
+
+            if (VideoLoader.rollingVideoQueueEnable && (selectedVideo.title == "CustomVideo Video" || selectedVideo == null))
+            {
+                rollingVideoQueueEnableButtonText.SetText("All Videos");
+                rollingVideoQueueEnableButton.interactable = true;
+            }
+            else if (!VideoLoader.rollingVideoQueueEnable && (selectedVideo.title == "CustomVideo Video" || selectedVideo == null))
+            {
+                rollingVideoQueueEnableButtonText.SetText("One Video");
+                rollingVideoQueueEnableButton.interactable = true;
+            }
+            else
+            {
+                rollingVideoQueueEnableButtonText.SetText("One Video");
+                rollingVideoQueueEnableButton.interactable = false;
+            }
+            UpdateGeneralInfoMessageText();
+            
+        }
+
+        private void UpdateDeleteButton(string deleteButtonMessage)
+        {
+            // deleteButtonMessage is sent from both youtube downloading method and video delete action
+            if (selectedVideo.downloadState == DownloadState.Downloading) 
+            {
+
+                deleteButtonText.SetText(deleteButtonMessage);
+            }
+            else if (selectedVideo.downloadState == DownloadState.NotDownloaded)
+            {
+                deleteButtonText.SetText("Re-Download");
+            }
+            else
+            {
+                deleteButtonText.SetText("Delete");
+            }         
+        }
+
+       
+        private void UpdateGeneralInfoMessageText()
+        {
+            string multiVideoInfo = "";
+            
+            if(VideoLoader.rollingVideoQueueEnable && !VideoLoader.rollingOffsetEnable && selectedVideo.title == "CustomVideo Video")
+            {
+                multiVideoInfo = "Video queue advances each play";
+            }
+            else if(VideoLoader.rollingVideoQueueEnable && VideoLoader.rollingOffsetEnable && selectedVideo.title == "CustomVideo Video")
+            {
+                multiVideoInfo = "Video queue advances and *offset adjusts " + ((int)Math.Round((VideoLoader.rollingOffsetAmount*VideoLoader.videoPlaybackSpeed/1000))) + " sec each play";
+            }
+            else if((!VideoLoader.rollingVideoQueueEnable || selectedVideo.title != "CustomVideo Video" ) && VideoLoader.rollingOffsetEnable)
+            {
+                multiVideoInfo = "Video *offset adjusts by " + ((int)Math.Round((VideoLoader.rollingOffsetAmount*VideoLoader.videoPlaybackSpeed/1000))) + " sec each play";
+            }
+
+            generalInfoMessageText.text = multiVideoInfo;
+        }
+ 
+
+        private void LoadVideoDownloadState()
+        {
+            string state = "Unknown";   
+
+            if (selectedVideo != null)
+            {
+                switch (selectedVideo.downloadState)
+                {
+                    case DownloadState.NotDownloaded:
+                        state = "No Video";
+                        break;
+                    case DownloadState.Queued:
+                        state = "Queued";
+                        break;
+                    case DownloadState.Downloading:
+                        state = $"Prog: {selectedVideo.downloadProgress * 100}% | Cancel";
+                        break;
+                    case DownloadState.Downloaded:
+                        state = "Downloaded";
+                        break;
+                    case DownloadState.Cancelled:
+                        state = "Cancelled";
+                        break;
+                }
+                               
+                UpdateDeleteButton(state);
+            }
+  
+        ///    downloadStateText.text = (selectedVideo.title == "CustomVideo Video") ? "CustomVideo Video" : state;
+
+         //   Plugin.logger.Debug("abc selectedVideo.title =");
+         //   Plugin.logger.Debug("selectedVideo.title = " + selectedVideo.title);
+            // downloadStateText.text = "Download Progress: " + state;      original code
+        }
+
+        private IEnumerator UpdateSearchResults(List<YTResult> results)
+        {
+            List<CustomListTableData.CustomCellInfo> videos = new List<CustomListTableData.CustomCellInfo>();
+
+            foreach (var result in results)
+            {
+                string description = $"[{result.duration}] {result.description}";
+                var item = new CustomListTableData.CustomCellInfo(result.title, description);
+
+                UnityWebRequest request = UnityWebRequestTexture.GetTexture(result.thumbnailURL);
+                yield return request.SendWebRequest();
+                if (request.isNetworkError || request.isHttpError)
+                    Debug.Log(request.error);
+                else
+                    item.icon = ((DownloadHandlerTexture)request.downloadHandler).texture;
+
+                videos.Add(item);
+            }
+
+            customListTableData.data = videos;
+            customListTableData.tableView.ReloadData();
+
+            refineButton.interactable = true;
+            searchResultsLoadingText.gameObject.SetActive(false);
+        }
+
+        private IEnumerator SearchLoading()
+        {
+            int count = 0;
+            string loadingText = "Loading Results";
+            searchResultsLoadingText.gameObject.SetActive(true);
+
+            while (searchResultsLoadingText.gameObject.activeInHierarchy)
+            {
+                string periods = string.Empty;
+                count++;
+
+                for (int i = 0; i < count; i++)
+                {
+                    periods += ".";
+                }
+
+                if (count == 3)
+                {
+                    count = 0;
+                }
+
+                searchResultsLoadingText.SetText(loadingText + periods);
+
+                yield return new WaitForSeconds(0.5f);
+            }
+        }
+
+        private string TruncateAtWord(string value, int maxLength)      
+        {
+            if (value == null || value.Trim().Length <= maxLength)
+                return value;
+
+            string ellipse = "...";
+            char[] truncateChars = new char[] { ' ', ',' };
+            int index = value.Trim().LastIndexOfAny(truncateChars);
+
+            while ((index + ellipse.Length) > maxLength)
+                index = value.Substring(0, index).Trim().LastIndexOfAny(truncateChars);
+
+            if (index > 0)
+                return value.Substring(0, index) + ellipse;
+
+            return value.Substring(0, maxLength - ellipse.Length) + ellipse;
+        }
+
+        #endregion
+
+        #region Actions
+
+        [UIAction("on-enable-rolling-offset")]
+        private void OnEnableRollingOffsetAction()
+        {
+            VideoLoader.rollingOffsetEnable = !VideoLoader.rollingOffsetEnable;
+            UpdateUseRollingOffset();
+            UpdateOffset(true, true);
+
+            UpdateLooping();
+            UpdateGeneralInfoMessageText();
+            MVPSettings.instance.rollingOffsetEnable = VideoLoader.rollingOffsetEnable;  // updates mvp.ini
+        }
+
+        [UIAction("on-looping-action")]
+        private void OnLoopingAction()
+        {
+            selectedVideo.loop = !selectedVideo.loop;
+            UpdateLooping();
+            Save(); 
+        }
+        
+        [UIAction("on-video-source-priority-action")]
+        private void OnVideoSourcePriorityAction()
+        {
+            VideoLoader.loadLocalVideosFirst = !VideoLoader.loadLocalVideosFirst;
+            selectedVideo = null;
+            ChangeView(false);       // this calls LoadVideoSettings which calls getvideo
+        }
+        
+        [UIAction("on-multi-video-action")]
+        private void OnCloneVideoAction()
+        {
+            switch (multiVideoMode)
+            {
+                case MultiVideoModes.Single:
+                    multiVideoMode = MultiVideoModes.Cloned;
+                    break;
+                case MultiVideoModes.Cloned:
+                    multiVideoMode = MultiVideoModes.Ninety;
+                    break;
+                case MultiVideoModes.Ninety:
+                    multiVideoMode = MultiVideoModes.ThreeSixty;
+                    break;
+                case MultiVideoModes.ThreeSixty:
+                    multiVideoMode = MultiVideoModes.Single;
+                    break;
+
+            }
+
+            UpdateCloneVideoButton();
+
+
+            // not done in switch statement above since too much delay prevents setting menu update
+            if (multiVideoMode == MultiVideoModes.Cloned)            // Four screen initialization is all done locally in ScreenManager.Prepare#Screen()
+            {
+                ScreenManager.video2URL = VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoPath;  // selectedVideo.videoPath;
+                ScreenManager.video2Placement = MVPSettings.instance.PlacementMode; // ScreenManager.placement; //  VideoPlacement.vz_Back_M;
+                ScreenManager.video2Speed = VideoLoader.videoPlaybackSpeed;
+                ScreenManager.video2Offset = (double) (selectedVideo.offset / 1000);
+            }
+            else
+            {
+                ScreenManager.video2URL = "not set";
+            }          
+        }
+
+        [UIAction("on-offset-magnitude-action")]
+        private void OnOffsetMagnitudeAction()
+        {
+            switch(manualOffsetDelta) 
+            {                           
+                case manualOffsetDeltaEnum.tenth:
+                    manualOffsetDelta = manualOffsetDeltaEnum.one;
+                    offsetMagnitudeButtonText.text = "1 sec";
+                    break;
+                case manualOffsetDeltaEnum.one:
+                    manualOffsetDelta = manualOffsetDeltaEnum.ten;
+                    offsetMagnitudeButtonText.text = "10 sec";
+                    break;
+                case manualOffsetDeltaEnum.ten:
+                    manualOffsetDelta = manualOffsetDeltaEnum.onehundred;
+                    offsetMagnitudeButtonText.text = "100 sec";
+                    break;
+                case manualOffsetDeltaEnum.onehundred:
+                    manualOffsetDelta = manualOffsetDeltaEnum.tenth;
+                    offsetMagnitudeButtonText.text = "0.1 sec";
+                    break;
+            }
+        }
+
+        [UIAction("on-speed-magnitude-action")]
+        private void OnSpeedMagnitudeAction()
+        {
+         
+            if(ScreenManager.debugOn)
+            { 
+                string path = @"c:\temp\MyTest.txt";
+                File.WriteAllLines(path, ScreenManager.debugList);
+            }
+
+            isSpeedDeltaOne = !isSpeedDeltaOne;
+
+            if(isSpeedDeltaOne)
+            {
+                speedMagnitudeButtonText.text = "+1";  
+            }
+            else
+            {
+                speedMagnitudeButtonText.text = "+0.1";
+            }
+        }
+
+        [UIAction("on-offset-decrease-action")]
+        private void OnOffsetDecreaseAction()
+        {
+            UpdateOffset(true, false);
+        }
+
+        [UIAction("on-offset-increase-action")]
+        private void OnOffsetIncreaseAction()
+        {
+            UpdateOffset(false, false);
+        }
+
+        [UIAction("on-offset-reset-action")]
+        private void OnOffsetResetAction()
+        {
+            ResetOffset();
+        }
+
+        [UIAction("on-speed-decrease-action")]
+        private void OnSpeedDecreaseAction()
+        {
+            UpdateSpeed(true);
+        }
+
+        [UIAction("on-speed-increase-action")]
+        private void OnSpeedIncreaseAction()
+        {
+            UpdateSpeed(false);
+        }
+
+        [UIAction("on-next-video-action")]
+        private void OnNextVideoAction()
+        {
+                  
+            VideoLoader.nextVideoNumber++;  
+            if (VideoLoader.nextVideoNumber >= (VideoLoader.numberOfCustomVideos-1)) VideoLoader.nextVideoNumber = 0;
+
+            LoadVideoSettings(null);   
+
+            if (isPreviewing)
+            {
+                ScreenManager.Instance.PrepareVideo(selectedVideo);
+                ScreenManager.Instance.PlayVideo(true);
+                songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+            }
+        }
+
+        [UIAction("on-previous-video-action")]
+        private void OnPreviousVideoAction()
+        {
+      
+            VideoLoader.nextVideoNumber--;  
+            if (VideoLoader.nextVideoNumber < 0) VideoLoader.nextVideoNumber = VideoLoader.numberOfCustomVideos - 1;
+
+            LoadVideoSettings(null);   
+
+            if (isPreviewing)
+            {
+                ScreenManager.Instance.PrepareVideo(selectedVideo);
+                ScreenManager.Instance.PlayVideo(true);
+                songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+            }
+        }
+
+        [UIAction("on-rolling-video-queue-action")]
+        private void OnUseRollingQueueAction()
+        {
+            if(VideoLoader.rollingVideoQueueEnable)
+            {
+                VideoLoader.rollingVideoQueueEnable = false;
+                MVPSettings.instance.rollingVideoQueueEnable = false;
+            }
+            else
+            {
+                VideoLoader.rollingVideoQueueEnable = true;
+                MVPSettings.instance.rollingVideoQueueEnable = true;
+            }
+         
+            UpdateUseRollingVideoQueueEnableButton();        
+        }
+
+        [UIAction("on-delete-action")]
+        private void OnDeleteAction()
+        {
+       
+         if(selectedVideo != null)
+            {
+
+                if(selectedVideo.downloadState == DownloadState.Downloading)
+                {
+                    YouTubeDownloader.Instance.DequeueVideo(selectedVideo);
+                }
+                else if(selectedVideo.downloadState == DownloadState.NotDownloaded) // Download from video.json if only video not there
+                {
+                    YouTubeDownloader.Instance.EnqueueVideo(selectedVideo);
+                    //VideoLoader.Instance.AddVideo(selectedVideo);
+                }
+                else
+                {
+                    VideoLoader.Instance.DeleteVideo(selectedVideo);
+                    Plugin.logger.Debug("OnDeleteAction in VideoMenu.cd reached");
+                    deleteButton.interactable = false;   
+                }
+
+                LoadVideoSettings(null);
+              //  UpdateDeleteButton("Video Deleted");    
+            }             
+
+           // Plugin.logger.Debug("OnDeleteAction in VideoMenu.cd reached");
+        }
+
+        [UIAction("on-preview-action")]
+        private void OnPreviewAction()
+        {
+            if (isPreviewing)
+            {
+                StopPreview(true);
+            }
+            else
+            {
+                isPreviewing = true;
+                ScreenManager.Instance.PrepareVideo(selectedVideo);
+                ScreenManager.Instance.PlayVideo(true);
+                songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+            }
+
+            SetPreviewState();
+        }
+        
+        [UIAction("on-enable-mvp-action")]
+        private void OnEnableMVPAction()
+        {
+            ScreenManager.showVideo = !ScreenManager.showVideo;
+            UpdateEnableMVPButton();
+
+            MVPSettings.instance.ShowVideoSettings = ScreenManager.showVideo;  // update mvp.ini
+        }
+
+        [UIAction("on-search-action")]
+        private void OnSearchAction()
+        {
+            VideoLoader.loadLocalVideosFirst = true;
+            ChangeView(true);
+              
+            searchKeyboard.SetText(selectedLevel.songName + " - " + selectedLevel.songAuthorName);
+            parserParams.EmitEvent("show-keyboard"); 
+        }
+
+        [UIAction("on-back-action")]
+        private void OnBackAction()
+        {
+            ChangeView(false);
+        }
+
+        [UIAction("on-select-cell")]
+        private void OnSelectCell(TableView view, int idx)
+        {
+            if(customListTableData.data.Count > idx)
+            {
+                selectedCell = idx;
+                downloadButton.interactable = true;
+                Plugin.logger.Debug($"Selected Cell: {YouTubeSearcher.searchResults[idx].ToString()}");
+            }
+            else
+            {
+                downloadButton.interactable = false; 
+                selectedCell = -1;
+            }
+        }
+
+        [UIAction("on-download-action")]
+        private void OnDownloadAction()
+        {
+
+            if (!VideoLoader.loadLocalVideosFirst)
+            {
+                VideoLoader.loadLocalVideosFirst = true;
+                UpdateVideoSourcePriorityButtonText();
+            }
+       
+            if (selectedCell >= 0)
+            {
+                VideoData data = new VideoData(YouTubeSearcher.searchResults[selectedCell], selectedLevel);
+                YouTubeDownloader.Instance.EnqueueVideo(data);
+                VideoLoader.Instance.AddVideo(data);
+            }
+        }
+
+        [UIAction("on-refine-action")]
+        private void OnRefineAction()
+        {
+            OnSearchAction();
+        }
+
+        [UIAction("on-query")]
+        private void OnQueryAction(string query)
+        {
+            ResetSearchView();
+            downloadButton.interactable = false;
+            refineButton.interactable = false;
+            StartCoroutine(SearchLoading());
+
+            YouTubeSearcher.Search(query, () =>
+            {
+                updateSearchResultsCoroutine = UpdateSearchResults(YouTubeSearcher.searchResults);
+                StartCoroutine(updateSearchResultsCoroutine);
+            });
+        }
+
+        #endregion
+
+        #region Youtube Downloader
+        private void VideoDownloaderDownloadProgress(VideoData video)
+        {
+         if (selectedLevel == video.level)
+            {
+           //     Plugin.logger.Debug("dl progress:");
+           //     Plugin.logger.Debug("video.title: " + video.downloadState.ToString());
+                selectedVideo = video;
+                ChangeView(false);   // this calls LoadVideoSettings(selectedvideo)
+                videoDetailsViewRect.gameObject.SetActive(true);
+                videoSearchResultsViewRect.gameObject.SetActive(false);        
+            }   
+        }
+        #endregion
+
+        #region BS Events
+        public void HandleDidSelectLevel(LevelCollectionViewController sender, IPreviewBeatmapLevel level)
+        {  
+            selectedLevel = level;
+            selectedVideo = null;
+            ChangeView(false);
+        }
+
+        private void GameSceneLoaded()
+        {
+         //   StopAllCoroutines();
+
+            if(isPreviewing)
+            {
+                ScreenManager.Instance.HideScreen(false);
+            }
+            else
+            {
+                selectedVideo = VideoLoader.Instance.GetVideo(selectedLevel);
+                ScreenManager.Instance.PrepareVideo(selectedVideo);
+            }
+
+            /*   trying to get song length
+             *   Plugin.logger.Debug("123 ...");   the following doesn't work ... either takes too long or just fails.
+
+                   //Fetch the AudioSource from the GameObject
+                   m_AudioSource = GetComponent<AudioSource>();
+
+                   //Set the original AudioClip as this clip
+                   m_AudioClip = m_AudioSource.clip;
+
+                   //Output the current clip's length
+                   Plugin.logger.Debug("speed decreased ...");
+                   Plugin.logger.Debug("Audio clip length : " + m_AudioSource.clip.length);
+                   //     Debug.Log("Audio clip length : " + m_AudioSource.clip.length); */
+
+
+            ScreenManager.Instance.TryPlayVideo();
+        }
+
+        #endregion
+
+        #region Events
+        private void MissionSelectionDidActivate(bool firstActivation, ViewController.ActivationType activationType)
+        {
+            selectedVideo = null;
+            selectedLevel = null;
+            Activate();
+        }
+
+        private void StatusViewerDidEnable(object sender, EventArgs e)
+        {
+            Activate();
+        }
+
+        private void StatusViewerDidDisable(object sender, EventArgs e)
+        {
+            Deactivate();
+        }
+        #endregion
+
+        #region Classes
+        public class VideoMenuStatus : MonoBehaviour
+        {
+            public event EventHandler DidEnable;
+            public event EventHandler DidDisable;
+
+            void OnEnable()
+            {
+                var handler = DidEnable;
+
+                if(handler != null)
+                {
+                    handler(this, EventArgs.Empty);
+                }
+            }
+
+            void OnDisable()
+            {
+                var handler = DidDisable;
+
+                if (handler != null)
+                {
+                    handler(this, EventArgs.Empty);
+                }
+            }
+        }
+        #endregion
+    }
+}

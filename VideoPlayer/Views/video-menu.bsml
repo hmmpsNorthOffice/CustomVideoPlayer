@@ -1,0 +1,94 @@
+<bg id='root-object' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+  <bg id='video-details'>
+    <horizontal pad='0'>
+      <vertical child-control-width='false' horizontal-fit='PreferredSize' vertical-fit='PreferredSize'>
+        <vertical id='current-video-player' pref-height='27' pref-width='28' pad-left='30'></vertical>
+          <vertical>
+          <horizontal pad-top='10' pad-left='15'>
+            <text id='general-info-message' word-wrapping='true' font-align='Left' text=' ' overflow-mode='Ellipsis' font-size='3'></text>
+          </horizontal>    
+            <vertical pad-bottom='25' pad-left='15' preferred-width='70' align='left'>
+              <!--  preferred-width='80' -->
+            <horizontal spacing='1' horizontal-fit='PreferredSize'>
+              <button id='previous-video-button' hover-hint='Previous Video' text='Previous' font-align='Center' pad='1' on-click='on-previous-video-action' all-uppercase='false' preferred-height='7' pref-width='18' font-size='3'/>
+              <text id='current-video-title' text ='No Map Selected' font-align='Center' font-size='3' overflow-mode='Ellipsis'></text>
+              <button id='next-video-button' hover-hint='Next Video' text='Next' font-align='Center' pad='1' on-click='on-next-video-action' all-uppercase='false' pref-height='7' pref-width='18' font-size='3'/>
+              
+            </horizontal>
+            </vertical>
+          </vertical>
+        </vertical>
+  
+      <vertical pad-top='20' preferred-width='50' pad-bottom='45' pad-right='10'>
+        <horizontal horizontal-fit='PreferredSize' align='left'>
+          <text id='offset-text' text='Offset' align='Left' font-size='3'></text>
+          <button id='offset-decrease-button' font-size='3' hover-hint='Starts Video Later' text='-' pad='1' on-click='on-offset-decrease-action'/>
+          <text id='current-video-offset' text='0.0' font-size='4' align='Center'></text>
+          <button id='offset-increase-button' font-size='3' hover-hint='Starts Video Earlier' text='+' pad='1' on-click='on-offset-increase-action' all-uppercase='false'/>
+          <button id='offset-magnitude-button' text='0.1' on-click='on-offset-magnitude-action' pad='1' font-size='3'/>
+          <button id='offset-reset-button' hover-hint='Resets offset to zero' text='R' pad='1' on-click='on-offset-reset-action' all-uppercase='false' font-size='3'/> 
+        </horizontal>
+ 
+        <horizontal  horizontal-fit='PreferredSize' align='left'>
+          <text id='speed-text' text='Speed' align='Left' font-size='3'></text>
+          <button id='speed-decrease-button' font-size='3' hover-hint='Decrease Speed' text='-' pad='1' on-click='on-speed-decrease-action' />
+          <text id='current-video-speed' text='1.0'  align='Center'></text>    
+          <button id='speed-increase-button' font-size='3' hover-hint='Increase Speed' text='+' pad='1' on-click='on-speed-increase-action' />
+          <button id='speed-magnitude-button' hover-hint='Change Speed Multiplier' text='+1' on-click='on-speed-magnitude-action' font-align='Center' pad='1' font-size='3'/>
+          <button id='speed-reset-button' hover-hint='Resets speed to one' text='R' on-click='on-speed-reset-action' pad='1' font-size='3' />
+        </horizontal>
+        <horizontal align='left' pad-right='5' pad-left='15'>
+          <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement"></dropdown-list-setting>
+        </horizontal>
+        <horizontal pad-right='10' spacing='1' pad-top='2'>
+          <modifier text='RVQ'  bind-value='true' value='rollingVideoQueueEnableUI' on-change="set-rolling-video-queue" hover-hint='Rolling Video Queue - Video queue advances each play' source="CustomVideoPlayer.Resources.arrow ring white.png" pref-height='6' font-size='3' pad-right='1'/>
+          <modifier  text="Refl"  bind-value='true' value="add-screen-reflection" on-change="add-screen-reflection-action"  hover-hint="Screen Reflection - A second screen creates a mirror effect" source="CustomVideoPlayer.Resources.reflect128.png" pref-height='6' font-size='3'/>
+        </horizontal>
+      </vertical>
+    </horizontal>
+    
+    
+    <horizontal  pad='2' font-size='3' preferred-width='80' horizontal-fit='PreferredSize'>
+       <vertical  pad-top='30'>
+         <horizontal pad-right='40' child-control-width='false' spacing='1' pad-top='2'>
+            <button id='video-source-priority-button'  text='Local' hover-hint='Choose video source location priority' on-click='on-video-source-priority-action' all-uppercase='false' pad='1' pref-width='18' preferred-height='7' font-size='3'/>
+            <button id='previous-screen-button' font-size='3' hover-hint='Select Previous Screen' text='-' pad='1' on-click='on-previous-screen-action'/>
+            <vertical preferred-width='30'>
+              <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" source="CustomVideoPlayer.Resources.power button white.png" preferred-height='7' font-size='3' />
+            </vertical>
+            <button id='next-screen-button' font-size='3' hover-hint='Select Next Screen' text='+' pad='1' on-click='on-next-screen-action'/>
+           
+           <horizontal pad-left='37'>
+              <dropdown-list-setting id='msplacementlistObj' on-change="setMSPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="multi-screen-modes" value="msplacement-list-value" pref-width='15' text='' hover-hint="Multi-Screen Placement (MSP)"></dropdown-list-setting>
+           </horizontal>
+         </horizontal>
+       </vertical>
+    </horizontal>  
+     
+     <horizontal pad-top='50' font-size='2'>
+      <button id='preview-button' text='Preview' on-click='on-preview-action'/>
+      <button id='extras-button' text='Extras' on-click='on-extras-action'/>
+      <button id='enable-cvp-button' text='CVP Off' on-click='on-enable-cvp-action'/>
+     </horizontal>
+  </bg>
+ 
+  <bg id='extras-menu'>
+    <vertical pad-bottom='20' pad-top='5' preferred-width='90' spacing='2'>
+      <horizontal spacing='2'>    
+         <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="MSP A uses a sequence" hover-hint="Determines if MV Preset A uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+         <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="MSP B uses a sequence" hover-hint="Determines if MV Presets B uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+      </horizontal>
+      <horizontal spacing='2'>
+        <modifier value="showScreenBodies" on-change="show-screen-bodies"  text="Show Screen Bodies" hover-hint="Shows the black frame behind video screens" source="CustomVideoPlayer.Resources.clone-white-128.png" pref-width='30'/>
+        <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='30'/>
+      </horizontal>
+       <horizontal> 
+           <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='300' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Sphere. Helpful when using other mods affecting skybox' />
+       </horizontal>
+    </vertical>
+
+    <horizontal pad-top='40'>
+      <button text='Back' on-click='on-back-action'/>
+    </horizontal>
+  </bg>
+</bg>

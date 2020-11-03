@@ -1,0 +1,1066 @@
+﻿using BS_Utils.Utilities;
+using MusicVideoPlayer.UI;
+using MusicVideoPlayer.Util;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+// using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Video;
+using VRUIControls;
+
+namespace MusicVideoPlayer
+{
+    public class ScreenManager : MonoBehaviour
+    {
+        public static ScreenManager Instance;
+
+        public static bool debugOn = false;
+        public static List<string> debugList;
+
+
+        public static bool showVideo = true;
+        public static bool playPreviewAudio = false;
+        public static VideoPlacement placement;
+
+        private VideoData currentVideo;
+        private GameObject screen;
+        private Renderer vsRenderer;
+        private Shader glowShader;
+        private Color _onColor = Color.white.ColorWithAlpha(0) * 0.85f;
+
+        public VideoPlayer videoPlayer;
+        private AudioTimeSyncController syncController;
+        private double offsetSec = 0d;
+
+        private EnvironmentSpawnRotation _envSpawnRot;
+
+        // 2nd screen
+  //      public static bool useSecondVideo = false;
+        public static string video2URL = "not set";
+        public static VideoPlacement video2Placement;
+        public static float video2Speed = 1f;
+        public static double video2Offset = 0d;      
+        private GameObject screen2;
+        private Renderer vsRenderer2;
+        private Shader glowShader2;
+        public VideoPlayer videoPlayer2;
+
+        // 3nd screen
+  //      public static bool useThirdVideo = false;
+        public static string video3URL = "not set";
+        public static VideoPlacement video3Placement;
+        public static float video3Speed = 1f;
+        public static double video3Offset = 0d;
+        private GameObject screen3;
+        private Renderer vsRenderer3;
+        private Shader glowShader3;
+        public VideoPlayer videoPlayer3;
+
+        // 4nd screen
+   //     public static bool useFourthVideo = true;
+        public static string video4URL = "not set";
+        public static VideoPlacement video4Placement;
+        public static float video4Speed = 1f;
+        public static double video4Offset = 0d;
+        private GameObject screen4;
+        private Renderer vsRenderer4;
+        private Shader glowShader4;
+        public VideoPlayer videoPlayer4;
+
+        public EnvironmentSpawnRotation instanceEnvironmentSpawnRotation
+        {
+            get
+            {
+                if (_envSpawnRot == null)
+                    _envSpawnRot = Resources.FindObjectsOfTypeAll<EnvironmentSpawnRotation>().FirstOrDefault();
+                return _envSpawnRot;
+            }
+        }
+
+        public static void OnLoad()
+        {
+
+            if (Instance == null)
+            {
+                new GameObject("VideoManager").AddComponent<ScreenManager>();
+                
+            }
+
+            
+
+        }
+
+        void Start()
+        {
+            if (Instance != null)
+            {
+                Destroy(this);
+                return;
+            }
+
+            Instance = this;
+
+          /*  if (debugOn)
+            {
+                debugList.Add("ScreenManager: Start() ");
+                debugList.Add("... currentVideo.title: " + currentVideo.title);
+                debugList.Add("... currentVideo.videoPath: " + currentVideo.videoPath);
+                debugList.Add("... currentVideo.downloadState: " + currentVideo.downloadState.ToString());
+            } */
+
+            showVideo = MVPSettings.instance.ShowVideoSettings;
+            playPreviewAudio = MVPSettings.instance.PlayPreviewAudio;
+            placement = MVPSettings.instance.PlacementMode;
+
+            VideoLoader.rollingVideoQueueEnable = MVPSettings.instance.rollingVideoQueueEnable;
+            VideoLoader.rollingOffsetEnable = MVPSettings.instance.rollingOffsetEnable;
+            VideoLoader.videoPlaybackSpeed = MVPSettings.instance.VideoPlaybackSpeed;
+            VideoLoader.nextVideoNumber = MVPSettings.instance.NextVideo;
+            VideoLoader.globalRollingOffset = MVPSettings.instance.RollingOffset;
+
+            BSEvents.songPaused += PauseVideo;
+            BSEvents.songUnpaused += ResumeVideo;
+            BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+            BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
+
+            DontDestroyOnLoad(gameObject);
+
+            debugList = new List<string>();
+            if (debugOn) debugList.Add("OnLoad: ScreenManager");  // Plugin.logger.Debug("OnLoad: ScreenManager");
+
+
+            CreateScreen2();
+            CreateScreen3();
+            CreateScreen4();
+
+            CreateScreen();
+ //           OnMenuSceneLoaded();
+        }
+
+
+  /*      void Update()
+        {
+            // happens continuously ...  if (debugOn) debugList.Add("Update: ScreenManager");
+            if (screen == null) return;
+            vsRenderer.material.SetTexture("_MainTex", videoPlayer.texture);
+        } */
+
+        void CreateScreen()
+        {
+            if (debugOn) debugList.Add("CreateScreen: ScreenManager");
+            screen = new GameObject("Screen");
+            screen.AddComponent<BoxCollider>().size = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            screen.transform.parent = transform;
+
+            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            if (body.GetComponent<Collider>() != null) Destroy(body.GetComponent<Collider>());
+            body.transform.parent = screen.transform;
+            body.transform.localPosition = new Vector3(0, 0, 0.1f);
+            body.transform.localScale = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            Renderer bodyRenderer = body.GetComponent<Renderer>();
+            bodyRenderer.material = new Material(Resources.FindObjectsOfTypeAll<Material>()
+                .First(x =>
+                    x.name == "DarkEnvironmentSimple")); // finding objects is wonky because platforms hides them
+
+            GameObject videoScreen = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            if (videoScreen.GetComponent<Collider>() != null) Destroy(videoScreen.GetComponent<Collider>());
+            videoScreen.transform.parent = screen.transform;
+            videoScreen.transform.localPosition = Vector3.zero;
+            videoScreen.transform.localScale = new Vector3(16f / 9f, 1, 1);
+            vsRenderer = videoScreen.GetComponent<Renderer>();
+            vsRenderer.material = new Material(GetShader());
+            vsRenderer.material.color = Color.clear;
+
+            screen.transform.position = VideoPlacementSetting.Position(placement);
+            screen.transform.eulerAngles = VideoPlacementSetting.Rotation(placement);
+            screen.transform.localScale = VideoPlacementSetting.Scale(placement) * Vector3.one;
+
+            videoPlayer = gameObject.AddComponent<VideoPlayer>();
+            videoPlayer.isLooping = true;
+            videoPlayer.renderMode = VideoRenderMode.MaterialOverride;
+            videoPlayer.targetMaterialProperty = "_MainTex";
+            videoPlayer.playOnAwake = false;
+            videoPlayer.targetMaterialRenderer = vsRenderer;
+            vsRenderer.material.SetTexture("_MainTex", videoPlayer.texture);
+            videoPlayer.errorReceived += VideoPlayerErrorReceived;
+
+        }
+
+        void CreateScreen2()
+        {
+            if (debugOn) debugList.Add("CreateScreen2: ScreenManager");
+            screen2 = new GameObject("Screen2");
+            screen2.AddComponent<BoxCollider>().size = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            screen2.transform.parent = transform;
+
+            GameObject body2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            if (body2.GetComponent<Collider>() != null) Destroy(body2.GetComponent<Collider>());
+            body2.transform.parent = screen2.transform;
+            body2.transform.localPosition = new Vector3(0, 0, 0.1f); // (1, 1, 1.1f);
+            body2.transform.localScale = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            Renderer bodyRenderer2 = body2.GetComponent<Renderer>();
+            bodyRenderer2.material = new Material(Resources.FindObjectsOfTypeAll<Material>()
+                .First(x =>
+                    x.name == "DarkEnvironmentSimple")); // finding objects is wonky because platforms hides them
+
+            GameObject videoScreen2 = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            if (videoScreen2.GetComponent<Collider>() != null) Destroy(videoScreen2.GetComponent<Collider>());
+            videoScreen2.transform.parent = screen2.transform;
+            videoScreen2.transform.localPosition = Vector3.zero;
+            videoScreen2.transform.localScale = new Vector3(16f / 9f, 1, 1);
+            vsRenderer2 = videoScreen2.GetComponent<Renderer>();
+            vsRenderer2.material = new Material(GetShader2());
+            vsRenderer2.material.color = Color.clear; // _onColor; //Color.clear;
+
+            video2Placement = VideoPlacement.vz_Back_M;
+            screen2.transform.position = VideoPlacementSetting.Position(video2Placement);
+            screen2.transform.eulerAngles = VideoPlacementSetting.Rotation(video2Placement);
+            screen2.transform.localScale = VideoPlacementSetting.Scale(video2Placement) * Vector3.one;
+
+            videoPlayer2 = gameObject.AddComponent<VideoPlayer>();
+            videoPlayer2.isLooping = true;
+            videoPlayer2.renderMode = VideoRenderMode.MaterialOverride;
+            videoPlayer2.targetMaterialProperty = "_MainTex";
+            videoPlayer2.playOnAwake = true;
+            videoPlayer2.targetMaterialRenderer = vsRenderer2;
+            vsRenderer2.material.SetTexture("_MainTex", videoPlayer2.texture);
+            videoPlayer2.errorReceived += VideoPlayer2ErrorReceived;
+
+        }
+
+        void CreateScreen3()
+        {
+            if (debugOn) debugList.Add("CreateScreen3: ScreenManager");
+            screen3 = new GameObject("Screen3");
+            screen3.AddComponent<BoxCollider>().size = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            screen3.transform.parent = transform;
+
+            GameObject body3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            if (body3.GetComponent<Collider>() != null) Destroy(body3.GetComponent<Collider>());
+            body3.transform.parent = screen3.transform;
+            body3.transform.localPosition = new Vector3(0, 0, 0.1f); // (1, 1, 1.1f);
+            body3.transform.localScale = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            Renderer bodyRenderer3 = body3.GetComponent<Renderer>();
+            bodyRenderer3.material = new Material(Resources.FindObjectsOfTypeAll<Material>()
+                .First(x =>
+                    x.name == "DarkEnvironmentSimple")); // finding objects is wonky because platforms hides them
+
+            GameObject videoScreen3 = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            if (videoScreen3.GetComponent<Collider>() != null) Destroy(videoScreen3.GetComponent<Collider>());
+            videoScreen3.transform.parent = screen3.transform;
+            videoScreen3.transform.localPosition = Vector3.zero;
+            videoScreen3.transform.localScale = new Vector3(16f / 9f, 1, 1);
+            vsRenderer3 = videoScreen3.GetComponent<Renderer>();
+            vsRenderer3.material = new Material(GetShader3());
+            vsRenderer3.material.color = Color.clear; // _onColor; //Color.clear;
+
+            video3Placement = VideoPlacement.vz_Back_M;
+            screen3.transform.position = VideoPlacementSetting.Position(video3Placement);
+            screen3.transform.eulerAngles = VideoPlacementSetting.Rotation(video3Placement);
+            screen3.transform.localScale = VideoPlacementSetting.Scale(video3Placement) * Vector3.one;
+
+            videoPlayer3 = gameObject.AddComponent<VideoPlayer>();
+            videoPlayer3.isLooping = true;
+            videoPlayer3.renderMode = VideoRenderMode.MaterialOverride;
+            videoPlayer3.targetMaterialProperty = "_MainTex";
+            videoPlayer3.playOnAwake = true;
+            videoPlayer3.targetMaterialRenderer = vsRenderer3;
+            vsRenderer3.material.SetTexture("_MainTex", videoPlayer3.texture);
+         //   videoPlayer3.errorReceived += VideoPlayer3ErrorReceived;
+
+        }
+
+        void CreateScreen4()
+        {
+            if (debugOn) debugList.Add("CreateScreen4: ScreenManager");
+            screen4 = new GameObject("Screen4");
+            screen4.AddComponent<BoxCollider>().size = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            screen4.transform.parent = transform;
+
+            GameObject body4 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            if (body4.GetComponent<Collider>() != null) Destroy(body4.GetComponent<Collider>());
+            body4.transform.parent = screen4.transform;
+            body4.transform.localPosition = new Vector3(0, 0, 0.1f); // (1, 1, 1.1f);
+            body4.transform.localScale = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
+            Renderer bodyRenderer4 = body4.GetComponent<Renderer>();
+            bodyRenderer4.material = new Material(Resources.FindObjectsOfTypeAll<Material>()
+                .First(x =>
+                    x.name == "DarkEnvironmentSimple")); // finding objects is wonky because platforms hides them
+
+            GameObject videoScreen4 = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            if (videoScreen4.GetComponent<Collider>() != null) Destroy(videoScreen4.GetComponent<Collider>());
+            videoScreen4.transform.parent = screen4.transform;
+            videoScreen4.transform.localPosition = Vector3.zero;
+            videoScreen4.transform.localScale = new Vector3(16f / 9f, 1, 1);
+            vsRenderer4 = videoScreen4.GetComponent<Renderer>();
+            vsRenderer4.material = new Material(GetShader4());
+            vsRenderer4.material.color = Color.clear; // _onColor; //Color.clear;
+
+            video4Placement = VideoPlacement.vz_Back_M;
+            screen4.transform.position = VideoPlacementSetting.Position(video4Placement);
+            screen4.transform.eulerAngles = VideoPlacementSetting.Rotation(video4Placement);
+            screen4.transform.localScale = VideoPlacementSetting.Scale(video4Placement) * Vector3.one;
+
+            videoPlayer4 = gameObject.AddComponent<VideoPlayer>();
+            videoPlayer4.isLooping = true;
+            videoPlayer4.renderMode = VideoRenderMode.MaterialOverride;
+            videoPlayer4.targetMaterialProperty = "_MainTex";
+            videoPlayer4.playOnAwake = true;
+            videoPlayer4.targetMaterialRenderer = vsRenderer4;
+            vsRenderer4.material.SetTexture("_MainTex", videoPlayer4.texture);
+        //    videoPlayer4.errorReceived += VideoPlayer4ErrorReceived;
+
+        }
+
+
+
+        private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
+        {
+            if (currentVideo != null) PrepareVideo(currentVideo);  // this might cause issues if takes too long ...
+            HideScreen(false);  
+            PauseVideo();
+
+        }
+
+        private void OnMenuSceneLoaded()
+        {
+            //    if (debugOn) debugList.Add("OnMenuSceneLoaded: ScreenManager");
+            if (currentVideo != null) PrepareVideo(currentVideo);
+            HideScreen(true);
+            PauseVideo();
+        }
+
+        public void TryPlayVideo()
+        {
+
+            if (debugOn)
+            {
+                debugList.Add("ScreenManager: TryPlayVideo() ");
+                debugList.Add("... currentVideo.title: " + currentVideo.title);
+            }
+
+            // screen2
+            if (VideoMenu.multiVideoMode != VideoMenu.MultiVideoModes.Single)  // for every other mode than single, screen2 is used
+            {
+                //  if (!videoPlayer2.isPrepared) 
+                PrepareSecondScreen();
+               // videoPlayer2.Play();   // moved to coroutine to allow time for url to sit
+            }
+            else
+            {
+                // videoPlayer2.Pause();
+                vsRenderer2.material.color = Color.clear;
+                screen2.gameObject.SetActive(false);                
+            }
+
+            // screen3 and screen4
+            if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Ninety || VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.ThreeSixty)
+            {
+                PrepareThirdScreen();               
+                PrepareFourthScreen();  
+            }
+            else
+            {
+                // videoPlayer2.Pause();
+                vsRenderer3.material.color = Color.clear;
+                screen3.gameObject.SetActive(false);
+                vsRenderer4.material.color = Color.clear;
+                screen4.gameObject.SetActive(false);
+            }
+
+            StartCoroutine(WaitForAudioSync());
+        }
+
+
+        private void VideoPlayerErrorReceived(VideoPlayer source, string message)
+        {
+            if (debugOn) debugList.Add("VideoPlayerErrorReceived: ScreenManager");
+            if (message == "Can't play movie []") return;
+            Plugin.logger.Warn("Video player error: " + message);
+        }
+
+        private void VideoPlayer2ErrorReceived(VideoPlayer source, string message)
+        {
+            if (debugOn) debugList.Add("VideoPlayer2ErrorReceived: ScreenManager");
+            if (message == "Can't play movie []") return;
+            Plugin.logger.Warn("Video player2 error: " + message);
+        }
+
+        public void PrepareVideo(VideoData video)
+        {
+            if (debugOn) debugList.Add("PrepareVideo: ScreenManager");
+            currentVideo = video;
+            if (video == null)
+            {
+                //   videoPlayer.url = null;      // this caused constant videoPlayer errors in log ...
+                vsRenderer.material.color = Color.clear;
+                return;
+            }
+
+            if (video.downloadState != DownloadState.Downloaded) if (debugOn) debugList.Add("download state mucking this up!!");
+            if (video.downloadState != DownloadState.Downloaded) return; 
+
+            // for rolling offset, looping should always be true
+            videoPlayer.isLooping = (VideoLoader.rollingOffsetEnable) ? true : video.loop;
+
+            // GetVideoPath (and its overload) are key for customVideo routine, returns vidoo path based on custom/local priority and availability.
+            string videoPath = VideoLoader.Instance.GetVideoPath(video, false);
+
+           // videoPlayer.Pause();
+            videoPlayer.url = videoPath;
+            
+
+
+            int offsetmSec = (VideoLoader.rollingOffsetEnable) ? VideoLoader.globalRollingOffset : video.offset;
+            offsetSec = (double)(offsetmSec / 1000d);
+
+            if (debugOn) debugList.Add("PrepareVideo: offsetSec :" + offsetSec.ToString());
+            if (debugOn) debugList.Add("debugtest test");
+
+
+            videoPlayer.audioOutputMode = VideoAudioOutputMode.None;   // this nukes preview audio
+            if (!videoPlayer.isPrepared) videoPlayer.Prepare();
+            vsRenderer.material.color = Color.clear;
+            
+            if(VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Single) StartCoroutine(ChangeURLDelay(0.005f));
+            
+        }
+
+        private IEnumerator ChangeURLDelay(float secDelay)
+        {
+            while (true)
+            {
+                // durr  videoPlayer.url = newVideoURL;               
+                yield return new WaitForSeconds(secDelay);
+
+                bool runOnce = true;
+                if(runOnce)
+                { 
+                    
+                //    videoPlayer.Pause();
+                  /*  for (ushort track = 0; track < videoPlayer.audioTrackCount; track++)
+                    {
+                        videoPlayer.SetDirectAudioVolume(track, 0f);
+                    } */
+                    if (!videoPlayer.isPrepared) videoPlayer.Prepare();
+                    // videoPlayer.Pause();
+
+                    if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.TwoVideos)
+                    {
+                        videoPlayer2.audioOutputMode = VideoAudioOutputMode.None;
+                    /*    for (ushort track = 0; track < videoPlayer2.audioTrackCount; track++)
+                        {
+                            videoPlayer2.SetDirectAudioVolume(track, 0f);
+                        } */
+                        if (!videoPlayer2.isPrepared) videoPlayer2.Prepare();
+                        videoPlayer2.Play();
+                    }
+
+                    if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Ninety || VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.ThreeSixty)
+                    {
+                        videoPlayer3.audioOutputMode = VideoAudioOutputMode.None;
+                        videoPlayer4.audioOutputMode = VideoAudioOutputMode.None;
+                    /*    for (ushort track = 0; track < videoPlayer3.audioTrackCount; track++)
+                        {
+                            videoPlayer3.SetDirectAudioVolume(track, 0f);
+                        }
+                        for (ushort track = 0; track < videoPlayer4.audioTrackCount; track++)
+                        {
+                            videoPlayer4.SetDirectAudioVolume(track, 0f);
+                        } */
+                        if (!videoPlayer3.isPrepared) videoPlayer3.Prepare();
+                        if (!videoPlayer4.isPrepared) videoPlayer4.Prepare();
+                        videoPlayer3.Play();
+                        videoPlayer4.Play();
+                    }
+                    runOnce = false;
+                }
+
+
+
+
+            }
+        }
+
+        private IEnumerator FindVideoLength()
+        {
+            ulong frameCount = 0;
+            float frameRate = 0;
+
+            double videoLengthSec = 0;
+
+            while (frameCount == 0)
+            {
+                frameCount = videoPlayer.frameCount;
+                //  Debug.Log("Preparing Video");
+                yield return null;
+            }
+
+
+
+
+                int currentArrayIndex = (VideoLoader.nextVideoNumber == 0) ? (VideoLoader.numberOfCustomVideos - 1) : (VideoLoader.nextVideoNumber - 1);
+
+
+            if (VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength != 0 && currentVideo.title == "CustomVideo Video")
+            {
+                videoLengthSec = VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength;  // retreive from CustomVideo list if its valid
+            }
+            else
+            {
+                frameRate = videoPlayer.frameRate;
+                // if for any reason, cannot get video length, use 1 sec to avoid divide by zero ...
+                videoLengthSec = ((frameRate < 1d) || (frameCount < 1d)) ? 1d : (frameCount / frameRate);
+            }
+
+            if (videoLengthSec > 1 && currentVideo.title == "CustomVideo Video")
+            {
+                VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength = videoLengthSec;  // save to CustomVideo list if its valid
+            }
+
+            if (debugOn) debugList.Add("Got framecount !!");
+            if (debugOn) debugList.Add("      framecount = " + frameCount);
+            if (debugOn) debugList.Add("      framerate = " + frameRate);
+
+            yield return null;
+        }
+
+
+        private void PrepareSecondScreen()
+        { 
+            if (debugOn) debugList.Add("PrepareSecondVideo: ScreenManager");
+
+            screen2.gameObject.SetActive(true);
+
+            int videoNumber = VideoLoader.nextVideoNumber + 1;
+            if ((VideoLoader.nextVideoNumber + 1) >= VideoLoader.numberOfCustomVideos) videoNumber = 0;
+           
+            switch (VideoMenu.multiVideoMode)
+            {
+                case VideoMenu.MultiVideoModes.TwoVideos:
+                    // "TwoVideos" mode placement was done during button action in VideoMenu
+                    videoPlayer2.url = video2URL;
+                    break;
+                case VideoMenu.MultiVideoModes.Ninety:
+                    video2Placement = VideoPlacement.vz_Left;
+                    videoPlayer2.url = VideoLoader.customVideos[videoNumber].videoPath;
+                    break;
+                case VideoMenu.MultiVideoModes.ThreeSixty:
+                    video2Placement = VideoPlacement.vz_Left_S;
+                    videoPlayer2.url = VideoLoader.customVideos[videoNumber].videoPath;
+                    break;
+
+            }
+            
+
+            screen2.transform.position = VideoPlacementSetting.Position(video2Placement);
+            screen2.transform.eulerAngles = VideoPlacementSetting.Rotation(video2Placement);
+            screen2.transform.localScale = VideoPlacementSetting.Scale(video2Placement) * Vector3.one;
+
+            // put check here to see if file exists ...    
+
+          //   videoPlayer2.url = video2URL;  
+           // videoPlayer2.url = VideoLoader.customVideos[VideoLoader.nextVideoNumber + 1].videoPath;
+
+            // need 2 second delay here
+
+            videoPlayer2.playbackSpeed = video2Speed;
+            videoPlayer2.isLooping = true;
+            videoPlayer2.audioOutputMode = VideoAudioOutputMode.None;
+            videoPlayer2.time = video2Offset;
+            vsRenderer2.material.color = _onColor; // Color.clear;
+
+            
+            if (!videoPlayer2.isPrepared) videoPlayer2.Prepare();
+         //   videoPlayer2.Pause(); // xxx late debugging to see if it help sync   nada
+            if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.TwoVideos) StartCoroutine(ChangeURLDelay(0.005f));
+        }
+
+        public void PrepareThirdScreen()
+        {
+            if (debugOn) debugList.Add("PrepareThirdVideo: ScreenManager");
+
+            screen3.gameObject.SetActive(true);
+
+            if(VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Ninety)
+            {
+                video3Placement = VideoPlacement.vz_Right;
+            }
+            else
+            {
+                video3Placement = VideoPlacement.vz_Right_S_B;
+            }
+
+
+
+            int videoNumber = VideoLoader.nextVideoNumber + 2;
+            if ((VideoLoader.nextVideoNumber + 1) >= VideoLoader.numberOfCustomVideos) videoNumber = 0;
+            else if ((VideoLoader.nextVideoNumber + 2) >= VideoLoader.numberOfCustomVideos) videoNumber = 1;
+            
+            videoPlayer3.url = VideoLoader.customVideos[videoNumber].videoPath;
+            
+
+            screen3.transform.position = VideoPlacementSetting.Position(video3Placement);
+            screen3.transform.eulerAngles = VideoPlacementSetting.Rotation(video3Placement);
+            screen3.transform.localScale = VideoPlacementSetting.Scale(video3Placement) * Vector3.one;
+
+            // put check here to see if file exists ...    
+
+            // videoPlayer3.url = video3URL;  
+           // videoPlayer3.url = VideoLoader.customVideos[VideoLoader.nextVideoNumber + 2].videoPath;
+
+            // need 3 second delay here
+
+            videoPlayer3.playbackSpeed = video3Speed;
+            videoPlayer3.isLooping = true;
+            videoPlayer3.audioOutputMode = VideoAudioOutputMode.None;
+            videoPlayer3.time = video3Offset;
+            vsRenderer3.material.color = _onColor; // Color.clear;
+
+        }
+
+        public void PrepareFourthScreen()
+        {
+            if (debugOn) debugList.Add("PrepareFourthVideo: ScreenManager");
+
+            screen4.gameObject.SetActive(true);
+
+            if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Ninety)
+            {
+                video4Placement = VideoPlacement.vz_Floor_M;
+            }
+            else
+            {
+                video4Placement = VideoPlacement.vz_Left_S_B;
+            }
+
+            int videoNumber = VideoLoader.nextVideoNumber + 3;
+            if ((VideoLoader.nextVideoNumber + 1) >= VideoLoader.numberOfCustomVideos) videoNumber = 0;
+            else if ((VideoLoader.nextVideoNumber + 2) >= VideoLoader.numberOfCustomVideos) videoNumber = 1;
+            else if ((VideoLoader.nextVideoNumber + 3) >= VideoLoader.numberOfCustomVideos) videoNumber = 2;
+
+            
+            videoPlayer4.url = VideoLoader.customVideos[videoNumber].videoPath;
+            
+
+            screen4.transform.position = VideoPlacementSetting.Position(video4Placement);
+            screen4.transform.eulerAngles = VideoPlacementSetting.Rotation(video4Placement);
+            screen4.transform.localScale = VideoPlacementSetting.Scale(video4Placement) * Vector3.one;
+
+            // put check here to see if file exists ...    
+
+            // videoPlayer4.url = video4URL;
+            //videoPlayer4.url = VideoLoader.customVideos[VideoLoader.nextVideoNumber+3].videoPath;
+
+            // need 4 second delay here
+
+            videoPlayer4.playbackSpeed = video4Speed;
+            videoPlayer4.isLooping = true;
+            videoPlayer4.audioOutputMode = VideoAudioOutputMode.None;
+            videoPlayer4.time = video4Offset;
+            vsRenderer4.material.color = _onColor; // Color.clear;
+
+            if (!videoPlayer4.isPrepared) videoPlayer4.Prepare();
+            StartCoroutine(ChangeURLDelay(0.005f));
+        }
+
+        public void PauseSecondScreen()
+        {
+            videoPlayer2.Pause();
+         //   screen2.SetActive(false);
+        }
+
+        public void PlayVideo(bool preview)
+        {
+            if (debugOn) debugList.Add("PlayVideo: ScreenManager");
+            if (currentVideo == null || currentVideo.downloadState != DownloadState.Downloaded || (!showVideo && !preview)) //If the current video is null or not downloaded or show video is off AND it isn't a preview hide the screen
+            {
+                HideScreen(false);
+                return;
+            }
+
+            ShowScreen();
+			vsRenderer.material.color = _onColor;
+            float practiceSettingsSongStart = 0;
+
+            if (!preview)
+            {
+                if (instanceEnvironmentSpawnRotation != null) // will be null when previewing
+                {
+
+                    // ----- Video is playing, advance video queue and rolling offset --------   
+
+                    // multivideo placement for primary screen
+                    if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.Ninety)
+                    {
+                        // placement = VideoPlacement.vz_Slant_M;
+                        SetPlacement(VideoPlacement.vz_Center);
+                    }
+                    else if (VideoMenu.multiVideoMode == VideoMenu.MultiVideoModes.ThreeSixty)
+                    {
+                        //  placement = VideoPlacement.vz_Right_S;
+                        SetPlacement(VideoPlacement.vz_Right_S);
+                        /*   screen3.transform.position = VideoPlacementSetting.Position(video3Placement);
+                           screen3.transform.eulerAngles = VideoPlacementSetting.Rotation(video3Placement);
+                           screen3.transform.localScale = VideoPlacementSetting.Scale(video3Placement) * Vector3.one; */
+                    }
+
+                    if (VideoLoader.rollingVideoQueueEnable)          
+                    {
+                        VideoLoader.nextVideoNumber++;
+                        if (VideoLoader.nextVideoNumber >= VideoLoader.numberOfCustomVideos) VideoLoader.nextVideoNumber = 0;
+                    }
+                    
+                    if(VideoLoader.rollingOffsetEnable)            
+                    {
+                        // rollingOffsetAmount is arbitrary for now (180 sec), should be based on song length
+                        VideoLoader.globalRollingOffset += (int)(VideoLoader.rollingOffsetAmount * VideoLoader.videoPlaybackSpeed);      
+
+                    } 
+
+
+                    //instanceEnvironmentSpawnRotation.didRotateEvent += ChangeRotation360; // Set up event for running 360 video (will simply do nothing for regular video)
+                    try // Try to get these as errors happen when only previewing (and they are unnecessary)
+                    {
+                        try // Try to get these as there will be a null reference if not in practice mode or only previewing
+                        {
+                            practiceSettingsSongStart = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.practiceSettings.startSongTime - 1;
+                            if (practiceSettingsSongStart < 0)
+                            {
+                                practiceSettingsSongStart = 0;
+                            }
+                        }
+                        catch (NullReferenceException)
+                        {
+                            practiceSettingsSongStart = 0;
+                        }
+
+                        float songSpeed = VideoLoader.videoPlaybackSpeed;
+                        // float songSpeed = BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.gameplayModifiers.songSpeedMul;
+
+                        videoPlayer.playbackSpeed =
+                            BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.practiceSettings != null
+                                ? BS_Utils.Plugin.LevelData.GameplayCoreSceneSetupData.practiceSettings.songSpeedMul
+                                : songSpeed; // Set video speed to practice or non-practice speed
+
+                        /*    if (offsetSec + practiceSettingsSongStart > 0)          Revisit this when testing practice timing
+                                {
+                                    videoPlayer.time = offsetSec + practiceSettingsSongStart;
+                                }
+                                else
+                                {
+                                    videoPlayer.time = 0;
+                                } */
+                    }
+                    catch (Exception e)
+                            {
+                                Plugin.logger.Debug("Probably cause previews don't have speed mults");
+                                Plugin.logger.Error(e.ToString());
+                            }        
+                    }
+
+                for (ushort track = 0; track < videoPlayer.audioTrackCount; track++) // For Each Track -> Decrease Audio volume to 0 on that track
+                    {
+                        // videoPlayer.SetDirectAudioMute(track, true);
+                        videoPlayer.SetDirectAudioVolume(track, 0f);
+                    }
+            }
+            else
+            {
+                videoPlayer.playbackSpeed = VideoLoader.videoPlaybackSpeed;
+
+                    //TODO: Make Left Ear Audio the Preview and Right Ear Audio the BeatMap
+                        for (ushort track = 0; track < videoPlayer.audioTrackCount; track++) // For Each Track -> Increase Audio volume to .5 (float) on that track
+                        {
+                    // videoPlayer.SetDirectAudioMute(track, false);
+                        videoPlayer.SetDirectAudioVolume(track, (playPreviewAudio ? .5f : 0f));
+                          //  Plugin.logger.Info($"Track: {track}");
+                          //  Plugin.logger.Info($"Channels: {videoPlayer.GetAudioChannelCount(track)}");
+                        } 
+                
+            }
+
+            if (debugOn) debugList.Add("  PlayVideo: OffsetSec before mod = " + offsetSec.ToString());
+
+            //  For rollingOffset > video length, find true offset
+
+            double videoLengthSec;
+            double frameCount = (double)videoPlayer.frameCount;
+            double frameRate = (double)videoPlayer.frameRate;
+
+            if (VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength != 0 && currentVideo.title == "CustomVideo Video")
+            {
+                videoLengthSec = VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength;  // retreive from CustomVideo list if its valid
+            }
+            else
+            {               
+
+
+                // if for any reason, cannot get video length, use 1 sec to avoid divide by zero ...
+                videoLengthSec = ((frameRate < 1d) || (frameCount < 1d)) ? 1d : (frameCount / frameRate);
+
+            }
+
+
+            if (videoLengthSec > 1 && currentVideo.title == "CustomVideo Video")
+            {
+                VideoLoader.customVideos[VideoLoader.nextVideoNumber].videoLength = videoLengthSec;  // save to CustomVideo list if its valid
+            }
+
+            if (offsetSec > videoLengthSec)   // if offset > video Length, use modulus operation
+            {
+                offsetSec = offsetSec % videoLengthSec;
+            }
+
+
+            if (debugOn) debugList.Add("  currentVideo.videoPath = " + currentVideo.videoPath);
+            if (debugOn) debugList.Add("  frameRate = " + frameRate.ToString());
+            if (debugOn) debugList.Add("  frameCount = " + frameCount.ToString());
+
+            if (debugOn) debugList.Add("  PlayVideo: VideoLengthSec = " + videoLengthSec.ToString());
+            if (debugOn) debugList.Add("  PlayVideo: OffsetSec = " + offsetSec.ToString());
+
+
+                if (offsetSec > 0)
+                {
+                    videoPlayer.time = offsetSec;
+                } 
+                else
+                {
+                    videoPlayer.time = 0;
+                }
+
+
+            StopAllCoroutines();
+            StartCoroutine(StartVideoDelayed(preview ? -offsetSec : -(offsetSec + practiceSettingsSongStart), preview));
+        }
+
+        private IEnumerator WaitForAudioSync()
+        {
+            if (debugOn) debugList.Add("IEnumerator WaitForAudioSync(): ScreenManager");
+            if (!IsVideoPlayable())
+            {
+                Plugin.logger.Debug("Video could not be found!");
+                HideScreen(false);
+                yield break;
+            }
+
+            try
+            {   
+                
+                new WaitUntil(() => Resources.FindObjectsOfTypeAll<AudioTimeSyncController>().Any());
+                syncController = Resources.FindObjectsOfTypeAll<AudioTimeSyncController>().First();
+
+		/*		if (videoPlayer.time != offsetSec)
+                {
+                    // game was restarted
+                    if (currentVideo.offset >= 0)
+                    {
+                        videoPlayer.time = offsetSec;
+                    }
+                    else
+                    {
+                        videoPlayer.time = 0;
+                    }
+                } */
+
+
+                SetPlacement(MVPSettings.instance.PlacementMode);             
+             //   ShowScreen();
+                PlayVideo(false);
+            }
+            catch (Exception e)
+            {
+                Plugin.logger.Debug(" IEnumerator WaitForAudioSync() try catch caught ...");
+                Plugin.logger.Error(e.ToString());
+
+            }
+        }
+
+        private IEnumerator StartVideoDelayed(double startTime, bool preview)
+        {
+            if (debugOn) debugList.Add("IEnumerator StartVideoDelayed: ScreenManager");
+            // Wait
+            double timeElapsed = 0;
+        //    Plugin.logger.Debug(videoPlayer.time.ToString());
+
+            if (preview)
+            {
+                if (startTime < 0)
+                {
+                    if (debugOn) debugList.Add("  ... and playing from 'StartVideoDelayed ...");
+                    videoPlayer.Play();
+                    yield break;
+                }
+                videoPlayer.frame = 0;
+                while (timeElapsed < startTime)
+                {
+                    timeElapsed += (double)Time.deltaTime;
+                    yield return null;
+                }
+            }
+            else
+            {
+                yield return new WaitUntil(() => syncController.songTime >= startTime);
+            }
+
+            // Time has elapsed, start video
+            // frames are short enough that we shouldn't notice imprecise start time
+            if (debugOn) debugList.Add("  ... and playing from 'StartVideoDelayed ... at the bottom ...");
+            videoPlayer.Play();
+        }
+
+        public void PauseVideo()
+        {
+            if (debugOn) debugList.Add("PauseVideo: ScreenManager");
+          //  StopAllCoroutines();
+
+            if (videoPlayer2.isPlaying) videoPlayer2.Pause();
+            if (videoPlayer3.isPlaying) videoPlayer3.Pause();
+            if (videoPlayer4.isPlaying) videoPlayer4.Pause();
+
+            if (videoPlayer == null) return;
+            if (videoPlayer.isPlaying) videoPlayer.Pause();
+        }
+
+        public void ResumeVideo()
+        {
+            if (debugOn) debugList.Add("ResumeVideo: ScreenManager");
+
+            if (!videoPlayer2.isPlaying) videoPlayer2.Play();
+            if (!videoPlayer3.isPlaying) videoPlayer3.Play();
+            if (!videoPlayer4.isPlaying) videoPlayer4.Play();
+
+            if (videoPlayer == null) return;
+            if (!videoPlayer.isPlaying) videoPlayer.Play();
+        }
+
+        public void ShowScreen()
+        {
+            if (debugOn) debugList.Add("ShowScreen: ScreenManager");
+            screen.SetActive(true);
+        //    vsRenderer.material.color = _onColor;   // causes initial primary to be white ...           
+        }
+
+        public void HideScreen(bool LeavePrimaryScreenOn)
+        {
+            if (debugOn) debugList.Add("HideScreen: ScreenManager");
+            if(!LeavePrimaryScreenOn) screen.SetActive(false); 
+
+            screen2.SetActive(false);  
+            screen3.SetActive(false);
+            screen4.SetActive(false); 
+
+        }
+
+        public void SetScale(Vector3 scale)
+        {
+            if (Instance.screen == null) return;
+            screen.transform.localScale = scale;
+        }
+
+        public void SetPosition(Vector3 pos)
+        {
+            if (Instance.screen == null) return;
+            screen.transform.position = pos;
+        }
+
+        public void SetRotation(Vector3 rot)
+        {
+            if (Instance.screen == null) return;
+            screen.transform.eulerAngles = rot;
+        }
+
+        public void SetPlacement(VideoPlacement placement)
+        {
+            VideoPlacement screenPlacement = placement;
+            if (Instance.screen == null) return;
+            screen.transform.position = VideoPlacementSetting.Position(screenPlacement);
+            screen.transform.eulerAngles = VideoPlacementSetting.Rotation(screenPlacement);
+            screen.transform.localScale = VideoPlacementSetting.Scale(screenPlacement) * Vector3.one;
+        }
+
+        public bool IsVideoPlayable()
+        {
+            if (currentVideo == null || currentVideo.downloadState != DownloadState.Downloaded)
+                return false;
+
+            return true;
+        }
+
+        public Shader GetShader()
+        {
+            if (glowShader != null) return glowShader;
+            // load shader
+
+            var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
+                UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "MusicVideoPlayer.Resources.mvp.bundle"));
+
+            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow");
+            myLoadedAssetBundle.Unload(false);
+            glowShader = shader;
+            return shader;
+        }
+
+        public Shader GetShader2()
+        {
+            if (glowShader2 != null) return glowShader2;
+            // load shader
+
+            var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
+                UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "MusicVideoPlayer.Resources.mvp.bundle"));
+
+            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow");
+            myLoadedAssetBundle.Unload(false);
+            glowShader2 = shader;
+            return shader;
+        }
+
+        public Shader GetShader3()
+        {
+            if (glowShader3 != null) return glowShader3;
+            // load shader
+
+            var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
+                UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "MusicVideoPlayer.Resources.mvp.bundle"));
+
+            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow");
+            myLoadedAssetBundle.Unload(false);
+            glowShader3 = shader;
+            return shader;
+        }
+
+        public Shader GetShader4()
+        {
+            if (glowShader4 != null) return glowShader4;
+            // load shader
+
+            var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
+                UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "MusicVideoPlayer.Resources.mvp.bundle"));
+
+            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow");
+            myLoadedAssetBundle.Unload(false);
+            glowShader4 = shader;
+            return shader;
+        }
+
+        //Function to run when rotation changes in 360/90 mode
+        //Will never be called if not in those modes
+        //Changes video rotation to match where you are looking in 360/90
+        public void ChangeRotation360(Quaternion quaternion)
+        {
+            if (debugOn) debugList.Add("ChangeRotation360: ScreenManager");
+            // Plugin.logger.Debug($"Song Time: {syncController.songTime}");
+            // screen.transform.eulerAngles = new Vector3(screen.transform.eulerAngles.x, quaternion.eulerAngles.y, screen.transform.eulerAngles.z); // Set screen rotation relative to itself
+            // screen.transform.position = new Vector3(quaternion.eulerAngles.y, screen.transform.position.y, screen.transform.position.z); // Set screen rotation relative to you
+        }
+    }
+}
