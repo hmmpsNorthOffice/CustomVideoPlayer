@@ -61,7 +61,7 @@ CVP was tested on an Odyssey Plus HMD in WMR and on a Quest2 using Virtual Deskt
 
 **The UI:**
 
-![]((VideoPlayer/Resources/MenuPic1.jpg)
+ ![](VideoPlayer/Resources/MenuPic1.jpg)
 
 These are the necessary steps needed to configure this mod:  (*Essential steps in bold*)
 
