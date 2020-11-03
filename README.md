@@ -255,6 +255,7 @@ Once a video is cropped into parts, the associated file names should allow it to
 Alternatively, they can be put in their own folder by creating the subfolder “VideoSets” in the CustomVideo folder.  If this folder exists, the mod will search recursively and find all .mp4 videos in any subfolders.  With this arrangement, the sets are ensured to retain their proper order in the video list.
 
  *Beat Saber/CustomVideos/VideoSets/AnyName1*
+ 
  *Beat Saber/CustomVideos/VideoSets/AnyName2*
 
 **Under the hood (for devs):**
