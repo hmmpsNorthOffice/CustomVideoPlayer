@@ -203,7 +203,7 @@ P8_360_Cardinal_H : The reflection screens create a 360 type floor  (P6_2x2_Floo
 
 P8_360_Ordinal_H : The reflection screens create a 360 type ceiling  (P6_2x2_Ceiling_H)
 
-P4_3x3, P4_4x4 : Reflection isn’t activated.
+P4_3x3, P4_4x4, P7_8Scr_Ring : Reflection isn’t activated.
 
 **360 Videos:**
 
