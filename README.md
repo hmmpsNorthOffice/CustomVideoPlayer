@@ -1,7 +1,7 @@
 **What this is**
 
 * CustomVideoPlayer is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP.
-* It can play videos from a user generated CustomVideo directory as well from a map’s local directory.
+* It plays videos from a CustomVideo directory as well from a map’s local directory.
 * It extends MVP’s functionality with three added features: 
 1. Plays multiple videos at once.
 2. Plays 360 videos.
