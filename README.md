@@ -8,8 +8,8 @@
 
 **What this is**
 
-* CustomVideo is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP.
-* It can play videos from a user generated CustomVideo directory as well from a map’s local directory.
+* CustomVideoPlayer is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP.
+* It plays videos from a CustomVideo directory as well from a map’s local directory.
 * It extends MVP’s functionality with three added features: 
 1. Plays multiple videos at once.
 2. Plays 360 videos.
@@ -69,9 +69,7 @@ CVP was tested on an Odyssey Plus HMD in WMR and on a Quest2 using Virtual Deskt
 
 **The UI:**
 
-![](C:\Users\zechm\Pictures\Saved%20Pictures\CV20%20Menu\MenuPic1.jpg)
-
-<!-- ![](Resources/MenuPic1.jpg) -->
+ ![](VideoPlayer/Resources/MenuPic1.jpg)
 
 These are the necessary steps needed to configure this mod:  (*Essential steps in bold*)
 
@@ -97,7 +95,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
    
     (note:  If using MSP A or B, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
    
-   ![](C:\Users\zechm\Pictures\Saved%20Pictures\CV20%20Menu\MenuPic2.jpg)
+   ![](VideoPlayer/Resources/MenuPic2.jpg)
 
 <!-- ![](Resources/MenuPic2.jpg) -->
 
@@ -161,7 +159,6 @@ There are six primary screens which can be configured with their own set of para
 
 The idea of ‘multi-screen placement’ presets began when I wanted to create arrangements of videos exclusively for 90/360 maps.  In the beginning there were just two presets; one with four screens (90) and one with eight (360).  I then started playing with 4K videos cropped into 4 parts and then played back as one.  The idea evolved to include 3k videos (5760 x 1080) which I created from slideshows of desktop wallpaper associated with 3 monitor setups.  Although it is a bit over the top, I included 6k and 8k videos as well.  I’ve found that if the videos were 30fps, my current 6700k/2070s setup can handle up to around 20 videos before they begin to lag.  Although it can take a while to preprocess these videos, the action is fairly simple using a single batch file and the ffmpeg utility.  I will provide the batch file and a step by step explanation below.
 
-- The 'MultiScreenSequence' 
 * The current Multi Screen Placement List:
   
   (Note: Many of the screen placement settings are exclusive to MSP presets, otherwise it would overwhelm the primary placement ui list)
@@ -214,7 +211,7 @@ P8_360_Cardinal_H : The reflection screens create a 360 type floor  (P6_2x2_Floo
 
 P8_360_Ordinal_H : The reflection screens create a 360 type ceiling  (P6_2x2_Ceiling_H)
 
-P4_3x3, P4_4x4 : Reflection isn’t activated.
+P4_3x3, P4_4x4, P7_8Scr_Ring : Reflection isn’t activated.
 
 **360 Videos:**
 
@@ -266,6 +263,7 @@ Once a video is cropped into parts, the associated file names should allow it to
 Alternatively, they can be put in their own folder by creating the subfolder “VideoSets” in the CustomVideo folder.  If this folder exists, the mod will search recursively and find all .mp4 videos in any subfolders.  With this arrangement, the sets are ensured to retain their proper order in the video list.
 
  *Beat Saber/CustomVideos/VideoSets/AnyName1*
+ 
  *Beat Saber/CustomVideos/VideoSets/AnyName2*
 
 **Under the hood (for devs):**
@@ -288,7 +286,7 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 - Add a screen placement editor in game and make more screen position values customizable and persistant.
 
-- Add user customization of an MSP preset using CustomVideo.ini.
+- Add user customization of MSP presets in CustomVideoPlayer.ini.
 
 - Add 180 video capability.
 
