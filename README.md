@@ -1,6 +1,6 @@
 **Added to Version 2.1**
 
-+ Ability to play layer two 360 videos.
+* Ability to layer two 360 videos (Added second 360 video screen).
 * Added additional MSP Controller screen for a total of three.
 * New placements:  Floor/Ceiling H90.
   - The old Floor_H, Ceiling_H placement were unique because they put the video at floor level, which suited the 90/360 environments well.  The player was placed however in the center of the screen so which was not ideal for 90 maps.
