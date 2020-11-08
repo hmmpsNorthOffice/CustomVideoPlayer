@@ -19,7 +19,7 @@
 **Feature List**
 
 * Multiple Screens: Ability to play multiple videos simultaneously.
-* 360 Screen:  The mod accepts monoscopic equirectangular 360 videos.  The video can be played alongside the primary or MSP screens.  Its radius can be dynamically resized using a slider control in the Extras Menu.
+* 360 Screen:  The mod accepts monoscopic equirectangular 360 videos.  Two 360 videos can be played alongside the primary or MSP screens.  Screen radius can be dynamically resized using a slider control in the Extras Menu.
 * Multi Screen Placement Presets: Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements.  This is useful to quickly create environments suited for 90/360 maps and to allow higher resolution videos.  I will explain below.
 * Screen reflection:  Each of the primary screens and most of the MSP configurations have reflection ability.  This attempts to create the effect similar to an image reflecting off of a pond.  Each primary and MSP screen orientation is handled a bit differently and will be described in more detail below.
 * Hide/Show screen body:  There is normally a cube shaped feature attached to the 2D screen to give it a more distinct appearance.  This can now be toggled on and off.
@@ -78,7 +78,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 2. **Select a screen** using (-/+).  
 * For basic single screen placement choose any of the six primary screens.  
 
-* For multi-screen placement, choose MSP A or B.  
+* For multi-screen placement, choose MSP A, B, or C.  
 
 * For 360 videos, choose 360 Video Screen.
 3. **Enable** that screen.  (In version 12.1, the screen button will be highlighted in pink.)
@@ -215,7 +215,7 @@ P4_3x3, P4_4x4, P7_8Scr_Ring : Reflection isn’t activated.
 
 **360 Videos:**
 
-There is currently one screen dedicated to 360 videos.  Only monoscopic equirectangular type videos will work.  I have been using the youtube-dl.exe utility in a DOS command shell to get these from Youtube.  Here is the structure of that command:
+There is currently two screens dedicated to 360 videos.  Only monoscopic equirectangular type videos will work.  I have been using the youtube-dl.exe utility in a DOS command shell to get these from Youtube.  Here is the structure of that command:
 
 *C:\temp>youtube-dl.exe -f bestvideo[ext=mp4] --user-agent '' URL*
 
@@ -279,10 +279,6 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 - I may publish a version with search functionality intact when I feel the other features are mature and bug free.
 
 **On the roadmap:**
-
-- Add another 360 video screen, which will allow the ability to layer that type of video.
-
-- Add another MSP selection screen, for a total of 3.
 
 - Add a screen placement editor in game and make more screen position values customizable and persistant.
 
