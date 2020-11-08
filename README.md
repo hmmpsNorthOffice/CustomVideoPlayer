@@ -143,11 +143,11 @@ There are six primary screens which can be configured with their own set of para
   
   - Floor_Medium
   
-  - Floor_Huge           (Feet level, 360 maps)
+  - Floor_H90, Floor_H360       (Feet level for 90, 360 maps)
   
   - Ceiling_Medium
   
-  - Ceiling_Huge        (360 maps)
+  - Ceiling_H90, Ceiling_H360   (Compliments Floor H90,360 arrangement)     
 
 - *Special*
   
@@ -187,7 +187,7 @@ The idea of ‘multi-screen placement’ presets began when I wanted to create a
    
    - 4k, 4 screens, slanted 
 
-6. P6_2x2_Floor_M, P6_2x2_Floor_H, P6_2x2_Ceiling_H
+6. P6_2x2_Floor_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360
    
    - 4K, 4 screens, Medium floor placing suitable for normal gameplay
    - Huge floor placed just above (0.01) pedestal floor.  Rotated 180°.
