@@ -47,10 +47,10 @@ namespace CustomVideoPlayer
         //     rotation values are set in PrepareNonPreviewScreens() but they cannot be changed by the offset UI buttons.
 
         public static bool placementUtilityOn = false;
-        public static float tempPlacementX = 0f;       //0, -30, 400, 650
-        public static float tempPlacementY = -50f;    // up-down
-        public static float tempPlacementZ = 250f;     // forward-back
-        public static float tempPlacementScale = 450f;
+        public static float tempPlacementX = 0f;       //0, 0.1f, 0
+        public static float tempPlacementY = 30f;    // up-down
+        public static float tempPlacementZ = 40f;     // forward-back
+        public static float tempPlacementScale = 250f;
         public enum TempPlaceEnum { X, Y, Z, Scale };
         public string tempSet = "X";
         public TempPlaceEnum tempPlace = TempPlaceEnum.X;
@@ -72,9 +72,11 @@ namespace CustomVideoPlayer
             VideoPlacement.Left_Medium,
             VideoPlacement.Right_Medium,
             VideoPlacement.Floor_Medium,
-            VideoPlacement.Floor_Huge,
+            VideoPlacement.Floor_Huge90,
+            VideoPlacement.Floor_Huge360,
             VideoPlacement.Ceiling_Medium,
-            VideoPlacement.Ceiling_Huge, 
+            VideoPlacement.Ceiling_Huge90,
+            VideoPlacement.Ceiling_Huge360, 
             VideoPlacement.Pedestal,
             VideoPlacement.Custom
 
@@ -104,7 +106,7 @@ namespace CustomVideoPlayer
 
 
         public enum MSPreset { Preset_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge,  P4_3x3, 
-            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Floor_H, P6_2x2_Ceiling_H, P7_8Scr_Ring, P8_360_Cardinal_H, P8_360_Ordinal_H
+            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360, P7_8Scr_Ring, P8_360_Cardinal_H, P8_360_Ordinal_H
         };
 
         [UIObject("select-mspreset-list")]
@@ -123,8 +125,10 @@ namespace CustomVideoPlayer
             MSPreset.P4_4x4,
             MSPreset.P5_2x2_Slant,
             MSPreset.P6_2x2_Floor_M, 
-            MSPreset.P6_2x2_Floor_H,
-            MSPreset.P6_2x2_Ceiling_H,
+            MSPreset.P6_2x2_Floor_H90,
+            MSPreset.P6_2x2_Floor_H360,
+            MSPreset.P6_2x2_Ceiling_H90,
+            MSPreset.P6_2x2_Ceiling_H360,
             MSPreset.P7_8Scr_Ring,
             MSPreset.P8_360_Cardinal_H,
             MSPreset.P8_360_Ordinal_H
@@ -246,6 +250,24 @@ namespace CustomVideoPlayer
             MVSequenceB = val;
         }
 
+        public static bool useSequenceInMSPresetC = true;       // todo: make this one bool and put somewhere on main menu screen
+        [UIValue("useMVSequenceC")]
+        public bool MVSequenceC
+        {
+            get => useSequenceInMSPresetC;
+            set
+            {
+                useSequenceInMSPresetC = value;
+                // NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
+            }
+        }
+
+        [UIAction("set-mvSequenceC")]
+        void SetMVSequenceC(bool val)
+        {
+            MVSequenceC = val;
+        }
+
         private bool showScreenBodiesBool=true;  
         [UIValue("showScreenBodies")]
         public bool ShowBodies
@@ -262,7 +284,7 @@ namespace CustomVideoPlayer
         void SetShowBodies(bool val)
         {
             ShowBodies = val;
-            for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 1; screenNumber++)  // not <= since last screen is 360
+            for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
             {
                 ScreenManager.screenControllers[screenNumber].body.transform.parent = transform;
                 ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(val);
@@ -285,7 +307,8 @@ namespace CustomVideoPlayer
         [UIAction("change-sphere-size")]
         void ChangeSphereSize(float val)
         {
-            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360].videoScreen.transform.localScale = new Vector3(val, val, val);
+            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360A].videoScreen.transform.localScale = new Vector3(val, val, val);
+            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360B].videoScreen.transform.localScale = new Vector3(val, val, val);
         }
 
         private bool addScreenReflection=false;
@@ -672,7 +695,7 @@ namespace CustomVideoPlayer
             {
                 for(int screenNumber = 1;screenNumber <= ScreenManager.totalNumberOfPrimaryScreens + 1; screenNumber++)
                 {
-                    // if all screens are already enabled
+                    // if all screens are already enabled (its gone thru the for next loop)
                     if(screenNumber == ScreenManager.totalNumberOfPrimaryScreens + 1)
                     {
                         selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
@@ -766,12 +789,19 @@ namespace CustomVideoPlayer
                     break;
 
                 case ScreenManager.ScreenType.mspController:
-                    showScreenUIBoolText.text = (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlA) ? "Multi-Screen Pl A" : "Multi-Screen Pl B";
+                
+                    if (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlA)
+                       showScreenUIBoolText.text = "Multi-Screen Pl A"; 
+                    else if (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlB)
+                       showScreenUIBoolText.text = "Multi-Screen Pl B";
+                    else 
+                       showScreenUIBoolText.text = "Multi-Screen Pl C";
+
                     MSPresetUISetting = ScreenManager.screenControllers[(int)selectedScreen].msPreset;
                     break;
 
                 case ScreenManager.ScreenType.threesixty:
-                    showScreenUIBoolText.text = "360 Video Screen";
+                    showScreenUIBoolText.text = (selectedScreen == ScreenManager.CurrentScreenEnum.Screen360A) ? "360 Screen A" : "360 Screen B";
                     break;
 
             }
@@ -984,9 +1014,16 @@ namespace CustomVideoPlayer
             string multiScreenInfo = " ";
            
             // if one of the mspControllers is not the selectedScreen, make it so
-            if(selectedScreen != ScreenManager.CurrentScreenEnum.ScreenMSPControlA && selectedScreen != ScreenManager.CurrentScreenEnum.ScreenMSPControlB)
+            if(selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA || selectedScreen > ScreenManager.CurrentScreenEnum.ScreenMSPControlC)
             {
-                selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
+                if(!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlA].enabled)
+                   selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
+                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlB].enabled)
+                   selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlB;
+                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlC].enabled)
+                    selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlC;
+                else 
+                    selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
 
                 ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex;
             }
@@ -997,7 +1034,7 @@ namespace CustomVideoPlayer
             switch (msPresetSetting)
             {
                 case MSPreset.Preset_Off:      
-                    multiScreenInfo = (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlA) ? "Multi-Screen Preset A disabled" : "Multi-Screen Preset B disabled";
+                    multiScreenInfo = "Multi-Screen Placement is disabled";
                     break;
 
                 case MSPreset.P1_4Screens:
@@ -1013,7 +1050,7 @@ namespace CustomVideoPlayer
                     break;
 
                 case MSPreset.P3_2x2_Large:
-                    multiScreenInfo = "2x2 panel (4k) - Huge Background";
+                    multiScreenInfo = "2x2 panel (4k) - Large Background";
                     break;
 
                 case MSPreset.P3_2x2_Huge:
@@ -1029,15 +1066,23 @@ namespace CustomVideoPlayer
                     break;
 
                 case MSPreset.P6_2x2_Floor_M:
-                    multiScreenInfo = "2x2 (4k) Floor for front facing levels";
+                    multiScreenInfo = "2x2 (4k) Medium Floor for front facing maps";
                     break;
 
-                case MSPreset.P6_2x2_Floor_H:
-                    multiScreenInfo = "2x2 (4K) Floor for 360 Levels";
+                case MSPreset.P6_2x2_Floor_H90:
+                    multiScreenInfo = "2x2 (4K) Huge Floor for 90 maps";
                     break;
 
-                case MSPreset.P6_2x2_Ceiling_H:
-                    multiScreenInfo = "2x2 (4K) Ceiling for 360 Levels";
+                case MSPreset.P6_2x2_Floor_H360:
+                    multiScreenInfo = "2x2 (4K) Huge Floor for 360 maps";
+                    break;
+
+                case MSPreset.P6_2x2_Ceiling_H90:
+                    multiScreenInfo = "2x2 (4K) Huge Ceiling for 90 maps";
+                    break;
+
+                case MSPreset.P6_2x2_Ceiling_H360:
+                    multiScreenInfo = "2x2 (4K) Huge Ceiling for 360 maps";
                     break;
 
                 case MSPreset.P7_8Scr_Ring:
@@ -1092,7 +1137,7 @@ namespace CustomVideoPlayer
         private void OnPreviousScreenAction()
         {
             // need to add logic to skip types with 0 videos in their lists ...
-            if (--selectedScreen < ScreenManager.CurrentScreenEnum.Screen1) selectedScreen = ScreenManager.CurrentScreenEnum.Screen360;
+            if (--selectedScreen < ScreenManager.CurrentScreenEnum.Screen1) selectedScreen = ScreenManager.CurrentScreenEnum.Screen360B;
             if(selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
@@ -1110,7 +1155,7 @@ namespace CustomVideoPlayer
         private void OnNextScreenAction()
         {
             // need to add logic to skip types with 0 videos in their lists ...
-            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen360) selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
+            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen360B) selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
             if (selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int)selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.

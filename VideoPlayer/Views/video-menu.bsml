@@ -77,13 +77,17 @@
       <horizontal spacing='2'>    
          <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="MSP A uses a sequence" hover-hint="Determines if MV Preset A uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
          <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="MSP B uses a sequence" hover-hint="Determines if MV Presets B uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="MSP C uses a sequence" hover-hint="Determines if MV Presets C uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
       </horizontal>
-      <horizontal spacing='2'>
+   <!--    <horizontal>
+        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="MSP C uses a sequence" hover-hint="Determines if MV Presets C uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+      </horizontal>
+   -->   <horizontal spacing='2'>
         <modifier value="showScreenBodies" on-change="show-screen-bodies"  text="Show Screen Bodies" hover-hint="Shows the black frame behind video screens" source="CustomVideoPlayer.Resources.clone-white-128.png" pref-width='30'/>
         <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='30'/>
       </horizontal>
        <horizontal> 
-           <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='300' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Sphere. Helpful when using other mods affecting skybox' />
+           <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Sphere. Helpful when using other mods affecting skybox' />
        </horizontal>
     </vertical>
 

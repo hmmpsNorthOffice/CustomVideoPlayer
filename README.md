@@ -1,3 +1,11 @@
+**Added to Version 2.1**
+
++ Ability to play layer two 360 videos.
+* Added additional MSP Controller screen for a total of three.
+* New placements:  Floor/Ceiling H90.
+  - The old Floor_H, Ceiling_H placement were unique because they put the video at floor level, which suited the 90/360 environments well.  The player was placed however in the center of the screen so which was not ideal for 90 maps.
+    I renamed the placements to Floor_H360, and Ceiling_H360 and added two complimentary configurations (H90) where the screen is in front of the player.
+
 **What this is**
 
 * CustomVideo is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP.
