@@ -157,7 +157,6 @@
     <EmbeddedResource Include="Resources\video_sequence.png" />
     <EmbeddedResource Include="Resources\video_sequence_white.png" />
     <EmbeddedResource Include="Resources\video_sequence_white-B.png" />
-    <EmbeddedResource Include="Resources\Reflect 360.png" />
     <Content Include="UI\Check.png" />
     <Content Include="UI\VideoMenu\Check.png" />
   </ItemGroup>

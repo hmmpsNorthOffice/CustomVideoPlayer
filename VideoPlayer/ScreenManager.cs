@@ -928,7 +928,7 @@ namespace CustomVideoPlayer
                         }
                         break;
 
-                    case VideoMenu.MSPreset.P7_8Scr_Ring:
+                    case VideoMenu.MSPreset.P7_Octagon:
 
                         screenControllers[firstMSPScreen].videoPlacement = VideoPlacement.North_H;
                         screenControllers[firstMSPScreen + 1].videoPlacement = VideoPlacement.Northeast;
@@ -973,7 +973,7 @@ namespace CustomVideoPlayer
                                 screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
                                 screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
                                 screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = screenControllers[mspControllerNumber].AddScreenRefl;
+                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = false;
                             }
                             else screenControllers[firstMSPScreen + screenNumber].enabled = false;
                         }
@@ -997,7 +997,32 @@ namespace CustomVideoPlayer
                                 screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
                                 screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
                                 screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = screenControllers[mspControllerNumber].AddScreenRefl;
+                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = false;
+                            }
+                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
+                        }
+                        break;
+
+                    case VideoMenu.MSPreset.P7_Hexagon:
+
+                        screenControllers[firstMSPScreen].videoPlacement = VideoPlacement.HexNorth;
+                        screenControllers[firstMSPScreen + 1].videoPlacement = VideoPlacement.HexNE;
+                        screenControllers[firstMSPScreen + 2].videoPlacement = VideoPlacement.HexSE;
+                        screenControllers[firstMSPScreen + 3].videoPlacement = VideoPlacement.HexSouth;
+                        screenControllers[firstMSPScreen + 4].videoPlacement = VideoPlacement.HexSW;
+                        screenControllers[firstMSPScreen + 5].videoPlacement = VideoPlacement.HexNW;
+
+                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
+                        {
+                            if (screenNumber <= 5 && screenControllers[mspControllerNumber].enabled)
+                            {
+                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
+                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
+                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
+                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
+                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
+                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
+                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = false;
                             }
                             else screenControllers[firstMSPScreen + screenNumber].enabled = false;
                         }
@@ -1014,7 +1039,11 @@ namespace CustomVideoPlayer
                 {
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = true;
 
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoPlacement + 1);
+                    // If type1 reflection, the placement enum value is incremented by 1 
+                    int refPlacementEnumOffset = (VideoMenu.use360ReflectionBool) ? 0 : 1;
+                    
+
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoPlacement + refPlacementEnumOffset);
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIndex = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoIndex;
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoIsLocal;
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoSpeed;
@@ -1057,7 +1086,10 @@ namespace CustomVideoPlayer
                     {
                         screenControllers[firstMSPReflectionScreen + screenNumber].enabled = true;
 
-                        screenControllers[firstMSPReflectionScreen + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[firstMSPScreen + screenNumber].videoPlacement + 1);
+                        // If type1 reflection, the placement enum value is incremented by 1 
+                        int refPlacementEnumOffset = (VideoMenu.use360ReflectionBool) ? 0 : 1;
+
+                        screenControllers[firstMSPReflectionScreen + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[firstMSPScreen + screenNumber].videoPlacement + refPlacementEnumOffset);
                         screenControllers[firstMSPReflectionScreen + screenNumber].videoIndex = screenControllers[firstMSPScreen + screenNumber].videoIndex;
                         screenControllers[firstMSPReflectionScreen + screenNumber].videoIsLocal = screenControllers[firstMSPScreen + screenNumber].videoIsLocal;
                         screenControllers[firstMSPReflectionScreen + screenNumber].videoSpeed = screenControllers[firstMSPScreen + screenNumber].videoSpeed;
@@ -1108,43 +1140,83 @@ namespace CustomVideoPlayer
                     if (screenNumber == (int)CurrentScreenEnum.Screen360A || screenNumber == (int)CurrentScreenEnum.Screen360B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
                     else screenControllers[screenNumber].screen.gameObject.SetActive(true);
 
-                    //  ** placementUtilityOn Section ** 
-                    // this next condition was added to enable/disable a dev utility to fine tune reflection placement  ... the offset buttons and generalinfotext ui elements were used.
 
                     if (screenControllers[screenNumber].screenType != ScreenType.threesixty)      // Set Placement
                     {
 
+                        //  **************************************************************************************************************************************
+                        //  ** placementUtilityOn Section ** --------------------------
+                        //            A dev utility used to fine tune placement settings  ... the offset buttons and generalinfotext ui elements are used.
+                        //
+                        // the basic idea to to create a conditional that allows us to manipulate placement settings for selected screens... 
+                        //    making use of tempPlacementX,Y,Z,Scale
 
-                        //  ** placementUtilityOn Section ** ---- Change the following condition to act on specific screen # or screentype.  --------------------------
+                        // ---- Change the following condition to act on specific screen # or screentype.  
 
                         // if (screenControllers[screenNumber].screenType == ScreenType.reflection && VideoMenu.placementUtilityOn) // using placement utility on one screenType and not the others
-                        // if (screenNumber >= (int)CurrentScreenEnum.Screen1 && screenNumber <= (int)CurrentScreenEnum.Screen2 && VideoMenu.placementUtilityOn) // using placement utility on one screenType and not the others
-                         if (screenNumber == (int)CurrentScreenEnum.ScreenRef_1 && VideoMenu.placementUtilityOn)  /// CHANGE THIS LINE (1)
+                        if (screenNumber >= (int)CurrentScreenEnum.ScreenMSPA_1 && screenNumber <= (int)CurrentScreenEnum.ScreenMSPA_6 && VideoMenu.placementUtilityOn) // using placement utility on one screenType and not the others
+                        // if (screenNumber == (int)CurrentScreenEnum.ScreenRef_1 && VideoMenu.placementUtilityOn)  /// CHANGE THIS LINE (1)
                         {
                             /// If the placement is based on symmetric screen patterns (2x2 for example) multiple screens can be modified at once by playing with the following ...
 
                             //   VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, VideoMenu.tempPlacementZ);  
-                            if (screenNumber == (int)CurrentScreenEnum.ScreenRef_1) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, VideoMenu.tempPlacementZ);
-                        //    if (screenNumber == (int)CurrentScreenEnum.Screen2) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, VideoMenu.tempPlacementZ);
-                            //   if (screenNumber == (int)CurrentScreenEnum.ScreenRef_MSPA_r3) VideoMenu.tempPlaceVector = new Vector3(-VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, -VideoMenu.tempPlacementZ);
-                            //   if (screenNumber == (int)CurrentScreenEnum.ScreenRef_MSPA_r4) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, -VideoMenu.tempPlacementZ);
-                            //  if (screenNumber == 12) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, -VideoMenu.tempPlacementY, -VideoMenu.tempPlacementZ + 40f);
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_1) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, VideoMenu.tempPlacementZ);
+                          //  if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_2) VideoMenu.tempPlaceVector = new Vector3(VideoMenu.tempPlacementX, VideoMenu.tempPlacementY, VideoMenu.tempPlacementZ);
 
+                            // all these conditionals below are part of the dev placement utility.  Normally I only need twp (the one above ) plus one for
+                            // a fixed rotation setting ... for multiscreen placement with symmetry, it can be helpful to use many.
+
+                            // this will all go away if I add a real placement editor function for the end user.
+
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_2)
+                                VideoMenu.tempPlaceVector = VideoPlacementSetting.Position(VideoPlacement.HexNE);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_3)
+                                VideoMenu.tempPlaceVector = VideoPlacementSetting.Position(VideoPlacement.HexSE);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_4)
+                                VideoMenu.tempPlaceVector = VideoPlacementSetting.Position(VideoPlacement.HexSouth);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_5)
+                                VideoMenu.tempPlaceVector = VideoPlacementSetting.Position(VideoPlacement.HexSW);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_6)
+                                VideoMenu.tempPlaceVector = VideoPlacementSetting.Position(VideoPlacement.HexNW);   /// CHANGE THIS LINE (2)
                             screenControllers[screenNumber].screen.transform.position = VideoMenu.tempPlaceVector;
 
                             //  screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation((VideoPlacement)(screenControllers[(int) CurrentScreenEnum.ScreenRef_1].videoPlacement));
-                            screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.Floor_Huge90_r);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_1)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexNorth);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_2)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexNE);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_3)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexSE);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_4)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexSouth);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_5)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexSW);   /// CHANGE THIS LINE (2)
+                            if (screenNumber == (int)CurrentScreenEnum.ScreenMSPA_6)
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(VideoPlacement.HexNW);   /// CHANGE THIS LINE (2)
                             screenControllers[screenNumber].screen.transform.localScale = VideoMenu.tempPlacementScale * Vector3.one;
                         }
-                        // ** end of placement utility section
 
+                        // ** end of placement utility section
+                        //  **************************************************************************************************************************************
 
                         else // normal operations (placement utility off)
                         {
-                            screenControllers[screenNumber].screen.transform.position = VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement);
-                            screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(screenControllers[screenNumber].videoPlacement);
-                            screenControllers[screenNumber].screen.transform.localScale = VideoPlacementSetting.Scale(screenControllers[screenNumber].videoPlacement) * Vector3.one;
+                            // if using type2 reflection (360) we need some extra processing for placement. invert x and z axis and change rotation
+                            if (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPC_r4 && VideoMenu.use360ReflectionBool)
+                            {
+                                // invert x and z axis and change y axis slightly so huge floors aren't on the same plane, must also invert rotation numbers
+                                screenControllers[screenNumber].screen.transform.position = Vector3.Scale(VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1.01f, -1f));
+                                screenControllers[screenNumber].screen.transform.eulerAngles = Vector3.Scale(VideoPlacementSetting.Rotation(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1f, -1f));
 
+                                // side note : VideoPlacementSetting.Scale != Vector3.Scale  (two differenct classes and methods entirely)
+                                screenControllers[screenNumber].screen.transform.localScale = VideoPlacementSetting.Scale(screenControllers[screenNumber].videoPlacement) * Vector3.one; 
+                            }
+                            else
+                            { 
+                                screenControllers[screenNumber].screen.transform.position = VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement);
+                                screenControllers[screenNumber].screen.transform.eulerAngles = VideoPlacementSetting.Rotation(screenControllers[screenNumber].videoPlacement);
+                                screenControllers[screenNumber].screen.transform.localScale = VideoPlacementSetting.Scale(screenControllers[screenNumber].videoPlacement) * Vector3.one;
+                            }
                         }
 
                     }

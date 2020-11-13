@@ -83,7 +83,8 @@
         <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="MSP C uses a sequence" hover-hint="Determines if MV Presets C uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
       </horizontal>
    -->   <horizontal spacing='2'>
-        <modifier value="showScreenBodies" on-change="show-screen-bodies"  text="Show Screen Bodies" hover-hint="Shows the black frame behind video screens" source="CustomVideoPlayer.Resources.clone-white-128.png" pref-width='30'/>
+        <modifier id='screen-body-bool' value="showScreenBodies" on-change="show-screen-bodies"  bind-value='true' apply-on-change='true' text="Show Screen Bodies" hover-hint="Shows the black frame behind video screens" source="CustomVideoPlayer.Resources.clone-white-128.png" pref-width='30'/>
+        <modifier value="Use360Reflection" on-change="use-360-reflection"  text="Reflect type ThreeSixty" hover-hint="Causes reflection screen to mirror video behind player, also deactivates screen bodies" source="CustomVideoPlayer.Resources.Reflect 360.png" pref-width='30'/>   
         <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='30'/>
       </horizontal>
        <horizontal> 

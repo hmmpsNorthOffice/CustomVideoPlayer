@@ -42,7 +42,8 @@ namespace CustomVideoPlayer.Util
         Ceiling_4k_H360_1, Ceiling_4k_H360_1_r, Ceiling_4k_H360_2, Ceiling_4k_H360_2_r,                                                     // 4k Ceiling Huge (360)
         Ceiling_4k_H360_3, Ceiling_4k_H360_3_r, Ceiling_4k_H360_4, Ceiling_4k_H360_4_r,
         Northwest, Northwest_r, Northeast, Northeast_r, Southwest, Southwest_r, Southeast, Southeast_r,                         // 8 Scr Ring
-        North, North_r, West, West_r, South, South_r, East, East_r,                         
+        North, North_r, West, West_r, South, South_r, East, East_r,
+        HexNorth, HexNorth_r, HexNE, HexNE_r, HexSouth, HexSouth_r, HexSE, HexSE_r, HexSW, HexSW_r, HexNW, HexNW_r,             // 6 Scr Octagon
         North_H, North_H_r, East_H, East_H_r, South_H, South_H_r, West_H, West_H_r,                                             // Cardinal (Huge)
         NorthEast_H, NorthEast_H_r, NorthWest_H, NorthWest_H_r, SouthEast_H, SouthEast_H_r, SouthWest_H, SouthWest_H_r,         // Ordinal (Huge)
 
@@ -61,17 +62,17 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.MVP_BackgroundLow:
                     return new Vector3(0, 4.5f, 50);
                 case VideoPlacement.Center:
-                    return new Vector3(0, 5, 75);
+                    return new Vector3(0, 5, 75);                           
                 case VideoPlacement.Center_r:
-                    return new Vector3(0, -11.44f, 43.2f);
-                case VideoPlacement.Back_Medium:        // pushed from 100 ... reflection broken
+                    return new Vector3(0, -11.44f, 43.2f);   // change to 360 mode old pond reflection : return new Vector3(0, -11.44f, 43.2f);
+                case VideoPlacement.Back_Medium:        
                     return new Vector3(0, 10, 200);
                 case VideoPlacement.Back_Medium_r:
                     return new Vector3(0, -90f, 100);
                 case VideoPlacement.Back_Huge:
                     return new Vector3(0, -20, 300);
                 case VideoPlacement.Back_Huge_r:
-                    return new Vector3(0, -380, -121);
+                    return new Vector3(0, -380, -121); // correct pond reflection Vector3(0, -380, -121);
 
                 case VideoPlacement.Slant_Small:
                     return new Vector3(0, -1.5f, 7.35f);
@@ -125,7 +126,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Ceiling_Huge360_r:
                     return new Vector3(0, 0.01f, 0);
                 case VideoPlacement.Pedestal:
-                    return new Vector3(0, 0, 0);
+                    return new Vector3(0, 0.1f, 0);   // changed in v2.1 from y=0
                 case VideoPlacement.Pedestal_r:
                     return new Vector3(0, -0.5f, 0);
 
@@ -330,7 +331,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Ceiling_4k_H360_4_r:
                     return new Vector3(-17.7778f, 0.1f, -10);
 
-                case VideoPlacement.Northwest:
+                case VideoPlacement.Northwest:        // 8 screen ring reflections are not currently utilized.
                     return new Vector3(-16, 3, 14);
                 case VideoPlacement.Northwest_r:
                     return new Vector3(-16, 3, 14);
@@ -362,6 +363,32 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(20, 3, 0);
                 case VideoPlacement.East_r:
                     return new Vector3(20, 3, 0);
+
+
+                case VideoPlacement.HexNorth:        // 6 screen hexagon reflections are not currently utilized.
+                    return new Vector3(0, 4, 16);    
+                case VideoPlacement.HexNorth_r:         
+                    return new Vector3(0, 4, 16);       
+                case VideoPlacement.HexNE:
+                    return new Vector3(13.856f, 4, 8f);    // hexagon geometry z= x / sq root(3) or x = z * 1.732 
+                case VideoPlacement.HexNE_r:
+                    return new Vector3(13.856f, 4, 8f);
+                case VideoPlacement.HexSE:
+                    return new Vector3(13.856f, 4, -8f);
+                case VideoPlacement.HexSE_r:
+                    return new Vector3(13.856f, 4, -8f);
+                case VideoPlacement.HexSouth:
+                    return new Vector3(0, 4, -16);
+                case VideoPlacement.HexSouth_r:
+                    return new Vector3(0, 4, -16);
+                case VideoPlacement.HexSW:
+                    return new Vector3(-13.856f, 4, -8f);
+                case VideoPlacement.HexSW_r:
+                    return new Vector3(-13.856f, 4, -8f);
+                case VideoPlacement.HexNW:
+                    return new Vector3(-13.856f, 4, 8f);
+                case VideoPlacement.HexNW_r:
+                    return new Vector3(-13.856f, 4, 8f);
 
                 case VideoPlacement.North_H:            // Cardinal (Huge) reflections will use Floor_H_4k placements
                     return new Vector3(0, 18, 50);      
@@ -417,7 +444,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Center:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Center_r:
-                    return new Vector3(90, 0, 180);
+                    return new Vector3(0, 0, 0);                       // old pond reflection : Vector3(90, 0, 180);
                 case VideoPlacement.Back_Medium:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Back_Medium_r:
@@ -425,7 +452,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Back_Huge:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Back_Huge_r:
-                    return new Vector3(90, 0, 180);
+                    return new Vector3(0, 0, 0);
 
                 case VideoPlacement.Slant_Small:
                     return new Vector3(15, 0, 0);
@@ -682,6 +709,31 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(0, 90, 0);
                 case VideoPlacement.East_r:
                     return new Vector3(0, 90, 0);
+
+                case VideoPlacement.HexNorth:        // 6 screen hexagon reflections are not currently utilized.
+                    return new Vector3(0, 0, 0);
+                case VideoPlacement.HexNorth_r:
+                    return new Vector3(0, 0, 0);
+                case VideoPlacement.HexNE:
+                    return new Vector3(0, 60, 0);
+                case VideoPlacement.HexNE_r:
+                    return new Vector3(0, 60, 0);
+                case VideoPlacement.HexSE:
+                    return new Vector3(0, 120, 0);
+                case VideoPlacement.HexSE_r:
+                    return new Vector3(0, 120, 0);
+                case VideoPlacement.HexSouth:
+                    return new Vector3(0, 180, 0);
+                case VideoPlacement.HexSouth_r:
+                    return new Vector3(0, 180, 0);
+                case VideoPlacement.HexSW:
+                    return new Vector3(0, 240, 0);
+                case VideoPlacement.HexSW_r:
+                    return new Vector3(0, 240, 0);
+                case VideoPlacement.HexNW:
+                    return new Vector3(0, -60, 0);
+                case VideoPlacement.HexNW_r:
+                    return new Vector3(0, -60, 0);
 
                 case VideoPlacement.North_H:
                     return new Vector3(0, 0, 0);
@@ -1039,6 +1091,31 @@ namespace CustomVideoPlayer.Util
                     return 6;
                 case VideoPlacement.East_r:
                     return 6;
+
+                case VideoPlacement.HexNorth:        // 6 screen hexagon reflections are not currently utilized.
+                    return 8;                        // If we want contiguous walls for Hex ... use 10.4f scale
+                case VideoPlacement.HexNorth_r:
+                    return 8;
+                case VideoPlacement.HexNE:
+                    return 8;
+                case VideoPlacement.HexNE_r:
+                    return 8;
+                case VideoPlacement.HexSE:
+                    return 8;
+                case VideoPlacement.HexSE_r:
+                    return 8;
+                case VideoPlacement.HexSouth:
+                    return 8;
+                case VideoPlacement.HexSouth_r:
+                    return 8;
+                case VideoPlacement.HexSW:
+                    return 8;
+                case VideoPlacement.HexSW_r:
+                    return 8;
+                case VideoPlacement.HexNW:
+                    return 8;
+                case VideoPlacement.HexNW_r:
+                    return 8;
 
                 case VideoPlacement.North_H:
                     return 36;

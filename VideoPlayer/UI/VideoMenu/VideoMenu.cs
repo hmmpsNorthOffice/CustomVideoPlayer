@@ -46,11 +46,11 @@ namespace CustomVideoPlayer
         //     The following floats determine where the placement starts so try to guess and get them close to the desired values
         //     rotation values are set in PrepareNonPreviewScreens() but they cannot be changed by the offset UI buttons.
 
-        public static bool placementUtilityOn = false;
-        public static float tempPlacementX = 0f;       //0, 0.1f, 0
-        public static float tempPlacementY = 30f;    // up-down
-        public static float tempPlacementZ = 40f;     // forward-back
-        public static float tempPlacementScale = 250f;
+        public static bool placementUtilityOn = false; 
+        public static float tempPlacementX = 0f;       //(0, 4, 8);f)
+        public static float tempPlacementY = 4f;    // up-down
+        public static float tempPlacementZ = 8f;     // forward-back
+        public static float tempPlacementScale = 8f;
         public enum TempPlaceEnum { X, Y, Z, Scale };
         public string tempSet = "X";
         public TempPlaceEnum tempPlace = TempPlaceEnum.X;
@@ -63,6 +63,7 @@ namespace CustomVideoPlayer
         private List<object> screenPositionsList = (new object[]
         {
             VideoPlacement.Center,
+            VideoPlacement.North_H,
             VideoPlacement.Back_Medium,
             VideoPlacement.Back_Huge,
             VideoPlacement.Slant_Small,
@@ -106,7 +107,7 @@ namespace CustomVideoPlayer
 
 
         public enum MSPreset { Preset_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge,  P4_3x3, 
-            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360, P7_8Scr_Ring, P8_360_Cardinal_H, P8_360_Ordinal_H
+            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360, P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
         };
 
         [UIObject("select-mspreset-list")]
@@ -124,12 +125,13 @@ namespace CustomVideoPlayer
             MSPreset.P4_3x3,
             MSPreset.P4_4x4,
             MSPreset.P5_2x2_Slant,
-            MSPreset.P6_2x2_Floor_M, 
+            MSPreset.P6_2x2_Floor_M,
             MSPreset.P6_2x2_Floor_H90,
             MSPreset.P6_2x2_Floor_H360,
             MSPreset.P6_2x2_Ceiling_H90,
             MSPreset.P6_2x2_Ceiling_H360,
-            MSPreset.P7_8Scr_Ring,
+            MSPreset.P7_Hexagon,
+            MSPreset.P7_Octagon,
             MSPreset.P8_360_Cardinal_H,
             MSPreset.P8_360_Ordinal_H
         }).ToList();
@@ -268,6 +270,8 @@ namespace CustomVideoPlayer
             MVSequenceC = val;
         }
 
+
+
         private bool showScreenBodiesBool=true;  
         [UIValue("showScreenBodies")]
         public bool ShowBodies
@@ -275,21 +279,60 @@ namespace CustomVideoPlayer
             get => showScreenBodiesBool;
             set
             {
-                showScreenBodiesBool = value;
-               // NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
+                showScreenBodiesBool = use360ReflectionBool ? false : value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
             }
         }
 
         [UIAction("show-screen-bodies")]
         void SetShowBodies(bool val)
         {
-            ShowBodies = val;
+            ShowBodies = use360ReflectionBool ? false : val;
+
+            if(!use360ReflectionBool) { 
+                for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
+                {
+                    ScreenManager.screenControllers[screenNumber].body.transform.parent = transform;
+                    ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(val);
+                    ScreenManager.screenControllers[screenNumber].body.transform.parent = ScreenManager.screenControllers[screenNumber].screen.transform;
+                }
+            }
+        }
+
+        public static bool use360ReflectionBool = false;
+        [UIValue("Use360Reflection")]
+        public bool Use360TypeRefl
+        {
+            get => use360ReflectionBool;
+            set
+            {
+                use360ReflectionBool = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
+            }
+        }
+
+        [UIAction("use-360-reflection")]
+        void SetUse360TypeRefl(bool val)
+        {
+            Use360TypeRefl = val;
+            ShowBodies = false; // SetShowBodies(false);
+
+            NotifyPropertyChanged();
             for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
             {
+                // need to hide bodies since we are turning screen objects around 180 (this normally doesn't cause an issue but we also need to reverse uv's)
                 ScreenManager.screenControllers[screenNumber].body.transform.parent = transform;
-                ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(val);
+                ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(false);
                 ScreenManager.screenControllers[screenNumber].body.transform.parent = ScreenManager.screenControllers[screenNumber].screen.transform;
-            }
+
+                // for reflection screens, reverse triangles so that the video does not appear mirrored (backwards)
+                // since this is just a toggle action ... needs to be tested to make sure it can't somehow get out of sync
+                if(screenNumber >= (int) ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPC_r4)
+                {                    
+                    Mesh mesh = ScreenManager.screenControllers[screenNumber].videoScreen.GetComponent<MeshFilter>().mesh;
+                    mesh.triangles = mesh.triangles.Reverse().ToArray(); 
+                }
+            } 
         }
 
         private float threeSixtySphereSize = 1000f;
@@ -439,6 +482,9 @@ namespace CustomVideoPlayer
 
         [UIComponent("preview-button")]
         private Button previewButton;
+
+     ///   [UIComponent("screen-body-bool")]
+     ///   private modifier screenBodyUIElement;
 
         #endregion
 
@@ -1085,7 +1131,11 @@ namespace CustomVideoPlayer
                     multiScreenInfo = "2x2 (4K) Huge Ceiling for 360 maps";
                     break;
 
-                case MSPreset.P7_8Scr_Ring:
+                case MSPreset.P7_Hexagon:
+                    multiScreenInfo = "6 Screen Ring for 360 Levels";
+                    break;
+
+                case MSPreset.P7_Octagon:
                     multiScreenInfo = "8 Screen Ring for 360 Levels.";
                     break;
 
@@ -1096,6 +1146,8 @@ namespace CustomVideoPlayer
                 case MSPreset.P8_360_Ordinal_H:
                     multiScreenInfo = "Cardinal Compass Pts NE,NW,SE,SW Huge Walls";
                     break;
+
+                
 
             }
 
