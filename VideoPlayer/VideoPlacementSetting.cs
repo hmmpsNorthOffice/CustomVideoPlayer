@@ -31,6 +31,7 @@ namespace CustomVideoPlayer.Util
         Back_8k_1a, Back_8k_1b, Back_8k_1c, Back_8k_1d, Back_8k_2a, Back_8k_2d,                                                 // 8k (4x4) ... uses Back_4k_M as center 2x2
         Back_8k_3a, Back_8k_3d, Back_8k_4a, Back_8k_4b, Back_8k_4c, Back_8k_4d,
         Floor_4k_M_1, Floor_4k_M_1_r,Floor_4k_M_2, Floor_4k_M_2_r, Floor_4k_M_3, Floor_4k_M_3_r, Floor_4k_M_4, Floor_4k_M_4_r,  // 4k floor Medium
+        Ceiling_4k_M_1, Ceiling_4k_M_1_r, Ceiling_4k_M_2, Ceiling_4k_M_2_r, Ceiling_4k_M_3, Ceiling_4k_M_3_r, Ceiling_4k_M_4, Ceiling_4k_M_4_r,  // 4k floor Medium
 
         // designed for MSP and 360 maps
         Floor_4k_H90_1, Floor_4k_H90_1_r, Floor_4k_H90_2, Floor_4k_H90_2_r,                                                     // 4k floor Huge (90)
@@ -64,7 +65,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Center:
                     return new Vector3(0, 5, 75);                           
                 case VideoPlacement.Center_r:
-                    return new Vector3(0, -11.44f, 43.2f);   // change to 360 mode old pond reflection : return new Vector3(0, -11.44f, 43.2f);
+                    return new Vector3(0, -11.44f, 43.2f);
                 case VideoPlacement.Back_Medium:        
                     return new Vector3(0, 10, 200);
                 case VideoPlacement.Back_Medium_r:
@@ -72,7 +73,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Back_Huge:
                     return new Vector3(0, -20, 300);
                 case VideoPlacement.Back_Huge_r:
-                    return new Vector3(0, -380, -121); // correct pond reflection Vector3(0, -380, -121);
+                    return new Vector3(0, -380, -121); 
 
                 case VideoPlacement.Slant_Small:
                     return new Vector3(0, -1.5f, 7.35f);
@@ -105,7 +106,7 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(0, -25f, 65);
                 case VideoPlacement.Floor_Medium_r:
                     return new Vector3(0, 25f, 65);
-                case VideoPlacement.Floor_Huge90:
+                case VideoPlacement.Floor_Huge90:     // need to move placement so no overlap occurs when in _r (360 type)
                     return new Vector3(0, 0.1f, 40);
                 case VideoPlacement.Floor_Huge90_r:
                     return new Vector3(0, 30, 200);
@@ -262,6 +263,23 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(26.665f, -25f, 35);
                 case VideoPlacement.Floor_4k_M_4_r:
                     return new Vector3(26.665f, 25f, 35);
+
+                case VideoPlacement.Ceiling_4k_M_1:
+                    return new Vector3(26.665f, 25f, 65);
+                case VideoPlacement.Ceiling_4k_M_1_r:
+                    return new Vector3(26.665f, -25f, 65);
+                case VideoPlacement.Ceiling_4k_M_2:
+                    return new Vector3(-26.665f, 25f, 65);
+                case VideoPlacement.Ceiling_4k_M_2_r:
+                    return new Vector3(-26.665f, -25f, 65);
+                case VideoPlacement.Ceiling_4k_M_3:
+                    return new Vector3(26.665f, 25f, 35);
+                case VideoPlacement.Ceiling_4k_M_3_r:
+                    return new Vector3(26.665f, -25f, 35);
+                case VideoPlacement.Ceiling_4k_M_4:
+                    return new Vector3(-26.665f, 25f, 35);
+                case VideoPlacement.Ceiling_4k_M_4_r:
+                    return new Vector3(-26.665f, -25f, 35);
 
                 case VideoPlacement.Floor_4k_H90_1:
                     return new Vector3(-17.7778f, 0.2f, 28);
@@ -444,7 +462,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Center:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Center_r:
-                    return new Vector3(0, 0, 0);                       // old pond reflection : Vector3(90, 0, 180);
+                    return new Vector3(90, 0, 180);                      // old pond reflection : Vector3(90, 0, 180);
                 case VideoPlacement.Back_Medium:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Back_Medium_r:
@@ -452,7 +470,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Back_Huge:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Back_Huge_r:
-                    return new Vector3(0, 0, 0);
+                    return new Vector3(90, 0, 180);
 
                 case VideoPlacement.Slant_Small:
                     return new Vector3(15, 0, 0);
@@ -593,9 +611,9 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(0, 0, 0);
 
                 case VideoPlacement.Floor_4k_M_1:
-                    return new Vector3(90, 0, 0);
+                    return new Vector3(90, 0, 0);     
                 case VideoPlacement.Floor_4k_M_1_r:
-                    return new Vector3(270, 0, 180);
+                    return new Vector3(270, 0, 180);  
                 case VideoPlacement.Floor_4k_M_2:
                     return new Vector3(90, 0, 0);
                 case VideoPlacement.Floor_4k_M_2_r:
@@ -608,6 +626,23 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(90, 0, 0);
                 case VideoPlacement.Floor_4k_M_4_r:
                     return new Vector3(270, 0, 180);
+
+                case VideoPlacement.Ceiling_4k_M_1:
+                    return new Vector3(270, 0, 180);      // was Vector3(90, 0, 0);
+                case VideoPlacement.Ceiling_4k_M_1_r:
+                    return new Vector3(90, 0, 0);   // was Vector3(90, 0, 0);
+                case VideoPlacement.Ceiling_4k_M_2:
+                    return new Vector3(270, 0, 180);
+                case VideoPlacement.Ceiling_4k_M_2_r:
+                    return new Vector3(90, 0, 0);
+                case VideoPlacement.Ceiling_4k_M_3:
+                    return new Vector3(270, 0, 180);
+                case VideoPlacement.Ceiling_4k_M_3_r:
+                    return new Vector3(90, 0, 0);
+                case VideoPlacement.Ceiling_4k_M_4:
+                    return new Vector3(270, 0, 180);
+                case VideoPlacement.Ceiling_4k_M_4_r:
+                    return new Vector3(90, 0, 0);
 
                 case VideoPlacement.Floor_4k_H90_1:           // Floor_Huge360 and Floor_H_4k are designed for 360 levels
                     return new Vector3(90, 0, 0);
@@ -989,6 +1024,23 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Floor_4k_M_4:
                     return 30;
                 case VideoPlacement.Floor_4k_M_4_r:
+                    return 30;
+
+                case VideoPlacement.Ceiling_4k_M_1:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_1_r:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_2:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_2_r:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_3:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_3_r:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_4:
+                    return 30;
+                case VideoPlacement.Ceiling_4k_M_4_r:
                     return 30;
 
                 case VideoPlacement.Floor_4k_H90_1:

@@ -832,6 +832,30 @@ namespace CustomVideoPlayer
                         }
                         break;
 
+                    case VideoMenu.MSPreset.P6_2x2_Ceiling_M:
+
+                        screenControllers[firstMSPScreen].videoPlacement = VideoPlacement.Ceiling_4k_M_1;
+                        screenControllers[firstMSPScreen + 1].videoPlacement = VideoPlacement.Ceiling_4k_M_2;
+                        screenControllers[firstMSPScreen + 2].videoPlacement = VideoPlacement.Ceiling_4k_M_3;
+                        screenControllers[firstMSPScreen + 3].videoPlacement = VideoPlacement.Ceiling_4k_M_4;
+
+                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
+                        {
+                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
+                            {
+                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
+
+                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
+                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
+                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
+                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
+                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
+                                screenControllers[firstMSPScreen + screenNumber].AddScreenRefl = screenControllers[mspControllerNumber].AddScreenRefl;
+                            }
+                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
+                        }
+                        break;
+
                     case VideoMenu.MSPreset.P6_2x2_Floor_H90:
 
                         screenControllers[firstMSPScreen].videoPlacement = VideoPlacement.Floor_4k_H90_1;
@@ -1204,8 +1228,15 @@ namespace CustomVideoPlayer
                             // if using type2 reflection (360) we need some extra processing for placement. invert x and z axis and change rotation
                             if (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPC_r4 && VideoMenu.use360ReflectionBool)
                             {
-                                // invert x and z axis and change y axis slightly so huge floors aren't on the same plane, must also invert rotation numbers
-                                screenControllers[screenNumber].screen.transform.position = Vector3.Scale(VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1.01f, -1f));
+                                // invert x and z axis and in the special case of Huge90 ceiling and floors, adjust y axis slightly so they are not on the same plane (causes flashing) 
+                                if(screenControllers[screenNumber].videoPlacement >= VideoPlacement.Floor_4k_H90_1 && screenControllers[screenNumber].videoPlacement <= VideoPlacement.Floor_4k_H90_4 ||
+                                    screenControllers[screenNumber].videoPlacement == VideoPlacement.Floor_Huge90 ||
+                                    screenControllers[screenNumber].videoPlacement >= VideoPlacement.Ceiling_4k_H90_1 && screenControllers[screenNumber].videoPlacement <= VideoPlacement.Ceiling_4k_H90_4 ||
+                                    screenControllers[screenNumber].videoPlacement == VideoPlacement.Ceiling_Huge90)
+                                        screenControllers[screenNumber].screen.transform.position = Vector3.Scale(VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1.01f, -1f));
+                                else
+                                    screenControllers[screenNumber].screen.transform.position = Vector3.Scale(VideoPlacementSetting.Position(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1f, -1f));
+
                                 screenControllers[screenNumber].screen.transform.eulerAngles = Vector3.Scale(VideoPlacementSetting.Rotation(screenControllers[screenNumber].videoPlacement), new Vector3(-1f, 1f, -1f));
 
                                 // side note : VideoPlacementSetting.Scale != Vector3.Scale  (two differenct classes and methods entirely)

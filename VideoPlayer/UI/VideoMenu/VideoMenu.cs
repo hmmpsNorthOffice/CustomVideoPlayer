@@ -63,7 +63,6 @@ namespace CustomVideoPlayer
         private List<object> screenPositionsList = (new object[]
         {
             VideoPlacement.Center,
-            VideoPlacement.North_H,
             VideoPlacement.Back_Medium,
             VideoPlacement.Back_Huge,
             VideoPlacement.Slant_Small,
@@ -73,10 +72,10 @@ namespace CustomVideoPlayer
             VideoPlacement.Left_Medium,
             VideoPlacement.Right_Medium,
             VideoPlacement.Floor_Medium,
-            VideoPlacement.Floor_Huge90,
-            VideoPlacement.Floor_Huge360,
             VideoPlacement.Ceiling_Medium,
+            VideoPlacement.Floor_Huge90,
             VideoPlacement.Ceiling_Huge90,
+            VideoPlacement.Floor_Huge360,
             VideoPlacement.Ceiling_Huge360, 
             VideoPlacement.Pedestal,
             VideoPlacement.Custom
@@ -107,7 +106,8 @@ namespace CustomVideoPlayer
 
 
         public enum MSPreset { Preset_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge,  P4_3x3, 
-            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360, P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
+            P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Ceiling_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360, 
+            P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
         };
 
         [UIObject("select-mspreset-list")]
@@ -126,9 +126,10 @@ namespace CustomVideoPlayer
             MSPreset.P4_4x4,
             MSPreset.P5_2x2_Slant,
             MSPreset.P6_2x2_Floor_M,
+            MSPreset.P6_2x2_Ceiling_M,
             MSPreset.P6_2x2_Floor_H90,
-            MSPreset.P6_2x2_Floor_H360,
             MSPreset.P6_2x2_Ceiling_H90,
+            MSPreset.P6_2x2_Floor_H360,
             MSPreset.P6_2x2_Ceiling_H360,
             MSPreset.P7_Hexagon,
             MSPreset.P7_Octagon,

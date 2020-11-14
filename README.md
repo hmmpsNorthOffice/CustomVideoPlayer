@@ -1,3 +1,7 @@
+**Added to Version 2.21**
+
+* Tweaked a couple reflection placement settings.
+
 **Added to Version 2.2**
 
 * Added a checkbox in 'Extras' menu that changes the way reflection screens work.  Type 1 reflections (bool unchecked) adds a screen to create either a mirror effect (vertical-horizontal) or between left-right, top-bottom.
@@ -214,8 +218,6 @@ This feature derives from an idea I had a long time ago but could not actuate un
 
 The reflection concept works for both Primary and MSP screens with the following exceptions.
 
-
-
 P4_3x3, P4_4x4, P7_Hexagon, P7_Octagon : Reflection isn’t activated.
 
 **360 Videos:**
@@ -268,7 +270,7 @@ Once a video is cropped into parts, the associated file names should allow it to
 Alternatively, they can be put in their own folder by creating the subfolder “VideoSets” in the CustomVideo folder.  If this folder exists, the mod will search recursively and find all .mp4 videos in any subfolders.  With this arrangement, the sets are ensured to retain their proper order in the video list.
 
  *Beat Saber/CustomVideos/VideoSets/AnyName1*
- 
+
  *Beat Saber/CustomVideos/VideoSets/AnyName2*
 
 **Under the hood (for devs):**
