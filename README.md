@@ -106,9 +106,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
    
     (note:  If using MSP A or B, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
    
-   ![](VideoPlayer/Resources/MenuPic22.jpg)
-
-<!-- ![](Resources/MenuPic2.jpg) -->
+ ![](VideoPlayer/Resources/MenuPic22.jpg)
 
 UI elements in the extras menu:
 
