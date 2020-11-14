@@ -5,7 +5,7 @@
 **Added to Version 2.2**
 
 * Added a checkbox in 'Extras' menu that changes the way reflection screens work.  Type 1 reflections (bool unchecked) adds a screen to create either a mirror effect (vertical-horizontal) or between left-right, top-bottom.
-  Type 2 reflections (bool checked) mirror the screen behind the player (inverts x and z coordinates).
+  Type 2 reflections (bool checked) mirrors the screen behind the player (inverts x and z coordinates).
 * Added another MSP (Multi-screen placement) preset for 6 screens in a hexagon shape.  This behaves similarly to the existing 8 screen octagon configuration.
 * Removed reflection ability from Cardinal/Ordinal MSP presets.  These used to create a huge floor/ceiling.  Now that there are three MSP controller screens, creating a floor or ceiling can be done by just using another MSP.
 
