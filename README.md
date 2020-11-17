@@ -53,7 +53,7 @@
 * I created this version, which I termed CVLite during development so that I could pay attention to adding new features and allow both mods to behave independently.
 * CV will recognize the new json file format used by BRad’s current MVP mod.  
 * If several local videos are allocated locally to a map, CV will allow the user to play them all simultaneously.  
-* A great deal of thanks goes to the mysterious and almighty Rolo who created this mod and to Rie Kumar, BRad and others who have maintained it.  
+* A great deal of thanks goes to the mysterious and almighty Rolo who created the original mod and to Rie Kumar, BRad and others who have maintained it.  
 
 **Mod Requirements:**
 
