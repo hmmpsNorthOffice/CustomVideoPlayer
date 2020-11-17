@@ -69,6 +69,7 @@ Prerequisite Mods:
     BeatSaberMarkupLanguage: 1.3.5
     BSIPA: 4.1.3
 
+Videos must have an .mp4 extension.  Other extensions (.mkv, .mov, avi) will not be recognized. 
 Videos with more advanced codecs will not work.  I haven't been able to get Unity to recognise the AV1 codec.  
 
   AV1 : AOMedia's AV1 Video (av01) doesn't work
