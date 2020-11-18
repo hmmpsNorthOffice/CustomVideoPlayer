@@ -27,6 +27,10 @@ namespace CustomVideoPlayer
 
         private Color _onColor = Color.white.ColorWithAlpha(0) * 0.85f;
 
+        private Vector3 videoPlayerDetailScale = new Vector3(0.55f, 0.55f, 1f);   // (0.57f, 0.57f, 1f);
+        private Vector3 videoPlayerDetailPosition = new Vector3(-2.46f, 1.40f, 0.83f);  //(-2.44f, 1.40f, 0.88f); 
+        private Vector3 videoPlayerDetailRotation = new Vector3(0f, 291f, 0f);  // (0f, 295f, 0f);
+
         public enum CurrentScreenEnum
         {
             Preview, Screen1, Screen2, Screen3, Screen4, Screen5, Screen6, ScreenMSPA_1, ScreenMSPA_2, ScreenMSPA_3, ScreenMSPA_4,
@@ -144,7 +148,10 @@ namespace CustomVideoPlayer
             screenControllers.Add(InitController360(vidControl360b, 2));
             screenControllers[(int)CurrentScreenEnum.Screen360B].screen.SetActive(false);
 
-            screenControllers[0].videoPlacement = VideoMenu.instance.PlacementUISetting;
+          //  screenControllers[0].videoPlacement = VideoMenu.instance.PlacementUISetting;
+            ScreenManager.Instance.SetScale(videoPlayerDetailScale);
+            ScreenManager.Instance.SetPosition(videoPlayerDetailPosition);
+            ScreenManager.Instance.SetRotation(videoPlayerDetailRotation);
 
         }
 
@@ -288,15 +295,15 @@ namespace CustomVideoPlayer
 
         private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
         {
-            if (currentVideo != null) PreparePreviewVideo(currentVideo);  // this might cause issues if takes too long ...
-            HideScreens(true);  
+            if (currentVideo != null) PreparePreviewVideo(currentVideo);  
+            HideScreens(false);  
             PauseVideo();
         }
 
         private void OnMenuSceneLoaded()
         {
             if (currentVideo != null) PreparePreviewVideo(currentVideo);
-            HideScreens(true);
+            HideScreens(false); 
             PauseVideo();
         }
 
@@ -318,8 +325,6 @@ namespace CustomVideoPlayer
             currentVideo = video;
             if (video == null)
             {
-                  //   videoPlayer.url = null;      // this caused constant videoPlayer errors in log ...
-                  screenControllers[0].vsRenderer.material.color = Color.clear;
                   return;
             }
 
@@ -329,16 +334,11 @@ namespace CustomVideoPlayer
 
             screenControllers[0].videoPlayer.url = videoPath;
 
-            //   rollingOffset will return in 2023
-            //   int offsetmSec = (VideoLoader.rollingOffsetEnable) ? VideoLoader.globalRollingOffset : screenControllers[0].fixedOffset; // video.offset;
-
             int offsetmSec = screenControllers[(int)VideoMenu.selectedScreen].fixedOffset; // video.offset;
             offsetSec = (double)(offsetmSec / 1000d);
 
-         //   screenControllers[0].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;   // this nukes preview audio
             if (!screenControllers[0].videoPlayer.isPrepared) screenControllers[0].videoPlayer.Prepare();
 
-            screenControllers[0].vsRenderer.material.color = Color.clear;
 
         }
 
@@ -391,6 +391,8 @@ namespace CustomVideoPlayer
 
         private IEnumerator PlayPrimaryScreensWithOffset(int screenNumber)
         {
+            ShowPreviewScreen(false); 
+
             if (!screenControllers[screenNumber].enabled)
             {
                 HideScreens(false);
@@ -1316,7 +1318,7 @@ namespace CustomVideoPlayer
                 return;
             } 
 
-            ShowPreviewScreen();
+            ShowPreviewScreen(true);
             screenControllers[0].vsRenderer.material.color = _onColor;
             screenControllers[0].videoPlayer.playbackSpeed = screenControllers[(int)VideoMenu.selectedScreen].videoSpeed; 
             screenControllers[0].videoPlayer.time = (offsetSec > 0) ? offsetSec : 0d;
@@ -1389,13 +1391,14 @@ namespace CustomVideoPlayer
         
             for (int screenNumber = 1; screenNumber < totalNumberOfScreens; screenNumber++)
             {
+                if (screenControllers[screenNumber].screenType == ScreenType.mspController) continue;
                 if (screenControllers[screenNumber].enabled) screenControllers[screenNumber].videoPlayer.Play();
             }
         }
 
-        public void ShowPreviewScreen()
+        public void ShowPreviewScreen(bool screenOn)
         {                          
-            screenControllers[0].screen.SetActive(true);       
+            screenControllers[0].screen.SetActive(screenOn);       
         }
 
         public void HideScreens(bool LeavePreviewScreenOn)

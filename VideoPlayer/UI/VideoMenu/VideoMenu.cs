@@ -491,10 +491,6 @@ namespace CustomVideoPlayer
 
         #region misc VideoMenu members 
 
-        private Vector3 videoPlayerDetailScale = new Vector3(0.55f, 0.55f, 1f);   // (0.57f, 0.57f, 1f);
-        private Vector3 videoPlayerDetailPosition = new Vector3(-2.46f, 1.40f, 0.83f);  //(-2.44f, 1.40f, 0.88f); 
-        private Vector3 videoPlayerDetailRotation = new Vector3(0f, 291f, 0f);  // (0f, 295f, 0f);
-
         private VideoData selectedVideo;
 
         private SongPreviewPlayer songPreviewPlayer;
@@ -550,6 +546,13 @@ namespace CustomVideoPlayer
 
         public void LoadVideoSettings(VideoData videoData)
         {
+            
+
+            if (isPreviewing)
+            {
+                ScreenManager.Instance.ShowPreviewScreen(true);
+            }
+
             if (selectedLevel == null)
             {
                 nextVideoButton.gameObject.SetActive(false);
@@ -557,11 +560,6 @@ namespace CustomVideoPlayer
                 previewButton.interactable = false;
                 currentVideoTitleText.text = "No Map Level Selected";
                 return;
-            }
-
-            if (isPreviewing)
-            {
-                ScreenManager.Instance.ShowPreviewScreen();
             }
 
             //   ScreenManager.Instance.HideScreens(true);  // hide all but preview screen
@@ -715,8 +713,7 @@ namespace CustomVideoPlayer
 
         public void Activate()
         {
-            isActive = true;
-            ScreenManager.Instance.ShowPreviewScreen();       
+            isActive = true;  
             ChangeView(false);
         }
 
@@ -726,8 +723,7 @@ namespace CustomVideoPlayer
 
             isActive = false;
             selectedVideo = null;
-
-            ScreenManager.Instance.SetPlacement(VideoMenu.instance.PlacementUISetting);
+            ScreenManager.Instance.ShowPreviewScreen(false);
         }
         #endregion
 
@@ -805,16 +801,13 @@ namespace CustomVideoPlayer
             {
                 if(isActive)
                 {
-                    ScreenManager.Instance.SetScale(videoPlayerDetailScale);
-                    ScreenManager.Instance.SetPosition(videoPlayerDetailPosition);
-                    ScreenManager.Instance.SetRotation(videoPlayerDetailRotation);
-                } 
-                      
+                    ScreenManager.Instance.ShowPreviewScreen(true);
+                }
                 LoadVideoSettings(selectedVideo);
             }
             else //  generalview
             {
-                ScreenManager.Instance.SetPlacement(VideoMenu.instance.PlacementUISetting);
+                ScreenManager.Instance.ShowPreviewScreen(false);
             }
         }
 
@@ -1189,6 +1182,8 @@ namespace CustomVideoPlayer
         [UIAction("on-previous-screen-action")]
         private void OnPreviousScreenAction()
         {
+            ScreenManager.Instance.ShowPreviewScreen(true);
+
             // need to add logic to skip types with 0 videos in their lists ...
             if (--selectedScreen < ScreenManager.CurrentScreenEnum.Screen1) selectedScreen = ScreenManager.CurrentScreenEnum.Screen360B;
             if(selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
@@ -1207,6 +1202,8 @@ namespace CustomVideoPlayer
         [UIAction("on-next-screen-action")]
         private void OnNextScreenAction()
         {
+            ScreenManager.Instance.ShowPreviewScreen(true);
+
             // need to add logic to skip types with 0 videos in their lists ...
             if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen360B) selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
             if (selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int)selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
@@ -1329,6 +1326,8 @@ namespace CustomVideoPlayer
         private void OnNextVideoAction()
         {
 
+            ScreenManager.Instance.ShowPreviewScreen(true);
+
             if (selectedLevel == null) return;
 
             // local algorithm:
@@ -1391,7 +1390,8 @@ namespace CustomVideoPlayer
         [UIAction("on-previous-video-action")]
         private void OnPreviousVideoAction()
         {
-            
+            ScreenManager.Instance.ShowPreviewScreen(true);
+
             if (selectedLevel == null) return;
 
             VideoDatas vids;
