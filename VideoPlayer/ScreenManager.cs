@@ -25,11 +25,11 @@ namespace CustomVideoPlayer
 
         private VideoData currentVideo;
 
-        private Color _onColor = Color.white.ColorWithAlpha(0) * 0.85f;
+        internal static Color _onColor = Color.white.ColorWithAlpha(0); //  * 0.85f;
 
-        private Vector3 videoPlayerDetailScale = new Vector3(0.55f, 0.55f, 1f);   // (0.57f, 0.57f, 1f);
-        private Vector3 videoPlayerDetailPosition = new Vector3(-2.46f, 1.40f, 0.83f);  //(-2.44f, 1.40f, 0.88f); 
-        private Vector3 videoPlayerDetailRotation = new Vector3(0f, 291f, 0f);  // (0f, 295f, 0f);
+        private Vector3 videoPlayerDetailScale = new Vector3(0.8f, 0.8f, 1f);   // (0.55f, 0.55f, 1f);
+        private Vector3 videoPlayerDetailPosition = new Vector3(-3.7f, 1.30f, 1.2f);  //(v1.12.2 -2.46f, 1.40f, 0.83f); 
+        private Vector3 videoPlayerDetailRotation = new Vector3(0f, 286f, 0f);  // (0f, 291f, 0f);
 
         public enum CurrentScreenEnum
         {

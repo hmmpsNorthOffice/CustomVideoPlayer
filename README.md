@@ -1,3 +1,7 @@
+**Added to Version 2.23**
+
+* Changed menu screen position to work with Beat Saber v1.13.2.  Added a slider control in 'Extras' to set video screen brightness.
+
 **Added to Version 2.22**
 
 * Fixed a bug where the preview screen would appear in the main scene.  There is still a minor glitch where the preview is screen is sometimes invisible in the settings menu.  The screen will appear when the user interacts with the UI.

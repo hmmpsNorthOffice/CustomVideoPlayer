@@ -87,8 +87,11 @@
         <modifier value="Use360Reflection" on-change="use-360-reflection"  text="Reflect type ThreeSixty" hover-hint="Causes reflection screen to mirror video behind player, also deactivates screen bodies" source="CustomVideoPlayer.Resources.Reflect 360.png" pref-width='30'/>   
         <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='30'/>
       </horizontal>
-       <horizontal> 
-           <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Sphere. Helpful when using other mods affecting skybox' />
+      <horizontal>
+         <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Sphere. Helpful when using other mods affecting skybox' />
+       </horizontal> 
+       <horizontal>
+          <slider-setting text='Screen Brightness' value='ScreenBrightness' on-change="change-screen-brightness" integer-only='false' min='0.1' max='1.0' increment='0.1' all-uppercase='false' font-size="4" hover-hint='Adjusts video screen brightness' />
        </horizontal>
     </vertical>
 

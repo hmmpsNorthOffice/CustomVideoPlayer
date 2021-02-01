@@ -355,6 +355,26 @@ namespace CustomVideoPlayer
             ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360B].videoScreen.transform.localScale = new Vector3(val, val, val);
         }
 
+        // vvvv new
+
+        private float screenBrightness = 1.0f;
+        [UIValue("ScreenBrightness")]
+        public float ScrBrightness
+        {
+            get => screenBrightness;
+            set
+            {
+                screenBrightness = value;
+                // NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-screen-brightness")]
+        void ChangeScreenBrightness(float val)
+        {
+            ScreenManager._onColor = Color.white.ColorWithAlpha(0) * val;
+        }
+
         private bool addScreenReflection=false;
         [UIValue("add-screen-reflection")]
         public bool AddScreenRefBool
