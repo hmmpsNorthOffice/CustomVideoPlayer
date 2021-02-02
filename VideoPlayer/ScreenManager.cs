@@ -1459,11 +1459,16 @@ namespace CustomVideoPlayer
         public Shader GetShader()
         {
             var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
-                UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "CustomVideoPlayer.Resources.cvp.bundle"));
+            
+            // older mvp shader  
+            //  UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "CustomVideoPlayer.Resources.cvp.bundle"));   
+            //  Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow"); 
 
-            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenGlow"); 
+            // cinema shader
+            UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "CustomVideoPlayer.Resources.bscinema.bundle"));    
+            Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenShader");
             myLoadedAssetBundle.Unload(false);
- 
+
             return shader;
         }
       

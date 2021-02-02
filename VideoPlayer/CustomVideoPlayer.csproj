@@ -144,6 +144,7 @@
     <EmbeddedResource Include="Views\video-menu.bsml" />
     <None Include="ILRepack.targets" />
     <EmbeddedResource Include="Resources\cvp.bundle" />
+    <EmbeddedResource Include="Resources\bscinema.bundle" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\arrow ring white.png" />
