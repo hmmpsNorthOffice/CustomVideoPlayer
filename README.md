@@ -1,3 +1,7 @@
+**Added to Version 2.24**
+
+* Changing from MVP shader to BeatSaberCinema shader.
+
 **Added to Version 2.23**
 
 * Changed menu screen position to work with Beat Saber v1.13.2.  Added a slider control in 'Extras' to set video screen brightness.
