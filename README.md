@@ -1,3 +1,8 @@
+**Added to Version 2.25**
+
+* Added two submenus that process screen properties made accessible by the new Cinema shader.
+  The UI changes do not appear in this readme file.  I will refresh this document when the UI is finalized.
+
 **Added to Version 2.24**
 
 * Changing from MVP shader to BeatSaberCinema shader.

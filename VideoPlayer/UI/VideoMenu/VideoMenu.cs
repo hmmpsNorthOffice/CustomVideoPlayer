@@ -217,24 +217,25 @@ namespace CustomVideoPlayer
             UpdateGeneralInfoMessageText();
         }
 
-        public static bool useSequenceInMSPresetA = true;
-        [UIValue("useMVSequenceA")]
-        public bool MVSequenceA
+        public static bool useSequenceInMSPreset = false;
+        [UIValue("useMSPSequence")] 
+        public bool MSPSequence
         {
-            get => useSequenceInMSPresetA;
+            get => useSequenceInMSPreset;
             set
             {
-                useSequenceInMSPresetA = value;
-                // NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
+                ScreenManager.screenControllers[(int)selectedScreen].mspSequence = value;
+                useSequenceInMSPreset = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
             }
         }
 
-        [UIAction("set-mvSequenceA")]
-        void SetMVSequenceA(bool val)
+        [UIAction("set-mspSequence")]
+        void SetMSPSequence(bool val)
         {
-            MVSequenceA = val;
+           // MSPSequenceA = val;
         }
-
+/*
         public static bool useSequenceInMSPresetB = true;
         [UIValue("useMVSequenceB")]
         public bool MVSequenceB
@@ -271,25 +272,29 @@ namespace CustomVideoPlayer
             MVSequenceC = val;
         }
 
+*/
 
-
-        private bool showScreenBodiesBool=true;  
-        [UIValue("showScreenBodies")]
-        public bool ShowBodies
+        private bool screenTransparencyBool=false;  
+        [UIValue("hideScreenBodies")]
+        public bool HideBodies
         {
-            get => showScreenBodiesBool;
+            get => screenTransparencyBool;
             set
             {
-                showScreenBodiesBool = use360ReflectionBool ? false : value;
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.transparent_attrib, 1.0f, use360ReflectionBool ? false : value);
+                screenTransparencyBool = use360ReflectionBool ? false : value;
                 NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
             }
         }
 
-        [UIAction("show-screen-bodies")]
-        void SetShowBodies(bool val)
+        /*   Changed control from modifier to bool in bsml, UIAction not used 
+        [UIAction("hide-screen-bodies")]
+        void SetHideBodies(bool val)
         {
-            ShowBodies = use360ReflectionBool ? false : val;
+            // HideBodies = use360ReflectionBool ? false : val;
 
+            // the procedure to show/hide screen bodies (aka transparancy) has been moved to a helper function in order to process each screen selectively.
+            /*
             if(!use360ReflectionBool) { 
                 for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
                 {
@@ -298,7 +303,10 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[screenNumber].body.transform.parent = ScreenManager.screenControllers[screenNumber].screen.transform;
                 }
             }
+            
         }
+        */
+
 
         public static bool use360ReflectionBool = false;
         [UIValue("Use360Reflection")]
@@ -316,15 +324,15 @@ namespace CustomVideoPlayer
         void SetUse360TypeRefl(bool val)
         {
             Use360TypeRefl = val;
-            ShowBodies = false; // SetShowBodies(false);
+            HideBodies = false; // SetHideBodies(false);
 
             NotifyPropertyChanged();
-            for (int screenNumber = 1; screenNumber < ScreenManager.Instance.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
+            for (int screenNumber = 1; screenNumber < ScreenManager.totalNumberOfScreens - 2; screenNumber++)  // not <= since last 2 screens are 360
             {
+                // until I find a smarter way of doing this, all screens become transparent with this option enabled.
+                ScreenManager.screenControllers[screenNumber].isTransparent = true;
                 // need to hide bodies since we are turning screen objects around 180 (this normally doesn't cause an issue but we also need to reverse uv's)
-                ScreenManager.screenControllers[screenNumber].body.transform.parent = transform;
                 ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(false);
-                ScreenManager.screenControllers[screenNumber].body.transform.parent = ScreenManager.screenControllers[screenNumber].screen.transform;
 
                 // for reflection screens, reverse triangles so that the video does not appear mirrored (backwards)
                 // since this is just a toggle action ... needs to be tested to make sure it can't somehow get out of sync
@@ -351,11 +359,196 @@ namespace CustomVideoPlayer
         [UIAction("change-sphere-size")]
         void ChangeSphereSize(float val)
         {
-            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360A].videoScreen.transform.localScale = new Vector3(val, val, val);
-            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen360B].videoScreen.transform.localScale = new Vector3(val, val, val);
+            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen_360_A].videoScreen.transform.localScale = new Vector3(val, val, val);
+            ScreenManager.screenControllers[(int) ScreenManager.CurrentScreenEnum.Screen_360_B].videoScreen.transform.localScale = new Vector3(val, val, val);
         }
 
-        // vvvv new
+        [UIAction("on-attrib-reset-action")]
+        private void OnAttribResetAction()
+        {
+            ScrContrast = ScreenManager.ColorCorrection.DEFAULT_CONTRAST;
+            ScrBrightness = ScreenManager.ColorCorrection.DEFAULT_BRIGHTNESS;
+            ScrExposure = ScreenManager.ColorCorrection.DEFAULT_EXPOSURE;
+            ScrGamma = ScreenManager.ColorCorrection.DEFAULT_GAMMA;
+            ScrHue = ScreenManager.ColorCorrection.DEFAULT_HUE;
+            ScrSaturation = ScreenManager.ColorCorrection.DEFAULT_SATURATION;
+        }
+
+        [UIAction("on-shape-reset-action")]
+        private void OnShapeResetAction()
+        {
+            VigEnabled = false;
+            VigOpal = false;
+            VigRadius = ScreenManager.Vignette.DEFAULT_VIGRADIUS;
+            VigSoftness = ScreenManager.Vignette.DEFAULT_VIGSOFTNESS;
+
+            // might add 360sphere size reset as well ... ??? but it is not associated with selectedScreen, not sure it matters.
+        }
+
+        private float screenContrast = 1.0f;
+        [UIValue("ScreenContrast")]
+        public float ScrContrast
+        {
+            get => screenContrast; 
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.contrast_attrib, value, false);
+                screenContrast = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+
+        [UIAction("on-contrast-decrement-action")]
+        private void OnContrastDecrementAction()
+        {
+            // not using auto-decrement so that multiple calls to NotifyPropertyChanged do not occur, probably not an issue ...
+            ScrContrast = ((ScrContrast - 0.1f) < ScreenManager.ColorCorrection.MIN_CONTRAST) ? ScreenManager.ColorCorrection.MIN_CONTRAST : ScrContrast - 0.1f;
+        }
+
+        [UIAction("on-contrast-increment-action")]
+        private void OnContrastIncrementAction()
+        {
+            ScrContrast = ((ScrContrast + 0.1f) > ScreenManager.ColorCorrection.MAX_CONTRAST) ? ScreenManager.ColorCorrection.MAX_CONTRAST : ScrContrast + 0.1f;
+        }
+
+        [UIAction("on-brightness-decrement-action")]
+        private void OnBrightnessDecrementAction()
+        {
+            ScrBrightness = ((ScrBrightness - 0.1f) < ScreenManager.ColorCorrection.MIN_BRIGHTNESS) ? ScreenManager.ColorCorrection.MIN_BRIGHTNESS : ScrBrightness - 0.1f;
+        }
+
+        [UIAction("on-brightness-increment-action")]
+        private void OnbrightnessIncrementAction()
+        {
+            ScrBrightness = ((ScrBrightness + 0.1f) > ScreenManager.ColorCorrection.MAX_BRIGHTNESS) ? ScreenManager.ColorCorrection.MAX_BRIGHTNESS : ScrBrightness + 0.1f;
+        }
+
+        [UIAction("on-saturation-decrement-action")]
+        private void OnSaturationDecrementAction()
+        {
+            ScrSaturation = ((ScrSaturation - 0.1f) < ScreenManager.ColorCorrection.MIN_SATURATION) ? ScreenManager.ColorCorrection.MIN_SATURATION : ScrSaturation - 0.1f;
+        }
+
+        [UIAction("on-saturation-increment-action")]
+        private void OnSaturationIncrementAction()
+        {
+            ScrSaturation = ((ScrSaturation + 0.1f) > ScreenManager.ColorCorrection.MAX_SATURATION) ? ScreenManager.ColorCorrection.MAX_SATURATION : ScrSaturation + 0.1f;
+        }
+
+        [UIAction("on-hue-decrement-action")]
+        private void OnHueDecrementAction()
+        {
+            ScrHue = ((ScrHue - 5.0f) < ScreenManager.ColorCorrection.MIN_HUE) ? ScreenManager.ColorCorrection.MIN_HUE : ScrHue - 5.0f;
+        }
+
+        [UIAction("on-hue-increment-action")]
+        private void OnHueIncrementAction()
+        {
+            ScrHue = ((ScrHue + 5.0f) > ScreenManager.ColorCorrection.MAX_HUE) ? ScreenManager.ColorCorrection.MAX_HUE : ScrHue + 5.0f;
+        }
+
+        [UIAction("on-exposure-decrement-action")]
+        private void OnExposureDecrementAction()
+        {
+            ScrExposure = ((ScrExposure - 0.1f) < ScreenManager.ColorCorrection.MIN_EXPOSURE) ? ScreenManager.ColorCorrection.MIN_EXPOSURE : ScrExposure - 0.1f;
+        }
+
+        [UIAction("on-exposure-increment-action")]
+        private void OnExposureIncrementAction()
+        {
+            ScrExposure = ((ScrExposure + 0.1f) > ScreenManager.ColorCorrection.MAX_EXPOSURE) ? ScreenManager.ColorCorrection.MAX_EXPOSURE : ScrExposure + 0.1f;
+        }
+
+        [UIAction("on-gamma-decrement-action")]
+        private void OnGammaDecrementAction()
+        {
+            ScrGamma = ((ScrGamma - 0.1f) < ScreenManager.ColorCorrection.MIN_GAMMA) ? ScreenManager.ColorCorrection.MIN_GAMMA : ScrGamma - 0.1f;
+        }
+
+        [UIAction("on-gamma-increment-action")]
+        private void OnGammaIncrementAction()
+        {
+            ScrGamma = ((ScrGamma + 0.1f) > ScreenManager.ColorCorrection.MAX_GAMMA) ? ScreenManager.ColorCorrection.MAX_GAMMA : ScrGamma + 0.1f;
+        }
+
+        [UIAction("change-screen-contrast")]
+        void ChangeScreenContrast(float val)
+        {
+            // nothing to do here ... Leaving the code for future ideas.  Could adapt to change preview screen properties while video is playing.
+        }
+
+        private float screenSaturation = 1.0f;
+        [UIValue("ScreenSaturation")]
+        public float ScrSaturation
+        {
+            get => screenSaturation; // ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.saturation_attrib, value, false);
+                screenSaturation = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-screen-saturation")]
+        void ChangeScreenSaturation(float val)
+        {
+        }
+
+        private float screenExposure = 1.0f;
+        [UIValue("ScreenExposure")]
+        public float ScrExposure
+        {
+            get => screenExposure; // ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.exposure_attib, value, false);
+                screenExposure = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-screen-exposure")]
+        void ChangeScreenExposure(float val)
+        {
+        }
+
+        private float screenGamma = 1.0f;
+        [UIValue("ScreenGamma")]
+        public float ScrGamma
+        {
+            get => screenGamma; 
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.gamma_attrib, value, false);
+                screenGamma = value; 
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-screen-gamma")]
+        void ChangeScreenGamma(float val)
+        {
+        }
+
+        private float screenHue = 1.0f;
+        [UIValue("ScreenHue")]
+        public float ScrHue
+        {
+            get => screenHue;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.hue_attrib, value, false);
+                screenHue = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-screen-hue")]
+        void ChangeScreenHue(float val)
+        {
+        }
 
         private float screenBrightness = 1.0f;
         [UIValue("ScreenBrightness")]
@@ -364,16 +557,108 @@ namespace CustomVideoPlayer
             get => screenBrightness;
             set
             {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.brightness_attrib, value, false);
                 screenBrightness = value;
-                // NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
             }
         }
 
         [UIAction("change-screen-brightness")]
         void ChangeScreenBrightness(float val)
         {
-            ScreenManager._onColor = Color.white.ColorWithAlpha(0) * val;
+            // changed to 'per screen' basis
+           //  ScreenManager._onColor = Color.white.ColorWithAlpha(0) * val;
         }
+
+        // <<<< new feb18
+
+        private float vignetteRadius = 1.0f;
+        [UIValue("VignetteRadius")]
+        public float VigRadius
+        {
+            get => vignetteRadius;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.vignette_radius_attrib, value, false);
+                vignetteRadius = value;
+                NotifyPropertyChanged();  
+            }
+        }
+
+        [UIAction("change-vignette-radius")]
+        void ChangeVignetteRadius(float val)
+        {
+        }
+
+        private float vignetteSoftness = 0.01f;
+        [UIValue("VignetteSoftness")]
+        public float VigSoftness
+        {
+            get => vignetteSoftness;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.vignette_softness_attrib, value, false);
+                vignetteSoftness = value;
+                NotifyPropertyChanged();       // Add this to update UI element if we need to change value in code.
+            }
+        }
+
+        [UIAction("change-vignette-softness")]
+        void ChangeVignetteSoftness(float val)
+        {
+        }
+
+
+        private bool vignetteEnabledBool = false;
+        [UIValue("vignetteEnabled")]
+        public bool VigEnabled
+        {
+            get => vignetteEnabledBool;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.use_vignette_attrib, 1.0f, value);
+                vignetteEnabledBool = value;
+                NotifyPropertyChanged();     
+            }
+        }
+
+        private bool useOpalShapeVignetteBool = false;
+        [UIValue("useOpalShapeVignette")]
+        public bool VigOpal
+        {
+            get => useOpalShapeVignetteBool;
+            set
+            {
+                SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute.use_opalVignette_attrib, 1.0f, value);
+                useOpalShapeVignetteBool = value;
+                NotifyPropertyChanged();      
+            }
+        }
+
+        [UIAction("on-vigRadius-increment-action")]
+        private void OnVigRadiusIncrementAction()
+        {
+            VigRadius = ((VigRadius + 0.05f) > ScreenManager.Vignette.MAX_VIGRADIUS) ? ScreenManager.Vignette.MAX_VIGRADIUS : VigRadius + 0.05f;
+        }
+
+        [UIAction("on-vigRadius-decrement-action")]
+        private void OnVigRadiusDecrementAction()
+        {
+            VigRadius = ((VigRadius - 0.05f) < ScreenManager.Vignette.MIN_VIGRADIUS) ? ScreenManager.Vignette.MIN_VIGRADIUS : VigRadius - 0.05f;
+        }
+
+        [UIAction("on-vigSoftness-increment-action")]
+        private void OnVigSoftnessIncrementAction()
+        {
+            VigSoftness = ((VigSoftness + 0.05f) > ScreenManager.Vignette.MAX_VIGSOFTNESS) ? ScreenManager.Vignette.MAX_VIGSOFTNESS : VigSoftness + 0.05f;
+        }
+
+        [UIAction("on-vigSoftness-decrement-action")]
+        private void OnVigSoftnessDecrementAction()
+        {
+            VigSoftness = ((VigSoftness - 0.05f) < ScreenManager.Vignette.MIN_VIGSOFTNESS) ? ScreenManager.Vignette.MIN_VIGSOFTNESS : VigSoftness - 0.05f;
+        }
+
 
         private bool addScreenReflection=false;
         [UIValue("add-screen-reflection")]
@@ -410,6 +695,13 @@ namespace CustomVideoPlayer
 
         [UIComponent("extras-menu")]
         private RectTransform videoExtrasViewRect;
+
+        [UIComponent("screen-attrib-menu")]
+        private RectTransform screenAttribViewRect;
+
+        [UIComponent("screen-shape-menu")]
+        private RectTransform screenShapeViewRect;
+
         #endregion
 
         #region Text Mesh Pro
@@ -418,6 +710,12 @@ namespace CustomVideoPlayer
 
         [UIComponent("general-info-message")]
         private TextMeshProUGUI generalInfoMessageText;
+
+        [UIComponent("current-screen-in-screen-attrib-message")]
+        private TextMeshProUGUI currentScreenInAttribMessageText;
+
+        [UIComponent("current-screen-in-screen-shape-message")]
+        private TextMeshProUGUI currentScreenInShapeMessageText;
 
         [UIComponent("no-video-message")]
         private TextMeshProUGUI noVideoMessageText;
@@ -443,8 +741,8 @@ namespace CustomVideoPlayer
         [UIComponent("enable-cvp-button")]
         private TextMeshProUGUI enableCVPButtonText;
 
-  //      [UIComponent("search-results-loading")]
-  //      private TextMeshProUGUI searchResultsLoadingText;
+        //      [UIComponent("search-results-loading")]
+        //      private TextMeshProUGUI searchResultsLoadingText;
 
 
         [UIComponent("video-source-priority-button")]
@@ -504,8 +802,15 @@ namespace CustomVideoPlayer
         [UIComponent("preview-button")]
         private Button previewButton;
 
-     ///   [UIComponent("screen-body-bool")]
-     ///   private modifier screenBodyUIElement;
+        [UIComponent("screen-shape-button")]
+        private Button screenShapeButton;
+
+        ///   [UIComponent("use-msp-sequence")] 
+        ///  private Button useMSPSequenceButton;
+
+
+        ///   [UIComponent("screen-body-bool")]
+        ///   private modifier screenBodyUIElement;
 
         #endregion
 
@@ -521,7 +826,7 @@ namespace CustomVideoPlayer
 
         private enum manualOffsetDeltaEnum { tenth, one, ten, onehundred };
 
-        public static ScreenManager.CurrentScreenEnum selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
+        public static ScreenManager.CurrentScreenEnum selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
 
         private manualOffsetDeltaEnum manualOffsetDelta = manualOffsetDeltaEnum.tenth;
 
@@ -551,6 +856,8 @@ namespace CustomVideoPlayer
 
             videoDetailsViewRect.gameObject.SetActive(true);
             videoExtrasViewRect.gameObject.SetActive(false);
+            screenAttribViewRect.gameObject.SetActive(false);
+            screenShapeViewRect.gameObject.SetActive(false);
 
             statusViewer = root.AddComponent<VideoMenuStatus>();
             statusViewer.DidEnable += StatusViewerDidEnable;
@@ -567,7 +874,6 @@ namespace CustomVideoPlayer
         public void LoadVideoSettings(VideoData videoData)
         {
             
-
             if (isPreviewing)
             {
                 ScreenManager.Instance.ShowPreviewScreen(true);
@@ -598,6 +904,10 @@ namespace CustomVideoPlayer
             UpdateEnableCVPButton();
             UpdateGeneralInfoMessageText();
             UpdateVideoSourcePriorityButtonText();
+
+            // if the selected level is of type 360, disable 'Screen Shape' menu.
+          // nope ... makes ui look uneven ...
+            // screenShapeButton.interactable = (!((selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_A) || (selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_A)));
 
             if (selectedVideo != null)
             {
@@ -734,7 +1044,7 @@ namespace CustomVideoPlayer
         public void Activate()
         {
             isActive = true;  
-            ChangeView(false);
+            ChangeView(false, false, false);
         }
 
         public void Deactivate()
@@ -749,20 +1059,270 @@ namespace CustomVideoPlayer
 
         #region Private Methods
 
+        // Helper method to populate screenController class members based on UI Controls
+        // It is kinda long because it must replicate screen properties from main screens to their 'child screens'.
+        // There are three typs of 'Main' screens (primary, msp_controller, 360) ... the primary and msp_controller screens have subsequent screens
+        // which inherit their properties ... Each primary has 1 reflection screen, each msp_controller has several child screens and several reflective screens.
+        // The call to actually impliment the properties (via the shader) is not made here, it is done during ScreenManager's PrepareNonPreviewScreens().
+        private void SetAuxiliaryScreenProperties(ScreenManager.ScreenAttribute attrib, float value1, bool value2)
+        {
+            switch (ScreenManager.screenControllers[(int)selectedScreen].screenType)
+            {
+                case ScreenManager.ScreenType.primary:
+                    switch (attrib)
+                    {
+                        case ScreenManager.ScreenAttribute.brightness_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.brightness = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.contrast_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.contrast = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.exposure_attib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.exposure = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.gamma_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.gamma = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.hue_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.hue = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.saturation_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.saturation = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.transparent_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].isTransparent = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen].body.gameObject.SetActive(!value2);
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].isTransparent = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].body.gameObject.SetActive(!value2);
+                            break;
+                        case ScreenManager.ScreenAttribute.vignette_radius_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.radius = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.radius = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.vignette_softness_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.softness = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.softness = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.use_vignette_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.vignetteEnabled = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.vignetteEnabled = value2;
+                            break;
+                        case ScreenManager.ScreenAttribute.use_opalVignette_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.type = value2 ? "elliptical" : "rectangular";
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.type = value2 ? "elliptical" : "rectangular";
+                            break;
+                        default:
+                            Plugin.logger.Error("SetAuxiliaryScreenProperties() ScreenAttribute Switch default option reached");
+                            break;
+                    }
+                    break;
+                case ScreenManager.ScreenType.mspController:
+
+                    int firstMSPScreen = ((Math.Abs((int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A - (int)selectedScreen)) *
+                        ScreenManager.totalNumberOfMSPScreensPerController) + (int)ScreenManager.CurrentScreenEnum.ScreenMSPA_1;
+
+                    int firstMSPReflScreen = ((Math.Abs((int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A - (int)selectedScreen)) *
+                        ScreenManager.totalNumberOfMSPReflectionScreensPerContr) + (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPA_r1;
+
+                    switch (attrib)
+                    {
+                        case ScreenManager.ScreenAttribute.brightness_attrib:
+                            // need to update properties for : the mspController screen, the nine 'controlled' screens, the four reflection screens.
+
+                            // mspControllerScreen
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness = value1;
+
+                            // msp 'Controlled' screens
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.brightness = value1;
+                            }
+
+                            // msp 'reflection' screens
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.brightness = value1;
+                            }
+                            break;
+
+                        case ScreenManager.ScreenAttribute.contrast_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.contrast = value1;
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.contrast = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.exposure_attib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.exposure = value1;
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.exposure = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.gamma_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.gamma = value1;
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.gamma = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.hue_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.hue = value1;
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.hue = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.saturation_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.saturation = value1;
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].colorCorrection.saturation = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.transparent_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].isTransparent = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen].body.gameObject.SetActive(!value2);
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].isTransparent = value2;
+                                ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(!value2);
+                            }
+
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].isTransparent = value2;
+                                ScreenManager.screenControllers[screenNumber].body.gameObject.SetActive(!value2);
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.vignette_radius_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.radius = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.radius = value1;
+                            }
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.radius = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.vignette_softness_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.softness = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.softness = value1;
+                            }
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.softness = value1;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.use_vignette_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.vignetteEnabled = value2;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.vignetteEnabled = value2;
+                            }
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.vignetteEnabled = value2;
+                            }
+                            break;
+                        case ScreenManager.ScreenAttribute.use_opalVignette_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].vignette.type = value2 ? "elliptical" : "rectangular";
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.type = value2 ? "elliptical" : "rectangular";
+                            }
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].vignette.type = value2 ? "elliptical" : "rectangular";
+                            }
+                            break;
+                        default:
+                            Plugin.logger.Error("SetAuxiliaryScreenProperties() ScreenAttribute Switch default option reached");
+                            break;
+                    }
+                    break;
+                case ScreenManager.ScreenType.threesixty:   // 360 has no child screens
+                    switch (attrib)
+                    {
+                        case ScreenManager.ScreenAttribute.brightness_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.contrast_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.exposure_attib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.gamma_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.hue_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.saturation_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.transparent_attrib:
+                            // nothing to do here
+                            break;
+                        default:
+                            Plugin.logger.Error("SetAuxiliaryScreenProperties() ScreenAttribute Switch default option reached");
+                            break;
+                    }
+                    break;
+                default:
+                    Plugin.logger.Error("SetAuxiliaryScreenProperties() ScreenType Switch default option reached");
+                    break;
+            }
+        }
         private void MessageifNotPrimary(VideoPlacement newPlacement)
         {
             // if the user changes the PrimaryScreenPlacement dropdownlist UI when either MSP or 360 screen is selected, the generalinfomessage should
             // clarify what should happen and select the first open Primary Screen.
 
-            if(selectedScreen > ScreenManager.CurrentScreenEnum.Screen6)
+            if(selectedScreen > ScreenManager.CurrentScreenEnum.Primary_Screen_6)
             {
                 for(int screenNumber = 1;screenNumber <= ScreenManager.totalNumberOfPrimaryScreens + 1; screenNumber++)
                 {
                     // if all screens are already enabled (its gone thru the for next loop)
                     if(screenNumber == ScreenManager.totalNumberOfPrimaryScreens + 1)
                     {
-                        selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
-                       // ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Screen1].videoPlacement = newPlacement;
+                        selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
+                       // ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Primary_Screen_1].videoPlacement = newPlacement;
                         UpdateSelectedVideoParameters();
                         generalInfoMessageText.text = "Cannot apply change to non-primary Screens";
                         break;
@@ -807,17 +1367,19 @@ namespace CustomVideoPlayer
             SetPreviewState();
         }
 
-        private void ChangeView(bool generalView)
+        private void ChangeView(bool generalView, bool screenAttribView, bool screenShapeView)
         {
             StopPreview(false);
 
-            if (generalView) videoDetailsViewRect.gameObject.SetActive(false);
+            if (generalView || screenAttribView || screenShapeView) videoDetailsViewRect.gameObject.SetActive(false);
             else videoDetailsViewRect.gameObject.SetActive(true);
 
             videoExtrasViewRect.gameObject.SetActive(generalView);
+            screenAttribViewRect.gameObject.SetActive(screenAttribView);
+            screenShapeViewRect.gameObject.SetActive(screenShapeView);
 
 
-            if (!generalView)
+            if (!generalView && !screenAttribView && !screenShapeView)
             {
                 if(isActive)
                 {
@@ -825,13 +1387,44 @@ namespace CustomVideoPlayer
                 }
                 LoadVideoSettings(selectedVideo);
             }
-            else //  generalview
+            else //  other views
             {
                 ScreenManager.Instance.ShowPreviewScreen(false);
+
+                if (screenAttribView) InitializeScreenAttribControls();
+                if (screenShapeView) InitializeScreenShapeControls();
             }
         }
 
-        
+        private void InitializeScreenAttribControls()
+        {
+            currentScreenInAttribMessageText.text = "Current Screen settings for :  " + selectedScreen;
+
+            ScrContrast = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast;
+            ScrBrightness = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness;
+            ScrExposure = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure;
+            ScrGamma = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma;
+            ScrHue = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue;
+            ScrSaturation = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation;
+            HideBodies = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
+            MSPSequence = ScreenManager.screenControllers[(int)selectedScreen].mspSequence;
+
+            // only show this button for mspController screentype
+           // useMSPSequenceButton.interactable = false;
+           // useMSPSequenceButton.gameObject.SetActive((ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.mspController));
+        }
+
+        private void InitializeScreenShapeControls()
+        {
+            currentScreenInShapeMessageText.text = "Current Screen settings for :  " + selectedScreen;
+
+            VigRadius = ScreenManager.screenControllers[(int)selectedScreen].vignette.radius;
+            VigSoftness = ScreenManager.screenControllers[(int)selectedScreen].vignette.softness;
+            VigEnabled = ScreenManager.screenControllers[(int)selectedScreen].vignette.vignetteEnabled;
+            VigOpal = ScreenManager.screenControllers[(int)selectedScreen].vignette.type == "rectangular" ? false : true;
+        }
+
+
         private void UpdateVideoSourcePriorityButtonText()
         {
             vidSourceButtonText.text = ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst ? "Local" : "Custom";
@@ -850,18 +1443,18 @@ namespace CustomVideoPlayer
 
                 case ScreenManager.ScreenType.mspController:
                 
-                    if (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlA)
-                       showScreenUIBoolText.text = "Multi-Screen Pl A"; 
-                    else if (selectedScreen == ScreenManager.CurrentScreenEnum.ScreenMSPControlB)
-                       showScreenUIBoolText.text = "Multi-Screen Pl B";
+                    if (selectedScreen == ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A)
+                       showScreenUIBoolText.text = "Multi-Screen Pr A"; 
+                    else if (selectedScreen == ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_B)
+                       showScreenUIBoolText.text = "Multi-Screen Pr B";
                     else 
-                       showScreenUIBoolText.text = "Multi-Screen Pl C";
+                       showScreenUIBoolText.text = "Multi-Screen Pr C";
 
                     MSPresetUISetting = ScreenManager.screenControllers[(int)selectedScreen].msPreset;
                     break;
 
                 case ScreenManager.ScreenType.threesixty:
-                    showScreenUIBoolText.text = (selectedScreen == ScreenManager.CurrentScreenEnum.Screen360A) ? "360 Screen A" : "360 Screen B";
+                    showScreenUIBoolText.text = (selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_A) ? "Screen 360 A" : "Screen 360 B";
                     break;
 
             }
@@ -1074,16 +1667,16 @@ namespace CustomVideoPlayer
             string multiScreenInfo = " ";
            
             // if one of the mspControllers is not the selectedScreen, make it so
-            if(selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA || selectedScreen > ScreenManager.CurrentScreenEnum.ScreenMSPControlC)
+            if(selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A || selectedScreen > ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_C)
             {
-                if(!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlA].enabled)
-                   selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
-                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlB].enabled)
-                   selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlB;
-                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.ScreenMSPControlC].enabled)
-                    selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlC;
+                if(!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A].enabled)
+                   selectedScreen = ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A;
+                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_B].enabled)
+                   selectedScreen = ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_B;
+                else if (!ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_C].enabled)
+                    selectedScreen = ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_C;
                 else 
-                    selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
+                    selectedScreen = ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A;
 
                 ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex;
             }
@@ -1199,14 +1792,35 @@ namespace CustomVideoPlayer
             LoadVideoSettings(null); 
         }
 
-        [UIAction("on-previous-screen-action")]
-        private void OnPreviousScreenAction()
+        [UIAction("on-previous-screen-action-preview-on")]
+        private void OnPreviousScreenActionPreviewOn()
         {
-            ScreenManager.Instance.ShowPreviewScreen(true);
+            OnPreviousScreenAction(true);
+        }
+
+        [UIAction("on-previous-screen-action-preview-off")]
+        private void OnPreviousScreenActionPreviewOff()
+        {
+            OnPreviousScreenAction(false);
+        }
+/*
+        [UIAction("on-previous-screen-action-skip360")]
+        private void OnPreviousScreenActionSkip360()
+        {
+            // this calling function should be specialized further to ignore 360 screens for shapes menu.
+            OnPreviousScreenAction(false);
+        }
+*/
+        private void OnPreviousScreenAction(bool displayPreview)
+        {
+            ScreenManager.Instance.ShowPreviewScreen(displayPreview);
+
+            // int skipping360 = skip360 ? 2 : 0;  // nudge the math a little to allow shapes menu to ignore 360 screens
+            int skipping360 = 0;
 
             // need to add logic to skip types with 0 videos in their lists ...
-            if (--selectedScreen < ScreenManager.CurrentScreenEnum.Screen1) selectedScreen = ScreenManager.CurrentScreenEnum.Screen360B;
-            if(selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
+            if (--selectedScreen < ScreenManager.CurrentScreenEnum.Primary_Screen_1) selectedScreen = ScreenManager.CurrentScreenEnum.Screen_360_B - skipping360;
+            if(selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
             if (!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal && !ScreenManager.screenControllers[(int)selectedScreen].enabled)
@@ -1217,16 +1831,32 @@ namespace CustomVideoPlayer
             }
 
             UpdateSelectedVideoParameters();
+            InitializeScreenAttribControls();
+            InitializeScreenShapeControls();
         }
 
-        [UIAction("on-next-screen-action")]
-        private void OnNextScreenAction()
+        [UIAction("on-next-screen-action-preview-on")]
+        private void OnNextScreenActionPreviewOn()
         {
-            ScreenManager.Instance.ShowPreviewScreen(true);
+            OnNextScreenAction(true);
+        }
+
+        [UIAction("on-next-screen-action-preview-off")]
+        private void OnNextScreenActionPreviewOff()
+        {
+            OnNextScreenAction(false);
+        }
+
+        private void OnNextScreenAction(bool displayPreview)
+        {
+            ScreenManager.Instance.ShowPreviewScreen(displayPreview);
+
+            //    int skipping360 = skip360 ? 2 : 0;  // nudge the math a little to allow shapes menu to ignore 360 screens
+            int skipping360 = 0;   // removed the skip option, moved 360 sphere size into shape menu ... may change back if menu gets too crowded after curve implimentation
 
             // need to add logic to skip types with 0 videos in their lists ...
-            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen360B) selectedScreen = ScreenManager.CurrentScreenEnum.Screen1;
-            if (selectedScreen < ScreenManager.CurrentScreenEnum.ScreenMSPControlA && (int)selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = ScreenManager.CurrentScreenEnum.ScreenMSPControlA;
+            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen_360_B - skipping360) selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
+            if (selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A && (int)selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
             if (!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal && !ScreenManager.screenControllers[(int)selectedScreen].enabled)
@@ -1237,6 +1867,9 @@ namespace CustomVideoPlayer
             }
 
             UpdateSelectedVideoParameters();
+            InitializeScreenAttribControls();
+            InitializeScreenShapeControls();
+
         }
 
         [UIAction("on-offset-magnitude-action")]
@@ -1499,15 +2132,25 @@ namespace CustomVideoPlayer
         [UIAction("on-extras-action")]
         private void OnExtrasAction()
         {
-            // set test text
-            ChangeView(true);
+            ChangeView(true, false, false);
+        }
 
+        [UIAction("on-screen-attrib-action")]
+        private void OnScreenAttribAction()
+        {
+            ChangeView(false, true, false);
+        }
+
+        [UIAction("on-screen-shape-action")]
+        private void OnScreenShapeAction()
+        {
+            ChangeView(false, false, true);
         }
 
         [UIAction("on-back-action")]
         private void OnBackAction()
         {
-            ChangeView(false);
+            ChangeView(false, false, false);
             
         }
 
@@ -1518,7 +2161,7 @@ namespace CustomVideoPlayer
         {
             selectedLevel = level;
             selectedVideo = null;
-            ChangeView(false);
+            ChangeView(false, false, false);
 			Plugin.logger.Debug($"HandleDidSelectLevel : Selected Level: {level.songName}");
         }
 

@@ -125,6 +125,7 @@ namespace CustomVideoPlayer.Util
 
         public static string GetCustomVideoPath()
         {
+            // note: this is accessing the filepath for Screen1 (primary) which is also used for the menu preview screen.
             switch (ScreenManager.screenControllers[(int)VideoMenu.selectedScreen].screenType)
             {
                 case ScreenManager.ScreenType.primary:

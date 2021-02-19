@@ -33,7 +33,7 @@ namespace CustomVideoPlayer
 
         public enum CurrentScreenEnum
         {
-            Preview, Screen1, Screen2, Screen3, Screen4, Screen5, Screen6, ScreenMSPA_1, ScreenMSPA_2, ScreenMSPA_3, ScreenMSPA_4,
+            Preview, Primary_Screen_1, Primary_Screen_2, Primary_Screen_3, Primary_Screen_4, Primary_Screen_5, Primary_Screen_6, ScreenMSPA_1, ScreenMSPA_2, ScreenMSPA_3, ScreenMSPA_4,
             ScreenMSPA_5, ScreenMSPA_6, ScreenMSPA_7, ScreenMSPA_8, ScreenMSPA_9, ScreenMSPB_1, ScreenMSPB_2, ScreenMSPB_3, ScreenMSPB_4,
             ScreenMSPB_5, ScreenMSPB_6, ScreenMSPB_7, ScreenMSPB_8, ScreenMSPB_9, ScreenMSPC_1, ScreenMSPC_2, ScreenMSPC_3, ScreenMSPC_4,
             ScreenMSPC_5, ScreenMSPC_6, ScreenMSPC_7, ScreenMSPC_8, ScreenMSPC_9,
@@ -41,14 +41,14 @@ namespace CustomVideoPlayer
             ScreenRef_MSPA_r1, ScreenRef_MSPA_r2, ScreenRef_MSPA_r3, ScreenRef_MSPA_r4, 
             ScreenRef_MSPB_r1, ScreenRef_MSPB_r2, ScreenRef_MSPB_r3, ScreenRef_MSPB_r4,
             ScreenRef_MSPC_r1, ScreenRef_MSPC_r2, ScreenRef_MSPC_r3, ScreenRef_MSPC_r4,
-            ScreenMSPControlA, ScreenMSPControlB, ScreenMSPControlC, Screen360A, Screen360B
+            Multi_Screen_Pr_A, Multi_Screen_Pr_B, Multi_Screen_Pr_C, Screen_360_A, Screen_360_B
         };
 
         public static readonly int totalNumberOfPrimaryScreens = 6;
         public static readonly int totalNumberOfMSPControllers = 3;
         public static readonly int totalNumberOfMSPReflectionScreensPerContr = 4;
-        public readonly int totalNumberOfScreens = 57;
-        public readonly int totalNumberOfMSPScreensPerController = 9;
+        public static readonly int totalNumberOfScreens = 57;
+        public static readonly int totalNumberOfMSPScreensPerController = 9;
 
         private double offsetSec = 0d;
 
@@ -56,6 +56,9 @@ namespace CustomVideoPlayer
         public AudioTimeSyncController syncController;
 
         public enum ScreenType { primary, mspController, reflection, threesixty };
+
+        public enum ScreenAttribute {brightness_attrib, contrast_attrib, saturation_attrib, hue_attrib, gamma_attrib, exposure_attib, 
+            vignette_radius_attrib, vignette_softness_attrib, use_vignette_attrib, use_opalVignette_attrib, transparent_attrib, mspSequence_attrib};
         internal static List<ScreenController> screenControllers { get; set; }
 
         internal class ScreenController
@@ -68,7 +71,28 @@ namespace CustomVideoPlayer
             public VideoPlayer videoPlayer;
             public GameObject videoScreen;
 
+            public ColorCorrection colorCorrection;
+            public Vignette vignette;
+
             public bool enabled = false;
+
+            // screen attributes from Cinema Shader
+            private const string MAIN_TEXTURE_NAME = "_MainTex";
+
+            private const float GLOBAL_SCREEN_BRIGHTNESS = 1.0f; // 0.92f
+            private readonly Color _screenColorOn = Color.white.ColorWithAlpha(0f) * GLOBAL_SCREEN_BRIGHTNESS;
+            private readonly Color _screenColorOff = Color.clear;
+
+            private static readonly int MainTex = Shader.PropertyToID(MAIN_TEXTURE_NAME);
+            private static readonly int Brightness = Shader.PropertyToID("_Brightness");
+            private static readonly int Contrast = Shader.PropertyToID("_Contrast");
+            private static readonly int Saturation = Shader.PropertyToID("_Saturation");
+            private static readonly int Hue = Shader.PropertyToID("_Hue");
+            private static readonly int Gamma = Shader.PropertyToID("_Gamma");
+            private static readonly int Exposure = Shader.PropertyToID("_Exposure");
+            private static readonly int VignetteRadius = Shader.PropertyToID("_VignetteRadius");
+            private static readonly int VignetteSoftness = Shader.PropertyToID("_VignetteSoftness");
+            private static readonly int VignetteOval = Shader.PropertyToID("_VignetteOval");
 
             // values associated 1:1 to screens
             public ScreenType screenType = ScreenType.primary;
@@ -78,6 +102,9 @@ namespace CustomVideoPlayer
             public VideoPlacement videoPlacement;
             internal VideoMenu.MSPreset msPreset = VideoMenu.MSPreset.Preset_Off;   // only utilized for mspControllerScreens
             public float videoSpeed = 1.0f;
+            public bool AddScreenRefl = false;
+            public bool isTransparent = false;
+            public bool mspSequence = false;
 
             // values associated 1:1 to videos (must be updated when new video loads)
             public int videoIndex = 0;
@@ -88,10 +115,47 @@ namespace CustomVideoPlayer
             public int fixedOffset = 0;
             public int rollingOffset = 0;
             public bool videoIsLocal = false;
-            public bool AddScreenRefl = false;
+            
 
             public object instance { get; internal set; }
+
+            public void SetScreenColor(Color color)
+            {
+                vsRenderer.material.color = color;
+            }
+
+            internal void SetShaderParameters()  // need to declare objects in ScreenManager class as colorCorrection and Vignette and then pass ScreenController here.
+            {
+              // var colorCorrection = screen.colorCorrection;
+              //  var vignette = screen.vignette;
+
+            SetShaderFloat(Brightness, this.colorCorrection?.brightness, 0f, 2f, 1f);
+            SetShaderFloat(Contrast, this.colorCorrection?.contrast, 0f, 5f, 1f);
+            SetShaderFloat(Saturation, this.colorCorrection?.saturation, 0f, 5f, 1f);
+            SetShaderFloat(Hue, this.colorCorrection?.hue, -360f, 360f, 0f);
+            SetShaderFloat(Exposure, this.colorCorrection?.exposure, 0f, 5f, 1f);
+            SetShaderFloat(Gamma, this.colorCorrection?.gamma, 0f, 5f, 1f);
+
+                if(this.vignette.vignetteEnabled)
+                {
+                    SetShaderFloat(VignetteRadius, this.vignette?.radius, 0f, 1f, 1f);
+                    SetShaderFloat(VignetteSoftness, this.vignette?.softness, 0f, 1f, 0.05f);
+                    this.vsRenderer.material.SetInt(VignetteOval, this.vignette?.type == "rectangular" ? 1 : 0);
+                }
+                else
+                {
+                    SetShaderFloat(VignetteRadius, 1f, 0f, 1f, 1f);
+                    SetShaderFloat(VignetteSoftness, 0.001f, 0f, 1f, 0.001f);
+                    this.vsRenderer.material.SetInt(VignetteOval, 1);  // int value 1 = type:"rectangular"
+                }
         }
+
+        private void SetShaderFloat(int nameID, float? value, float min, float max, float defaultValue)
+        {
+                this.vsRenderer.material.SetFloat(nameID, Math.Min(max, Math.Max(min, value ?? defaultValue)));
+        }
+
+    }
 
         public EnvironmentSpawnRotation instanceEnvironmentSpawnRotation
         {
@@ -142,11 +206,11 @@ namespace CustomVideoPlayer
             // create and initialize 360 screen and add it to controller array
             ScreenController vidControl360a = new ScreenController();
             screenControllers.Add(InitController360(vidControl360a, 1));
-            screenControllers[(int)CurrentScreenEnum.Screen360A].screen.SetActive(false);
+            screenControllers[(int)CurrentScreenEnum.Screen_360_A].screen.SetActive(false);
 
             ScreenController vidControl360b = new ScreenController();
             screenControllers.Add(InitController360(vidControl360b, 2));
-            screenControllers[(int)CurrentScreenEnum.Screen360B].screen.SetActive(false);
+            screenControllers[(int)CurrentScreenEnum.Screen_360_B].screen.SetActive(false);
 
           //  screenControllers[0].videoPlacement = VideoMenu.instance.PlacementUISetting;
             ScreenManager.Instance.SetScale(videoPlayerDetailScale);
@@ -180,6 +244,11 @@ namespace CustomVideoPlayer
             vidControl.vsRenderer = vidControl.videoScreen.GetComponent<Renderer>();
             vidControl.vsRenderer.material = new Material(this.GetShader());
 
+            vidControl.colorCorrection = new ColorCorrection();
+            vidControl.vignette = new Vignette();
+            vidControl.isTransparent = false;
+            vidControl.mspSequence = false;
+
             // inverts uv values so screen can look like a proper reflection
             if (screenNumber >= (int)CurrentScreenEnum.ScreenRef_1 && screenNumber <= ((int)CurrentScreenEnum.ScreenRef_MSPA_r1 + (totalNumberOfMSPReflectionScreensPerContr * totalNumberOfMSPControllers)) - 1)
             {
@@ -189,7 +258,7 @@ namespace CustomVideoPlayer
                 mesh.uv = mesh.uv.Select(o => new Vector2(1 - o.x, o.y)).ToArray();
                 mesh.normals = mesh.normals.Select(o => -o).ToArray();
             }
-            else if (screenNumber == (int)CurrentScreenEnum.ScreenMSPControlA || screenNumber == (int)CurrentScreenEnum.ScreenMSPControlB || screenNumber == (int)CurrentScreenEnum.ScreenMSPControlC)
+            else if (screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_A || screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_B || screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_C)
             {
                 vidControl.screenType = ScreenType.mspController;
                 vidControl.videoPlacement = VideoPlacement.Center;
@@ -248,6 +317,11 @@ namespace CustomVideoPlayer
             mesh.normals = mesh.normals.Select(o => -o).ToArray();
 
             vidControl.vsRenderer.material.color = _onColor;
+
+            vidControl.colorCorrection = new ColorCorrection();
+            vidControl.vignette = new Vignette();
+            vidControl.isTransparent = false;
+            vidControl.mspSequence = false;
 
             vidControl.videoPlayer.isLooping = true;
             vidControl.videoPlayer.renderMode = VideoRenderMode.MaterialOverride; // VideoRenderMode.RenderTexture; 
@@ -367,7 +441,7 @@ namespace CustomVideoPlayer
                     StartCoroutine(PlayPrimaryScreensWithOffset(screenNumber));
                 }
             }
-            for (int screenNumber = (int)CurrentScreenEnum.ScreenMSPControlA; screenNumber < (int)CurrentScreenEnum.ScreenMSPControlA + totalNumberOfMSPControllers; screenNumber++)  
+            for (int screenNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; screenNumber < (int)CurrentScreenEnum.Multi_Screen_Pr_A + totalNumberOfMSPControllers; screenNumber++)  
             {
                 if (screenControllers[screenNumber].enabled)
                 {
@@ -375,14 +449,14 @@ namespace CustomVideoPlayer
                 }
             }
 
-            if(screenControllers[(int)CurrentScreenEnum.Screen360A].enabled)
+            if(screenControllers[(int)CurrentScreenEnum.Screen_360_A].enabled)
             {
-                StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen360A));
+                StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen_360_A));
             }
 
-            if (screenControllers[(int)CurrentScreenEnum.Screen360B].enabled)
+            if (screenControllers[(int)CurrentScreenEnum.Screen_360_B].enabled)
             {
-                StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen360B));
+                StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen_360_B));
             }
 
             screenControllers[0].videoPlayer.Pause();
@@ -454,15 +528,15 @@ namespace CustomVideoPlayer
 
             switch ((CurrentScreenEnum)mSPNumber)
             {
-                case CurrentScreenEnum.ScreenMSPControlA:
+                case CurrentScreenEnum.Multi_Screen_Pr_A:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
                     firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                     break;
-                case CurrentScreenEnum.ScreenMSPControlB:
+                case CurrentScreenEnum.Multi_Screen_Pr_B:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
                     firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPB_r1;
                     break;
-                case CurrentScreenEnum.ScreenMSPControlC:
+                case CurrentScreenEnum.Multi_Screen_Pr_C:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
                     firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPC_r1;
                     break;
@@ -484,7 +558,7 @@ namespace CustomVideoPlayer
                 screenControllers[screenNumber].videoPlayer.Play();
                 
                 // MSPreset 4x4 is a special case where MSPController A initializes both A and B screens (16 screens)
-                if(mSPNumber == (int)CurrentScreenEnum.ScreenMSPControlA && screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].msPreset == VideoMenu.MSPreset.P4_4x4)
+                if(mSPNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_A && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4)
                 { 
                     screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.time = screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[mSPNumber].fixedOffset / 1000.0d) : 0d;
 
@@ -533,59 +607,57 @@ namespace CustomVideoPlayer
         public void PrepareNonPreviewScreens()
         {
             //  MSP (MultiScreenPreset) logic
-            for (int mspControllerNumber = (int)CurrentScreenEnum.ScreenMSPControlA; mspControllerNumber <= (int)CurrentScreenEnum.ScreenMSPControlC; mspControllerNumber++)
+            for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             {
                 int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                bool enableSequence = false;
 
                 switch ((CurrentScreenEnum)mspControllerNumber)
                 {
-                    case CurrentScreenEnum.ScreenMSPControlA:
+                    case CurrentScreenEnum.Multi_Screen_Pr_A:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                        enableSequence = VideoMenu.useSequenceInMSPresetA;
                         break;
-                    case CurrentScreenEnum.ScreenMSPControlB:
+                    case CurrentScreenEnum.Multi_Screen_Pr_B:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
-                        enableSequence = VideoMenu.useSequenceInMSPresetB;
                         break;
-                    case CurrentScreenEnum.ScreenMSPControlC:
+                    case CurrentScreenEnum.Multi_Screen_Pr_C:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
-                        enableSequence = VideoMenu.useSequenceInMSPresetC;
                         break;
                 }
 
                 // IndexMult is used decide if MSP will play one video several times or an sequence. (ordered by filename) It is set by two bool UIs in 'Extras'
-                int IndexMult = (enableSequence && !screenControllers[mspControllerNumber].videoIsLocal) ? 1 : 0;  // if video is local, cancel sequential videos
+                int IndexMult = (screenControllers[mspControllerNumber].mspSequence && !screenControllers[mspControllerNumber].videoIsLocal) ? 1 : 0;  // if video is local, cancel sequential videos
 
                 // since 8k uses screens allocated to both mspController A & B, only one can be active.
                 // if ContrB was enabled and set to 8k, copy its contents to ContrA and disable ContrB.
                 // this has the unhappy side effect of overriding contrA's settings and should be mentioned in the docs. 
 
-                // After introducing a third MSP Controller, I chose to just disregard it if it was set to P4_4x4 ... this is not elequent, but this preset 
-                // is only experimental and will be removed shortly.
-                if (screenControllers[(int)CurrentScreenEnum.ScreenMSPControlC].msPreset == VideoMenu.MSPreset.P4_4x4)
+                // After introducing a third MSP Controller, I chose to just disregard it if it was set to P4_4x4 ... this is not eloquent, but this preset 
+                // is only experimental.
+                if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset == VideoMenu.MSPreset.P4_4x4)
                 {
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlC].msPreset = VideoMenu.MSPreset.Preset_Off;
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlC].enabled = false;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.Preset_Off;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled = false;
                 }
 
-                if ((screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].enabled)
-                         || (screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].enabled))
+                if ((screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled)
+                         || (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled))
                 {
-                    if (screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].enabled && screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].msPreset == VideoMenu.MSPreset.P4_4x4)
+                    if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset == VideoMenu.MSPreset.P4_4x4)
                     {
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoIndex = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].videoIndex;
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoSpeed = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].videoSpeed;
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].rollingVideoQueue;
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoIsLocal = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].videoIsLocal;
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoURL = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].videoURL;
-                        screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].AddScreenRefl = false;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIndex = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoIndex;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoSpeed = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoSpeed;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].rollingVideoQueue;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoIsLocal;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoURL = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoURL;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].colorCorrection = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].colorCorrection;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].vignette = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].vignette;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].AddScreenRefl = false;
                     }
 
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].enabled = true;
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].enabled = false;
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].msPreset = VideoMenu.MSPreset.P4_4x4;
-                    screenControllers[(int)CurrentScreenEnum.ScreenMSPControlB].msPreset = VideoMenu.MSPreset.P4_4x4;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled = true;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled = false;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset = VideoMenu.MSPreset.P4_4x4;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset = VideoMenu.MSPreset.P4_4x4;
                 }
                 // turn off unused screens if their mspController is disabled
                 else if (!screenControllers[mspControllerNumber].enabled)
@@ -750,7 +822,7 @@ namespace CustomVideoPlayer
 
                     case VideoMenu.MSPreset.P4_4x4:
 
-                        if (mspControllerNumber == (int)CurrentScreenEnum.ScreenMSPControlB) break;
+                        if (mspControllerNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_B) break;
 
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1].videoPlacement = VideoPlacement.Back_8k_1a;
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPA_2].videoPlacement = VideoPlacement.Back_8k_1b;
@@ -775,11 +847,17 @@ namespace CustomVideoPlayer
                             if (screenNumber <= 15 && screenControllers[mspControllerNumber].enabled)
                             {
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].enabled = true;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIndex = (screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoSpeed;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].rollingVideoQueue;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoIsLocal;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.ScreenMSPControlA].videoURL;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIndex = (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoSpeed;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].rollingVideoQueue;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIsLocal;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoURL;
+
+                                // special case: replication of the vignette and colorCorrection members is normally done using a helper method in VideoMenu.
+                                // Since P4_4x4 uses both msp_A and msp_B, these must be added
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].colorCorrection = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].colorCorrection;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].vignette = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].vignette;
+
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].AddScreenRefl = false;
                             }
                             else screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].enabled = false;
@@ -1061,7 +1139,7 @@ namespace CustomVideoPlayer
             for (int screenNumber = 0; screenNumber <= totalNumberOfPrimaryScreens - 1; screenNumber++)
             {
                 // Each primary screen can be reflected if desired.  
-                if (screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].enabled && screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].AddScreenRefl) // VideoMenu.instance.AddScreenRefBool)
+                if (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].enabled && screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].AddScreenRefl) // VideoMenu.instance.AddScreenRefBool)
                 {
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = true;
 
@@ -1069,37 +1147,37 @@ namespace CustomVideoPlayer
                     int refPlacementEnumOffset = (VideoMenu.use360ReflectionBool) ? 0 : 1;
                     
 
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoPlacement + refPlacementEnumOffset);
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIndex = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoIndex;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoIsLocal;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoSpeed;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].videoURL;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].fixedOffset = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].fixedOffset;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffset = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].rollingOffset;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffsetEnable = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].rollingOffsetEnable;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Screen1 + screenNumber].rollingVideoQueue;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoPlacement = (VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoPlacement + refPlacementEnumOffset);
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIndex = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoIndex;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoIsLocal;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoSpeed;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoURL;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].fixedOffset = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].fixedOffset;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffset = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingOffset;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffsetEnable = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingOffsetEnable;
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingVideoQueue;
                 }
                 else screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = false;
             }
 
 
             // Only the first 4 MSP screens are currently reflected.
-            for (int mspControllerNumber = (int)CurrentScreenEnum.ScreenMSPControlA; mspControllerNumber <= (int)CurrentScreenEnum.ScreenMSPControlC; mspControllerNumber++)
+            for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             { 
                 int firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                 int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
 
                 switch ((CurrentScreenEnum)mspControllerNumber) 
                 {
-                    case CurrentScreenEnum.ScreenMSPControlA:
+                    case CurrentScreenEnum.Multi_Screen_Pr_A:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
                         firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                         break;
-                    case CurrentScreenEnum.ScreenMSPControlB:
+                    case CurrentScreenEnum.Multi_Screen_Pr_B:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
                         firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPB_r1;
                         break;
-                    case CurrentScreenEnum.ScreenMSPControlC:
+                    case CurrentScreenEnum.Multi_Screen_Pr_C:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
                         firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPC_r1;
                         break;
@@ -1163,7 +1241,7 @@ namespace CustomVideoPlayer
                 if (screenControllers[screenNumber].enabled)
                 {
 
-                    if (screenNumber == (int)CurrentScreenEnum.Screen360A || screenNumber == (int)CurrentScreenEnum.Screen360B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
+                    if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
                     else screenControllers[screenNumber].screen.gameObject.SetActive(true);
 
 
@@ -1255,7 +1333,7 @@ namespace CustomVideoPlayer
                     }
 
 
-                    if (screenNumber < (int)CurrentScreenEnum.ScreenMSPControlA)      // all the enums for Primary screens are < ScreenMSPControlA
+                    if (screenNumber < (int)CurrentScreenEnum.Multi_Screen_Pr_A)      // all the enums for Primary screens are < Multi_Screen_Pr_A
                     {
                         // two distinct cases ... if video is local, the url resides in videoURL, if custom, the videoIndex is used to access approp list.
                         // ... this may be changed to rely solely on videoURL.
@@ -1280,7 +1358,7 @@ namespace CustomVideoPlayer
                         Plugin.logger.Debug("... and the filepath is ...");
                         Plugin.logger.Debug("... and the filepath is ... " + screenControllers[screenNumber].videoURL);
                     }
-                    else if (screenNumber == (int)CurrentScreenEnum.Screen360A || screenNumber == (int)CurrentScreenEnum.Screen360B)
+                    else if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B)
                     {
                         screenControllers[screenNumber].videoPlayer.url = VideoLoader.custom360Videos[screenControllers[screenNumber].videoIndex].videoPath;
                     }
@@ -1293,6 +1371,37 @@ namespace CustomVideoPlayer
                     screenControllers[screenNumber].videoPlayer.isLooping = true;
                     screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 
+                    //... New! Feb13 2021 ... testing changing video attributes using Cinema Shader ...
+                    screenControllers[screenNumber].SetShaderParameters();
+
+                    /*   if (screenNumber == 1)
+                       {
+                           // screenControllers[1].SetScreenColor(Color.red);
+                           // screenControllers[1].vignette.radius = 1.0f;
+                            screenControllers[1].colorCorrection.hue = 40.0f;
+                           screenControllers[1].colorCorrection.gamma = 0.9f;
+                           screenControllers[1].colorCorrection.contrast = 1.05f;
+                           screenControllers[1].colorCorrection.saturation = 1.2f;
+
+                           screenControllers[1].SetShaderParameters();
+                       }
+                           if (screenNumber == 2)
+                           {
+                                screenControllers[2].colorCorrection.hue = 80.0f;
+                               screenControllers[2].colorCorrection.gamma = 0.6f;
+                           screenControllers[2].colorCorrection.contrast = 0.9f;
+                           screenControllers[2].colorCorrection.saturation = 1.8f;
+
+                           screenControllers[2].SetShaderParameters();
+                       } */
+
+                    // screenControllers[screenNumber].SetScreenColor(_onColor);
+
+                    //  screenControllers[1].SetShaderParameters();
+                    // ... end new section
+
+
+                    //  screenControllers[screenNumber].SetScreenColor(_onColor);
                     screenControllers[screenNumber].vsRenderer.material.color = _onColor;
 
 
@@ -1302,7 +1411,7 @@ namespace CustomVideoPlayer
                 {
                     screenControllers[screenNumber].vsRenderer.material.color = Color.clear;
 
-                    if (screenNumber == (int)CurrentScreenEnum.Screen360A || screenNumber == (int)CurrentScreenEnum.Screen360B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(false);   //  videoScreen != screen issue on 360
+                    if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(false);   //  videoScreen != screen issue on 360
                     else screenControllers[screenNumber].screen.gameObject.SetActive(false);
                 }
             }
@@ -1411,10 +1520,10 @@ namespace CustomVideoPlayer
                 screenControllers[screenNumber].screen.SetActive(false);
                 if (screenControllers[screenNumber].videoPlayer.isPlaying) screenControllers[screenNumber].videoPlayer.Stop();
             }
-            screenControllers[(int)CurrentScreenEnum.Screen360A].videoScreen.SetActive(false);
-            screenControllers[(int)CurrentScreenEnum.Screen360B].videoScreen.SetActive(false);
-            if (screenControllers[(int)CurrentScreenEnum.Screen360A].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen360A].videoPlayer.Stop();
-            if (screenControllers[(int)CurrentScreenEnum.Screen360B].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen360B].videoPlayer.Stop();
+            screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoScreen.SetActive(false);
+            screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoScreen.SetActive(false);
+            if (screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoPlayer.Stop();
+            if (screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoPlayer.Stop();
 
         }
 
@@ -1471,6 +1580,53 @@ namespace CustomVideoPlayer
 
             return shader;
         }
-      
+
+        internal class ColorCorrection
+        {
+
+            internal static readonly float MIN_BRIGHTNESS = 0.1f;
+            internal static readonly float DEFAULT_BRIGHTNESS = 1.0f;
+            internal static readonly float MAX_BRIGHTNESS = 1.0f;
+            internal static readonly float MIN_CONTRAST = 0.1f;
+            internal static readonly float DEFAULT_CONTRAST = 1.0f;
+            internal static readonly float MAX_CONTRAST = 5.0f;
+            internal static readonly float MIN_SATURATION = 0.1f;
+            internal static readonly float DEFAULT_SATURATION = 1.0f;
+            internal static readonly float MAX_SATURATION = 5.0f;
+            internal static readonly float MIN_HUE = -360.0f;
+            internal static readonly float DEFAULT_HUE = 0.0f;
+            internal static readonly float MAX_HUE = 360.0f;
+            internal static readonly float MIN_EXPOSURE = 0.1f;
+            internal static readonly float DEFAULT_EXPOSURE = 1.0f;
+            internal static readonly float MAX_EXPOSURE = 5.0f;
+            internal static readonly float MIN_GAMMA = 0.1f;
+            internal static readonly float DEFAULT_GAMMA = 1.0f;
+            internal static readonly float MAX_GAMMA = 5.0f;
+
+            public float brightness = DEFAULT_BRIGHTNESS;
+            public float contrast = DEFAULT_CONTRAST;
+            public float saturation = DEFAULT_SATURATION;
+            public float hue = DEFAULT_HUE;
+            public float exposure = DEFAULT_EXPOSURE;
+            public float gamma = DEFAULT_GAMMA;
+        }
+
+        internal class Vignette
+        {
+            internal static readonly float MIN_VIGRADIUS = 0.05f;
+            internal static readonly float DEFAULT_VIGRADIUS = 1.0f;
+            internal static readonly float MAX_VIGRADIUS = 1.0f;
+            internal static readonly float MIN_VIGSOFTNESS = 0.05f;
+            internal static readonly float DEFAULT_VIGSOFTNESS = 0.05f;
+            internal static readonly float MAX_VIGSOFTNESS = 1.0f;
+
+            public bool vignetteEnabled = false;
+            public string type= "rectangular";
+            public float radius = DEFAULT_VIGRADIUS;
+            public float softness = DEFAULT_VIGSOFTNESS;  // The shader call will conditionally set this value to 0.001f if vignette is disabled.
+                                                          // The default of 0.05 (if enabled) allows the slider control to incriment in 0.05f steps.  
+                                                          // Cinema's default is 0.005f. 
+
+        }
     }
 }
