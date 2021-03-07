@@ -1,7 +1,10 @@
+**Added to Version 2.26**
+
+* Added screen curvature and screen color.  Game environment captures screen reflection properly.  Updated this readme file with new images.
+
 **Added to Version 2.25**
 
 * Added two submenus that process screen properties made accessible by the new Cinema shader.
-  The UI changes do not appear in this readme file.  I will refresh this document when the UI is finalized.
 
 **Added to Version 2.24**
 
@@ -48,9 +51,9 @@
 
 * Multiple Screens: Ability to play multiple videos simultaneously.
 * 360 Screen:  The mod accepts monoscopic equirectangular 360 videos.  Two 360 videos can be played alongside the primary or MSP screens.  Screen radius can be dynamically resized using a slider control in the Extras Menu.
-* Multi Screen Placement Presets: Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements.  This is useful to quickly create environments suited for 90/360 maps and to allow higher resolution videos.  I will explain below.
-* Screen reflection:  Each of the primary screens and most of the MSP configurations have reflection ability.  This attempts to create the effect similar to an image reflecting off of a pond.  Each primary and MSP screen orientation is handled a bit differently and will be described in more detail below.
-* Hide/Show screen body:  There is normally a cube shaped feature attached to the 2D screen to give it a more distinct appearance.  This can now be toggled on and off.
+* Multi Screen Placement Presets: Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements.  This is useful to quickly create environments suited for 90/360 maps and to allow higher resolution videos.
+* Screen reflection:  Each of the primary screens and most of the MSP configurations have reflection ability.  They can either be relected with a second screen to create a 'pond mirror' effect or they can be duplicated behind the player for 360 level play.
+* Hide/Show screen body:  This creates screen transparency. 
 * Rolling video queue:  Each primary and MSP screen can be set to automatically increment the video queue after each game play.
 * Video offset control:  Just like the original mod, a timing offset is associated with each video.
 * Video speed control:  There is a video playback speed control that is a property associated with each screen.
@@ -63,14 +66,15 @@
 * Video offsets are currently not saved between sessions.
 * Rolling Offset.  This was a feature in a previous version that would play a video from where it ended during the last play session.
 
-**CustomVideos mod and MusicVideoPlayer mod**
+**CustomVideoPlayer, MusicVideoPlayer, AND BeatSaberCinema mod!**
 
 * Since the CV mod is just a branch of MVP it shares a common framework.
 * Up until recently, all of the features of MVP were present in CV but there was overlap which created resource allocation problems during initialization and termination of the two mods when both were installed.
 * I created this version, which I termed CVLite during development so that I could pay attention to adding new features and allow both mods to behave independently.
 * CV will recognize the new json file format used by BRad’s current MVP mod.  
 * If several local videos are allocated locally to a map, CV will allow the user to play them all simultaneously.  
-* A great deal of thanks goes to the mysterious and almighty Rolo who created the original mod and to Rie Kumar, BRad and others who have maintained it.  
+* A great deal of thanks goes to the mysterious and almighty Rolo who created the original mod and to Rie Kumar, BRad and others who have maintained it. 
+* [2021 addition]  The new BeatSaberCinema mod has added many new features and configuration options when importing videos to the game.  It should be considered the 'de facto' video player and really points a bright future for the game.  I have made use of several of these features in recent updates and will try to maintain compatibility with its config files going forward.  
 
 **Mod Requirements:**
 
@@ -96,9 +100,8 @@ The executables youtube-dl.exe and ffmpeg.exe were included in earlier releases 
 
 CVP was tested on an Odyssey Plus HMD in WMR and on a Quest2 using Virtual Desktop.  System specs: 6700k / 2070s / 16GB  and Windows 10.  The performance and stability of gameplay will set the limit to how many videos should be allowed to play simultaneously.
 
-**The UI:**
-
- ![](VideoPlayer/Resources/MenuPic1.jpg)
+**Main Menu:**
+ ![](VideoPlayer/Resources/menu226a.jpg)
 
 These are the necessary steps needed to configure this mod:  (*Essential steps in bold*)
 
@@ -122,23 +125,56 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 
 6. Set optional screen parameters Speed, Offset, RVQ, Reflection Screen.
    
-    (note:  If using MSP A or B, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
-   
- ![](VideoPlayer/Resources/MenuPic22.jpg)
+    (note:  If using MSP A, B, or C, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
 
-UI elements in the extras menu:
 
-- 'Multi Screen Sequence Bool' - if set, the MSP screen will display a sequence of videos by their order in the video list.  Otherwise, a single video is repeated.
+**Extras Menu:**
+ ![](VideoPlayer/Resources/menu226b.jpg)
 
-- Show Screen Bodies - The black cube that appears behind the 2D screen can be shown or hidden.
+UI elements in the Extras menu:
 
-- Play Audio In Preview - User can choose to play or mute audio during video preview.
+- 'Multi Screen Sequence Bool' - if set, the screens controlled by the MSP screen will display a sequence of videos by their order in the video list.  Otherwise, a single video is repeated.
 
 - 360 Sphere Size - If other mods have features in the periphery of the platform, setting the 360 sphere size can control which mod appears visible.  It will also change how the 360 screen interacts with other huge screen sizes playing within this mod.
 
+- Play Audio In Preview - User can choose to play or mute audio during video preview.
+
+
+**Screen Attributes Menu:**
+ ![](VideoPlayer/Resources/menu226c.jpg)
+
+UI elements in the Screen Attributes Menu menu:
+
+- 'Screen Selection' - Determines which screen the attributes are applied to.
+
+- Reset - Resets values to default
+
+- Transparent Screen - Hides the screen body creating transparency.
+
+- Screen Color - Analogous to adding a colored filter to the lens of a camera.  Can be used effectively to alter videos to compliment the lasers/bricks used in the scene.  This works similarily to changes in the 'hue' value but works with much more drastic effect.  The hue value also does not alter black/white videos in any way.
+
+- Color correction attributes : Contrast, Saturation, Exposure, Gamma, Hue, Brightness
+
+
+**Screen Shapes Menu:**
+ ![](VideoPlayer/Resources/menu226d.jpg)
+
+UI elements in the Screen Shapes menu:
+
+- 'Screen Selection' - Determines which screen the attributes are applied to.  It should be noted that while the 360 screens are selectable, none of the adjustments in the shapes menu affect them.
+
+- Reset - Resets values to default
+
+- Aspect Ratio - Dropdown list selects screen aspect ratio.
+
+- Screen Vignette controls - Enables/disables vignetting.  The shape can be toggled between elliptical and rectangular.  The radius and softness can be adjusted.  Softness of zero removes vignetting completely while a larger number has significant effect.  
+
+- Screen Curvature controls - Enables/disables screen curvature.  The 'Auto-Adjustment' bool calculates the degree of curvature from the distance from the origin of the scene.  The manual adjustment slider will be applied if 'auto' is disabled.
+
+
 **Primary Screens:**
 
-There are six primary screens which can be configured with their own set of parameters.   The upper dropdown list is used for these screens exclusively.  The UI does not do a very good job at getting this across so this may be a point of confusion.  If the user modifies the MSP dropdown list while a primary screen is selected, the mod automatically changes the screen selection to the first open MSP screen (A or B).  Conversely, if the user changes a setting of the primary screen placement (upper dropdown list) while a MSP screen is selected, the mod will reselect to the first open primary screen.  This behavior can be used as a shortcut in configuring the UI but if it remains too confusing I may just disable the placement list which is not exclusive to the selected screen.
+There are six primary screens which can be configured with their own set of parameters.   The upper dropdown list is used for these screens exclusively.  The UI does not do a very good job at getting this across so this may be a point of confusion.  If the user modifies the MSP preset list (lower dropdown list) while a primary screen is selected, the mod automatically changes the screen selection to the first open MSP screen.  Conversely, if the user changes a setting of the primary screen placement (upper dropdown list) while a MSP screen is selected, the mod will reselect to the first open primary screen.  This behavior can be used as a shortcut in configuring the UI but if it remains too confusing I may just disable the placement list which is not exclusive to the selected screen.
 
 *Available Screen Placement Options:*
 
@@ -230,7 +266,7 @@ The idea of ‘multi-screen placement’ presets began when I wanted to create a
 
 **Screen Reflection:**
 
-This feature derives from an idea I had a long time ago but could not actuate until I learned how to reverse the uv elements of a 2D object.  It creates a mirror effect as if the video sits above a pond surface.  The overall concept was hit and miss depending on the type of video.  It was also very easy to implement when there were only a half dozen or so screen placement settings.  For many of the screen configurations, a reflection does not make sense and looks out of place.  In those arrangements, the reflection feature becomes a way to quickly enhance the screen setup process.  For floor placed screens, the reflection is on the ceiling, and visa versa.  For Left placed screens, the reflection is on the right.  For the pedestal and larger slant screens, the reflection is placed behind the original at a slightly larger size, creating a video frame.
+Screen reflection can be added in two different ways.  The original mode, 'type1', creates a mirror effect by using a second screen at a 90 degree angle to mimic the first, creating a 'mirrored pond' effect.  The second mode, 'type2' creates a second screen behind the player in the exact orientation of the original.  It is designed for use in 360 maps ... (hurry up Beat Sage!)  The original idea arose as an answer to the question:  Now that I have mutliple screens, what can I do with them?   The overall concept was hit and miss depending on the type of video.  It was also very easy to implement when there were only a half dozen or so screen placements.  For many of the screen configurations, a reflection does not make sense and looks out of place.  In those arrangements, the reflection placement acts to add a quick way to add a second screen in left/right or floor/ceiling arrangements.    For the pedestal and the large slant screen, the reflection is placed behind the original at a slightly larger size, creating a video frame.
 
 The reflection concept works for both Primary and MSP screens with the following exceptions.
 

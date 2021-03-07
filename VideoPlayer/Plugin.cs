@@ -19,14 +19,14 @@ namespace CustomVideoPlayer
     [Plugin(RuntimeOptions.SingleStartInit)]
     public sealed class Plugin
     {
-        public static IPA.Logging.Logger logger;
+        public static IPA.Logging.Logger Logger;
         
 
         [Init]
-        public void Init(IPA.Logging.Logger logger)
+        public void Init(IPA.Logging.Logger Logger)
         {
             CVPSettings.Init();
-            Plugin.logger = logger;
+            Plugin.Logger = Logger;
         }
 
         [OnStart]

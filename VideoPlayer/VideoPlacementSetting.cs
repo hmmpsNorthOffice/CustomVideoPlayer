@@ -12,6 +12,7 @@ namespace CustomVideoPlayer.Util
 {
     internal enum VideoPlacement                      // placement of '_r' (reflection screen position) in the enum must be +1 of the original position
     {
+        PreviewScreenInMenu, PreviewScreenLeft,
         MVP_Background, MVP_BackgroundLow,                                     // MusicVideoPlayer compatible
         Center, Center_r, Back_Medium, Back_Medium_r, Back_Huge, Back_Huge_r,               // vertical
         Slant_Small, Slant_Small_r, Slant_Large, Slant_Large_r,                             // slanted
@@ -58,12 +59,16 @@ namespace CustomVideoPlayer.Util
         {
             switch (placement)
             {
+                case VideoPlacement.PreviewScreenInMenu:
+                    return new Vector3(-3.7f, 1.35f, 1.2f);
+                case VideoPlacement.PreviewScreenLeft:
+                    return new Vector3(-4.7f, 1.50f, -1.2f); // x was -3.7
                 case VideoPlacement.MVP_Background:
                     return new Vector3(0, 20, 50);
                 case VideoPlacement.MVP_BackgroundLow:
                     return new Vector3(0, 4.5f, 50);
                 case VideoPlacement.Center:
-                    return new Vector3(0, 5, 75);                           
+                    return new Vector3(0, 5, 75);   
                 case VideoPlacement.Center_r:
                     return new Vector3(0, -11.44f, 43.2f);
                 case VideoPlacement.Back_Medium:        
@@ -171,19 +176,19 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(30.88f, -34.35f, 56.1f);
 
                 case VideoPlacement.Slant_4k_L_1:
-                    return new Vector3(-71.11f, 20f, 120); //(111.11f, 30f, 160);  125
+                    return new Vector3(-71.06f, 20f, 120);   // -71.11f, 20f, 120
                 case VideoPlacement.Slant_4k_L_1_r:
                     return new Vector3(111.11f, 30f, 160);
                 case VideoPlacement.Slant_4k_L_2:
-                    return new Vector3(71.11f, 20f, 120);
+                    return new Vector3(71.06f, 20f, 120);
                 case VideoPlacement.Slant_4k_L_2_r:
                     return new Vector3(-111.11f, 30f, 160);
                 case VideoPlacement.Slant_4k_L_3:
-                    return new Vector3(-71.11f, -31.4f, 58.59f);
+                    return new Vector3(-71.06f, -31.4f, 58.59f);
                 case VideoPlacement.Slant_4k_L_3_r:
-                    return new Vector3(111.11f, -50.32f, 64.05f);  //111.11f, -50.32f, 64.05
+                    return new Vector3(111.11f, -50.32f, 64.05f);  
                 case VideoPlacement.Slant_4k_L_4:
-                    return new Vector3(71.11f, -31.4f, 58.59f);
+                    return new Vector3(71.06f, -31.4f, 58.59f);
                 case VideoPlacement.Slant_4k_L_4_r:
                     return new Vector3(-111.11f, -50.32f, 64.05f);
 
@@ -456,6 +461,10 @@ namespace CustomVideoPlayer.Util
         {
             switch (placement)
             {
+                case VideoPlacement.PreviewScreenInMenu:
+                    return new Vector3(0f, 286f, 0f);
+                case VideoPlacement.PreviewScreenLeft:                    
+                    return new Vector3(0f, 254f, 0f);
                 case VideoPlacement.MVP_BackgroundLow:
                 case VideoPlacement.MVP_Background:
                     return new Vector3(0, 0, 0);
@@ -820,6 +829,10 @@ namespace CustomVideoPlayer.Util
         {
             switch (placement)
             {
+                case VideoPlacement.PreviewScreenInMenu:
+                    return 0.8f;
+                case VideoPlacement.PreviewScreenLeft:
+                    return 1.2f;
                 case VideoPlacement.MVP_BackgroundLow:
                 case VideoPlacement.MVP_Background:
                     return 30;

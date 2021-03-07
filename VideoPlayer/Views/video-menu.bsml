@@ -7,7 +7,7 @@
           <horizontal pad-top='10' pad-left='15'>
             <text id='general-info-message' word-wrapping='true' font-align='Left' text=' ' overflow-mode='Ellipsis' font-size='3'></text>
           </horizontal>    
-            <vertical pad-bottom='25' pad-left='15' preferred-width='70' align='left'>
+            <vertical pad-bottom='26' pad-left='15' preferred-width='70' align='left'>
               <!--  preferred-width='80' -->
             <horizontal spacing='1' horizontal-fit='PreferredSize'>
               <button id='previous-video-button' hover-hint='Previous Video' text='Previous' font-align='Center' pad='1' on-click='on-previous-video-action' all-uppercase='false' preferred-height='7' pref-width='18' font-size='3'/>
@@ -40,59 +40,60 @@
         <horizontal align='left' pad-right='5' pad-left='15'>
           <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement"></dropdown-list-setting>
         </horizontal>
-        <horizontal pad-right='10' spacing='1' pad-top='2'>
+        <horizontal pad-right='3' spacing='1' pad-top='2'>
           <modifier text='RVQ'  bind-value='true' value='rollingVideoQueueEnableUI' on-change="set-rolling-video-queue" hover-hint='Rolling Video Queue - Video queue advances each play' source="CustomVideoPlayer.Resources.arrow ring white.png" pref-height='6' font-size='3' pad-right='1'/>
-          <modifier  text="Refl"  bind-value='true' value="add-screen-reflection" on-change="add-screen-reflection-action"  hover-hint="Screen Reflection - A second screen creates a mirror effect" source="CustomVideoPlayer.Resources.reflect128.png" pref-height='6' font-size='3'/>
+          <modifier id='chooseReflectButton' text="Refl Scr : Off"  bind-value='true' value="reflection-screen-button-value" on-change="reflection-screen-button-action"  hover-hint="Selects between no reflection, mirror reflection, or 360 reflection" source="CustomVideoPlayer.Resources.reflect128.png" pref-height='6' pref-width='8' font-size='3'/>
         </horizontal>
       </vertical>
     </horizontal>
     
     
     <horizontal  pad='2' font-size='3' preferred-width='80' horizontal-fit='PreferredSize'>
-       <vertical  pad-top='30'>
+       <vertical  pad-top='25'>
          <horizontal pad-right='40' child-control-width='false' spacing='1' pad-top='2'>
             <button id='video-source-priority-button'  text='Local' hover-hint='Choose video source location priority' on-click='on-video-source-priority-action' all-uppercase='false' pad='1' pref-width='18' preferred-height='7' font-size='3'/>
             <button id='previous-screen-button' font-size='3' hover-hint='Select Previous Screen' text='-' pad='1' on-click='on-previous-screen-action-preview-on'/>
-            <vertical preferred-width='30'>
-              <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" source="CustomVideoPlayer.Resources.power button white.png" preferred-height='7' font-size='3' />
+            <vertical preferred-width='30' pad-top='4'>
+              <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" source="CustomVideoPlayer.Resources.power button white.png" preferred-height='5' font-size='3' />
             </vertical>
             <button id='next-screen-button' font-size='3' hover-hint='Select Next Screen' text='+' pad='1' on-click='on-next-screen-action-preview-on'/>
            
-           <horizontal pad-left='37'>
-              <dropdown-list-setting id='msplacementlistObj' on-change="setMSPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="multi-screen-modes" value="msplacement-list-value" pref-width='15' text='' hover-hint="Multi-Screen Placement (MSP)"></dropdown-list-setting>
-           </horizontal>
+            <horizontal pad-left='37'> 
+               <dropdown-list-setting id='msplacementlistObj' on-change="setMSPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="multi-screen-modes" value="msplacement-list-value" pref-width='15' text='' hover-hint="Multi-Screen Placement (MSP)"></dropdown-list-setting>
+            </horizontal> 
          </horizontal>
        </vertical>
     </horizontal>  
      
      <horizontal pad-top='50' font-size='2'>
-      <button id='preview-button' text='Preview' on-click='on-preview-action'/>
-      <button id='extras-button' text='Extras' on-click='on-extras-action'/>
-      <button id='screen-attrib-button' text='Screen Attributes' on-click='on-screen-attrib-action'/>
-      <button id='screen-shape-button' text='Screen Shape' on-click='on-screen-shape-action'/>
+      <button id='preview-button1' text='Preview' on-click='on-preview-action'/>
+      <button text='Extras' on-click='on-extras-action'/>
+      <button text='Screen Attributes' on-click='on-screen-attrib-action'/>
+      <button text='Screen Shape' on-click='on-screen-shape-action'/>
       <button id='enable-cvp-button' text='CVP Off' on-click='on-enable-cvp-action'/>
      </horizontal>
   </bg>
  
   <bg id='extras-menu'>
-    <vertical pad-bottom='20' pad-top='5' preferred-width='90' spacing='2'>
-      <!--      <horizontal spacing='2'>    
-         <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="MSP A uses a sequence" hover-hint="Determines if MV Preset A uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
-         <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="MSP B uses a sequence" hover-hint="Determines if MV Presets B uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
-        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="MSP C uses a sequence" hover-hint="Determines if MV Presets C uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+    <vertical pad-bottom='30' pad-top='5' preferred-width='95' spacing='3'>
+            
+      <horizontal spacing='2'>
+        <text id='mvp-use-sequence-text' text='MSP Preset Video Selection' align='Left' font-size='4'></text>
+        <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="A" hover-hint="If enabled, MSP Preset A uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
+        <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="B" hover-hint="If enabled, MSP Preset B uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
+        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="C" hover-hint="If enabled, MSP Preset C uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
       </horizontal>
-     <horizontal>
-        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="MSP C uses a sequence" hover-hint="Determines if MV Presets C uses the same video or several" source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
-      </horizontal>
-   -->   <horizontal spacing='2'>
-        
-        <modifier value="Use360Reflection" on-change="use-360-reflection"  text="Reflect type ThreeSixty" hover-hint="Causes reflection screen to mirror video behind player, also deactivates screen bodies" source="CustomVideoPlayer.Resources.Reflect 360.png" pref-width='30'/>   
-        <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='30'/>
+      <horizontal pad-bottom='3' spacing='3'>
+        <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4"  pref-width='55' hover-hint='Sets the size of 360 Screen Spheres. Helpful when using other mods affecting skybox.  Setting effects both 360 screens' />
+        <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='18'/>
       </horizontal>
 
     </vertical>
 
-    <horizontal pad-top='40'>
+    <horizontal pad-top='52'>
+      <button id='preview-button2' text='Preview' on-click='on-preview-action'/>
+      <button text='Screen Attributes' on-click='on-screen-attrib-action'/>
+      <button text='Screen Shape' on-click='on-screen-shape-action'/>
       <button text='Back' on-click='on-back-action'/>
     </horizontal>
   </bg>
@@ -107,6 +108,18 @@
         <button id='attrib-reset-button' hover-hint='Resets attributes to default' text='Reset' pad='1' on-click='on-attrib-reset-action' all-uppercase='false' font-size='3'/> 
       </horizontal>
 
+      <horizontal>
+        <!--    <modifier id='screen-body-bool' value="setTransparency" on-change="use-transparency"  bind-value='true' apply-on-change='true' text="Screen is transparent" hover-hint="Creates transparency by hiding screen body" source="CustomVideoPlayer.Resources.clone-white-128.png" all-uppercase='false' font-size="3" pref-width='30'/>
+        <modifier id='use-msp-sequence' value="useMSPSequence" on-change="set-mspSequence"  bind-value='true' apply-on-change='true'  text="MSPreset uses a sequence" hover-hint="Determines if MSPreset uses the same video or several"  all-uppercase='false' font-size="3" pref-width='30' source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+-->
+        <bool-setting apply-on-change="true" bind-value='true' text='Transparent Screen' value='setTransparency' on-change="use-transparency" all-uppercase='false' font-size="4" pref-width='25' hover-hint='Creates transparency by hiding screen body.'></bool-setting>
+            <dropdown-list-setting id='select-screen-color-dropdownlist' text=' ' on-change="screenColor-list-Action" bind-value='true' apply-on-change='true' all-uppercase='false' font-size="3" options="screen-color-list" value="screencolor-list-value" pref-width='15' hover-hint="Select screen color"></dropdown-list-setting>
+      <!--  <dropdown-list-setting id='select-aspect-ratio-dropdownlist' text='Screen Aspect Ratio' on-change="aspectRatio-list-Action" bind-value='true' apply-on-change='true' font-size="4" options="aspect-ratio-list" value="aspectRatio-list-value" pref-width='15' hover-hint="Select screen aspect ratio"></dropdown-list-setting> 
+        <dropdown-list-setting id='select-screen-color-dropdownlist' text='Screen Color' on-change="screenColor-list-Action" bind-value='true' apply-on-change='true' font-size="4" options="screen-color-list" value="screencolor-list-value" pref-width='15' hover-hint="Select screen color"></dropdown-list-setting>
+        
+   -->
+      </horizontal>
+      
       <horizontal>
         <slider-setting text='Contrast' value='ScreenContrast' on-change="change-screen-contrast" bind-value='true' apply-on-change='true' integer-only='false' min='0.1' max='5.0' increment='0.1' all-uppercase='false' font-size="4" hover-hint='Adjusts contrast of current screen' />
         <button id='contrast-decrement-button' font-size='3' text='-' pad='1' on-click='on-contrast-decrement-action'/>
@@ -137,23 +150,20 @@
         <button id='brightness-decrement-button' font-size='3' text='-' pad='1' on-click='on-brightness-decrement-action'/>
         <button id='brightness-increment-button' font-size='3' text='+' pad='1' on-click='on-brightness-increment-action'/>
       </horizontal>
-      <horizontal>
-     <!--    <modifier id='screen-body-bool' value="hideScreenBodies" on-change="hide-screen-bodies"  bind-value='true' apply-on-change='true' text="Screen is transparent" hover-hint="Creates transparency by hiding screen body" source="CustomVideoPlayer.Resources.clone-white-128.png" all-uppercase='false' font-size="3" pref-width='30'/>
-        <modifier id='use-msp-sequence' value="useMSPSequence" on-change="set-mspSequence"  bind-value='true' apply-on-change='true'  text="MSPreset uses a sequence" hover-hint="Determines if MSPreset uses the same video or several"  all-uppercase='false' font-size="3" pref-width='30' source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
--->
-        <bool-setting apply-on-change="true" bind-value='true' text='Screen is transparent' value='hideScreenBodies' all-uppercase='false' font-size="3" pref-width='45' hover-hint='Creates transparency by hiding screen body.'></bool-setting>
-        <bool-setting apply-on-change="true" bind-value='true' text='MSP uses a sequence' value='useMSPSequence' all-uppercase='false' font-size="3" pref-width='45' hover-hint='Determines if MSPreset uses the same video or several. (only applicable to MSP Screens)'></bool-setting>
-      </horizontal>
+
     </vertical>
 
-    <horizontal pad-top='50'>
+    <horizontal pad-top='50' font-size='2'>
+      <button id='preview-button3' text='Preview' on-click='on-preview-action'/>
+      <button text='Extras' on-click='on-extras-action'/>
+      <button text='Screen Shape' on-click='on-screen-shape-action'/>
       <button text='Back' on-click='on-back-action'/>
     </horizontal>
   </bg>
 
 
   <bg id='screen-shape-menu'>
-    <vertical pad-bottom='10' pad-top='2' preferred-width='90' spacing='2'>
+    <vertical pad-bottom='8' pad-top='2' preferred-width='90' spacing='2'>
 
       <horizontal pad-left='5'>
         <text id='current-screen-in-screen-shape-message' word-wrapping='true' font-align='Left' text=' ' font-size='3'></text>
@@ -162,27 +172,40 @@
         <button id='shape-reset-button' hover-hint='Resets shape to default' text='Reset' pad='1' on-click='on-shape-reset-action' all-uppercase='false' font-size='3'/>
       </horizontal>
 
-      <horizontal pad-top='10'>
-        <bool-setting apply-on-change="true" bind-value='true' text='Vignette Enabled' value='vignetteEnabled' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Enabling Vignette softens the edges of the screen.'></bool-setting>
-        <bool-setting apply-on-change="true" bind-value='true' text='Opal Vignette' value='useOpalShapeVignette' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Determines if vignette shape is elliptical or rectangular.'></bool-setting>
+      <horizontal align='left' pad-right='25' pad-top='2'>
+        <dropdown-list-setting id='select-aspect-ratio-dropdownlist' text='Screen Aspect Ratio' on-change="aspectRatio-list-Action" bind-value='true' apply-on-change='true' font-size="4" options="aspect-ratio-list" value="aspectRatio-list-value" pref-width='15' hover-hint="Select screen aspect ratio"></dropdown-list-setting>
+      </horizontal>
+      <horizontal pad-top='3'>
+        <bool-setting apply-on-change="true" bind-value='true' text='Vignette Enabled' value='vignetteEnabled' on-change='on-vignette-enabled-action' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Enabling Vignette softens the edges of the screen.'></bool-setting>
+        <bool-setting apply-on-change="true" bind-value='true' text='Elliptical Vignette' value='useOpalShapeVignette' on-change='on-use-elliptical-vignette-action' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Determines if vignette shape is elliptical or rectangular.'></bool-setting>
       </horizontal>
       <horizontal>
       <slider-setting text='Vignette Radius' value='VignetteRadius' on-change="change-vignette-radius"  bind-value='true' apply-on-change='true' integer-only='false' min='0.05' max='1.0' increment='0.05' all-uppercase='false' font-size="4" hover-hint='Adjusts geometry of vignette effect' />
       <button id='vigRadius-decrement-button' font-size='3' text='-' pad='1' on-click='on-vigRadius-decrement-action'/>
       <button id='vigRadius-increment-button' font-size='3' text='+' pad='1' on-click='on-vigRadius-increment-action'/>
       </horizontal>
-      <horizontal pad-bottom='10'>
+      <horizontal pad-bottom='3'>
         <slider-setting text='Vignette Softness' value='VignetteSoftness' on-change="change-vignette-softness"  bind-value='true' apply-on-change='true' integer-only='false' min='0.05' max='1.0' increment='0.05' all-uppercase='false' font-size="4" hover-hint='Adjusts severity of vignette effect' />
         <button id='vigSoftness-decrement-button' font-size='3' text='-' pad='1' on-click='on-vigSoftness-decrement-action'/>
         <button id='vigSoftness-increment-button' font-size='3' text='+' pad='1' on-click='on-vigSoftness-increment-action'/>
       </horizontal>
       <horizontal>
-        <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4" hover-hint='Sets the size of 360 Screen Spheres. Helpful when using other mods affecting skybox.  Setting effects both 360 screens' />
+        <bool-setting apply-on-change="true" bind-value='true' text='Curvature Enabled' value='CurvatureEnabled' on-change='on-curvature-enabled-action' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Enables curved screen shape.'></bool-setting>
+        <bool-setting apply-on-change="true" bind-value='true' text='Auto Adjustment' value='UseAutoCurvature' on-change='on-auto-curvature-enabled-action' all-uppercase='false' font-size="4" pref-width='40' hover-hint='Amount of curvature set by distance from screen. (Disables manual curvature setting)'></bool-setting>
       </horizontal>
+      <horizontal pad-bottom='5'>
+        <slider-setting text='Extent of Curvature' value='CurvatureValue' on-change="change-curve-value" bind-value='true' apply-on-change='true' integer-only='false' min='0' max='180' increment='5' all-uppercase='false' font-size="4" hover-hint='Sets the extent of curvature in degrees' />
+        <button id='curvature-decrement-button' font-size='3' text='-' pad='1' on-click='on-curvature-decrement-action'/>
+        <button id='curvature-increment-button' font-size='3' text='+' pad='1' on-click='on-curvature-increment-action'/>
+      </horizontal>
+      
 
     </vertical>
 
     <horizontal pad-top='50'>
+      <button id='preview-button4' text='Preview' on-click='on-preview-action'/>
+      <button text='Extras' on-click='on-extras-action'/>
+      <button text='Screen Attributes' on-click='on-screen-attrib-action'/>
       <button text='Back' on-click='on-back-action'/>
     </horizontal>
   </bg>

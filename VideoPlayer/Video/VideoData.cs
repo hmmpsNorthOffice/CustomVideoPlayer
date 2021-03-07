@@ -113,11 +113,11 @@ namespace CustomVideoPlayer
             {
                 var absoluteVideoPath = Path.Combine(levelDir, videoPath);
                 File.Delete(absoluteVideoPath);
-                Plugin.logger.Info($"Deleted: {absoluteVideoPath}");
+                Plugin.Logger.Info($"Deleted: {absoluteVideoPath}");
             }
             catch (Exception e)
             {
-                Plugin.logger.Error(e);
+                Plugin.Logger.Error(e);
                 status = false;
             }
             if (cutVideoPath == null || notCut) return status;
@@ -125,11 +125,11 @@ namespace CustomVideoPlayer
             {
                 var absoluteCutVideoPath = Path.Combine(levelDir, cutVideoPath);
                 File.Delete(absoluteCutVideoPath);
-                Plugin.logger.Info($"Deleted: {absoluteCutVideoPath}");
+                Plugin.Logger.Info($"Deleted: {absoluteCutVideoPath}");
             }
             catch (Exception e)
             {
-                Plugin.logger.Error(e);
+                Plugin.Logger.Error(e);
                 status = false;
             }
             return status;

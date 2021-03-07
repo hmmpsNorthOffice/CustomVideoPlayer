@@ -99,10 +99,10 @@ namespace CustomVideoPlayer.Util
 
         public static string GetVideoPath(VideoData video, bool localVideosFirst, bool onlyLocalVideos = false, bool getCutVideo = false )
         {
-            // Plugin.logger.Info($"Video: {video?.level.songName}");
-            // Plugin.logger.Info($"Cut Path: {video?.cutVideoPath}");
-            // Plugin.logger.Info($"Video Path: {video?.videoPath}");
-            // Plugin.logger.Info($"? Operator: {getCutVideo && !string.IsNullOrEmpty(video?.cutVideoPath)}");
+            // Plugin.Logger.Info($"Video: {video?.level.songName}");
+            // Plugin.Logger.Info($"Cut Path: {video?.cutVideoPath}");
+            // Plugin.Logger.Info($"Video Path: {video?.videoPath}");
+            // Plugin.Logger.Info($"? Operator: {getCutVideo && !string.IsNullOrEmpty(video?.cutVideoPath)}");
 
             if (localVideosFirst && SongHasVideo(video.level) || onlyLocalVideos)
             {
@@ -352,7 +352,7 @@ namespace CustomVideoPlayer.Util
 
             if (!Directory.Exists(GetLevelPath(videos.level))) Directory.CreateDirectory(GetLevelPath(videos.level));
             var videoJsonPath = Path.Combine(GetLevelPath(videos.level), "video.json");
-            Plugin.logger.Info($"Saving to {videoJsonPath}");
+            Plugin.Logger.Info($"Saving to {videoJsonPath}");
 
             // This next line creates asset contention between mvp/cvp ... since files are in use.
             // A check to see if file is locked might help but ultimately fail if a timeout point is reached.
@@ -437,8 +437,8 @@ namespace CustomVideoPlayer.Util
             }
             catch (Exception e)
             {
-                Plugin.logger.Debug("RetrieveCustomVideoData() try catch caught ...");
-                Plugin.logger.Error(e.ToString());
+                Plugin.Logger.Debug("RetrieveCustomVideoData() try catch caught ...");
+                Plugin.Logger.Error(e.ToString());
             }
 
             // Do the same for 360 video list
@@ -471,7 +471,7 @@ namespace CustomVideoPlayer.Util
         {
             BeatmapLevelSO[] levels = Resources.FindObjectsOfTypeAll<BeatmapLevelSO>()
                 .Where(x => x.GetType() != typeof(CustomBeatmapLevel)).ToArray();
-            Plugin.logger.Info("Getting OST Video Data");
+            Plugin.Logger.Info("Getting OST Video Data");
             Action job = delegate
             {
                 try
@@ -483,7 +483,7 @@ namespace CustomVideoPlayer.Util
                         level.beatmapLevelData.audioClip.GetData(soundData, level.beatmapLevelData.audioClip.samples);
                         i++;
                         var videoFileName = level.songName;
-                        // Plugin.logger.Info($"Trying for: {videoFileName}");
+                        // Plugin.Logger.Info($"Trying for: {videoFileName}");
                         // strip invlid characters
                         foreach (var c in Path.GetInvalidFileNameChars())
                         {
@@ -499,19 +499,19 @@ namespace CustomVideoPlayer.Util
                         {
                             continue;
                         }
-                        // Plugin.logger.Info($"Using name: {videoFileName}");
-                        // Plugin.logger.Info($"At Path: {songPath}");
-                        // Plugin.logger.Info($"Exists");
+                        // Plugin.Logger.Info($"Using name: {videoFileName}");
+                        // Plugin.Logger.Info($"At Path: {songPath}");
+                        // Plugin.Logger.Info($"Exists");
                         var results = Directory.GetFiles(songPath, "video.json", SearchOption.AllDirectories);
                         if (results.Length == 0)
                         {
-                            // Plugin.logger.Info($"No video.json");
+                            // Plugin.Logger.Info($"No video.json");
                             continue;
                         }
-                        // Plugin.logger.Info($"Found video.json");
+                        // Plugin.Logger.Info($"Found video.json");
 
                         var result = results[0];
-                        Plugin.logger.Info(result);
+                        Plugin.Logger.Info(result);
 
                         try
                         {
@@ -521,16 +521,16 @@ namespace CustomVideoPlayer.Util
                                 VideoDatas videos;
                                 if (_loadingCancelled) return;
                                 IPreviewBeatmapLevel previewBeatmapLevel = level.difficultyBeatmapSets[0].difficultyBeatmaps[0].level;
-                                Plugin.logger.Info($"Loading: {previewBeatmapLevel.songName}");
+                                Plugin.Logger.Info($"Loading: {previewBeatmapLevel.songName}");
                                 try
                                 {
-                                    // Plugin.logger.Info($"Loading as multiple videos");
+                                    // Plugin.Logger.Info($"Loading as multiple videos");
                                     videos = LoadVideos(result, previewBeatmapLevel);
                                     videos.level = previewBeatmapLevel;
                                 }
                                 catch
                                 {
-                                    // Plugin.logger.Info($"Loading as single video");
+                                    // Plugin.Logger.Info($"Loading as single video");
                                     var video = LoadVideo(result, previewBeatmapLevel);
                                     videos = new VideoDatas
                                     {
@@ -544,26 +544,26 @@ namespace CustomVideoPlayer.Util
                                     AddLevelsVideos(videos);
                                     foreach (var videoData in videos)
                                     {
-                                        // Plugin.logger.Info($"Found Video: {videoData.ToString()}");
+                                        // Plugin.Logger.Info($"Found Video: {videoData.ToString()}");
                                     }
                                 }
                                 else
                                 {
-                                    // Plugin.logger.Info($"No Videos");
+                                    // Plugin.Logger.Info($"No Videos");
                                 }
                             });
                         }
                         catch (Exception e)
                         {
-                            Plugin.logger.Error("Failed to load song folder: " + result);
-                            Plugin.logger.Error(e.ToString());
+                            Plugin.Logger.Error("Failed to load song folder: " + result);
+                            Plugin.Logger.Error(e.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    Plugin.logger.Error("RetrieveOSTVideoData failed:");
-                    Plugin.logger.Error(e.ToString());
+                    Plugin.Logger.Error("RetrieveOSTVideoData failed:");
+                    Plugin.Logger.Error(e.ToString());
                 }
             };
 
@@ -627,15 +627,15 @@ namespace CustomVideoPlayer.Util
                         }
                         catch (Exception e)
                         {
-                            Plugin.logger.Error("Failed to load song folder: " + result);
-                            Plugin.logger.Error(e.ToString());
+                            Plugin.Logger.Error("Failed to load song folder: " + result);
+                            Plugin.Logger.Error(e.ToString());
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    Plugin.logger.Error("RetrieveCustomLevelVideoData failed:");
-                    Plugin.logger.Error(e.ToString());
+                    Plugin.Logger.Error("RetrieveCustomLevelVideoData failed:");
+                    Plugin.Logger.Error(e.ToString());
                 }
             }, () =>
             {
@@ -659,7 +659,7 @@ namespace CustomVideoPlayer.Util
             }
             catch (Exception)
             {
-                Plugin.logger.Warn("Error parsing video json: " + jsonPath);
+                Plugin.Logger.Warn("Error parsing video json: " + jsonPath);
                 return null;
             }
 
@@ -693,9 +693,9 @@ namespace CustomVideoPlayer.Util
             }
             catch (Exception e)
             {
-                Plugin.logger.Warn("Error parsing video json: " + jsonPath);
-                Plugin.logger.Error(e.GetType().ToString());
-                Plugin.logger.Error(e.StackTrace);
+                Plugin.Logger.Warn("Error parsing video json: " + jsonPath);
+                Plugin.Logger.Error(e.GetType().ToString());
+                Plugin.Logger.Error(e.StackTrace);
                 return null;
             }
 
