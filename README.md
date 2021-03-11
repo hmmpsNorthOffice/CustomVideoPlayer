@@ -1,3 +1,7 @@
+**Added to Version 2.27**
+
+* Updates for game version 1.13.4.  Added Environment and Cube(Saber) colors to screen dropdown list.
+
 **Added to Version 2.26**
 
 * Added screen curvature and screen color.  Game environment captures screen reflection properly.  Updated this readme file with new images.

@@ -26,7 +26,6 @@ namespace CustomVideoPlayer
         private VideoData currentVideo;
 
         
-
         // default preview screen position placement
         // old, mvp 1.0 usage ... static readonly Vector3 defaultPreviewScale = new Vector3(0.8f, 0.8f, 1f);   // (0.55f, 0.55f, 1f);
 
@@ -102,7 +101,7 @@ namespace CustomVideoPlayer
 
             public VideoConfig.ColorCorrection colorCorrection;
             public VideoConfig.Vignette vignette;
-            public ScreenColorUtil.ScreenColorEnum screenColor = ScreenColorUtil.ScreenColorEnum.screenColorOn;
+            public ScreenColorUtil.ScreenColorEnum screenColor = ScreenColorUtil.ScreenColorEnum.White;
 
             public bool isCurved = false;           
             public bool useAutoCurvature = false;
@@ -267,8 +266,6 @@ namespace CustomVideoPlayer
                         break;
                 }
 
-                
-                
 
                 float width = VideoPlacementSetting.Scale(placement) * aspectRatioMult; // (16f / 9); // (21f / 9f);
                 float height = VideoPlacementSetting.Scale(placement);
@@ -352,25 +349,6 @@ namespace CustomVideoPlayer
                 }
                 
             }
-
-            /*  Cinema example:
-             *  
-                        public void SetDefaultMenuPlacement()
-                        {
-                            //    SetPlacement(defaultPreviewPosition, defaultPreviewRotation, _menuHeight * (21f / 9f), _menuHeight);
-                            SetPlacement(_defaultPreviewPosition, defaultPreviewRotation, defaultPreviewScale * (21f / 9f), defaultPreviewScale);
-                        }
-
-                        public void SetPlacement(SerializableVector3? position, SerializableVector3? rotation, float? width = null, float? height = null, float? curvatureDegrees = null)
-                        {
-                            //Scale doesnt need to be a vector. Width is calculated based on height and aspect ratio. Depth is a constant value.
-                            _screen.SetPlacement(position ?? _defaultGameplayPosition,
-                                rotation ?? _defaultGameplayRotation,
-                                width ?? height * GetVideoAspectRatio() ?? _defaultGameplayHeight * GetVideoAspectRatio(),
-                                height ?? _defaultGameplayHeight,
-                                curvatureDegrees);
-                        }
-            */
 
         }
 
@@ -862,6 +840,7 @@ namespace CustomVideoPlayer
 
         public void PrepareNonPreviewScreens()
         {
+            ScreenColorUtil.GetMainColorScheme();
             //  MSP (MultiScreenPlacement) logic
             for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             {
@@ -1757,6 +1736,7 @@ namespace CustomVideoPlayer
                     //... New! Feb13 2021 ... changing video attributes using Cinema Shader ...
                     screenControllers[screenNumber].SetShaderParameters();
 
+                    
                     screenControllers[screenNumber].SetScreenColor(ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor));    // ScreenColorEnum.screenColorOn)); // screenControllers[screenNumber].screenColor); // _screenColorOn);   // was _onColor  ...this actually works!  kinda redundant to 'hue' setting but creates drastic effect
                     // screenControllers[screenNumber].vsRenderer.material.color = _screenColorOn;
 
@@ -1782,8 +1762,9 @@ namespace CustomVideoPlayer
             {
                 HideScreens(false);
                 return;
-            } 
+            }
 
+            ScreenColorUtil.GetMainColorScheme();   // init ScreenColorUtil with current player ColorScheme settings
             ShowPreviewScreen(true);
             //   screenControllers[0].vsRenderer.material.color = _screenColorOn;
             ScreenManager.screenControllers[0].SetScreenColor(ScreenColorUtil.ColorFromEnum(ScreenManager.screenControllers[0].screenColor));

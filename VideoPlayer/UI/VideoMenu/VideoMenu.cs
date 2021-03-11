@@ -64,6 +64,11 @@ namespace CustomVideoPlayer
         {
            //  White, Red, Lime, Blue, Yellow, Cyan, Majenta, Silver, Gray, Maroon, Olive, Green, Purple, Teal, Navy
 
+            ScreenColorUtil.ScreenColorEnum.LeftLight,
+            ScreenColorUtil.ScreenColorEnum.RightLight,
+            ScreenColorUtil.ScreenColorEnum.LeftCube,
+            ScreenColorUtil.ScreenColorEnum.RightCube,
+
             ScreenColorUtil.ScreenColorEnum.White,
             ScreenColorUtil.ScreenColorEnum.Red,
             ScreenColorUtil.ScreenColorEnum.Lime,
@@ -666,7 +671,7 @@ namespace CustomVideoPlayer
             {
                 SetScreenAttributeProperties(ScreenManager.ScreenAttribute.saturation_attrib, value, false);
                 screenSaturation = value;
-                Plugin.Logger.Debug("... ScrSaturation Set UIValue");
+            //    Plugin.Logger.Debug("... ScrSaturation Set UIValue");
                 NotifyPropertyChanged();      
             }
         }
@@ -763,7 +768,7 @@ namespace CustomVideoPlayer
             get => screenBrightness;
             set
             {
-                Plugin.Logger.Debug("... [UIValue(ScreenBrightness)]");
+             //   Plugin.Logger.Debug("... [UIValue(ScreenBrightness)]");
                 SetScreenAttributeProperties(ScreenManager.ScreenAttribute.brightness_attrib, value, false);
                 screenBrightness = value;
                 NotifyPropertyChanged();    
@@ -1298,6 +1303,19 @@ namespace CustomVideoPlayer
         private int lastPrimaryVideoIndex = 0;
         private int last360VideoIndex = 0;
 
+        public static Color selectedEnvColorLeft = ScreenColorUtil._WHITE;
+        public static Color selectedEnvColorRight = ScreenColorUtil._WHITE;
+        public static Color selectedCubeColorLeft = ScreenColorUtil._WHITE;    // need to use actual red, blue defaults
+        public static Color selectedCubeColorRight = ScreenColorUtil._WHITE;
+
+        // I suppose there could be maps missing colors ...
+        public static bool mapHasEnvColors = false;
+        public static Color mapEnvColorLeft = ScreenColorUtil._WHITE;
+        public static Color mapEnvColorRight = ScreenColorUtil._WHITE;
+        public static bool mapHasCubeColors = false;
+        public static Color mapCubeColorLeft = ScreenColorUtil._WHITE;
+        public static Color mapCubeColorRight = ScreenColorUtil._WHITE;
+
         private IPreviewBeatmapLevel selectedLevel;
 
         #endregion
@@ -1531,7 +1549,7 @@ namespace CustomVideoPlayer
         private void SetScreenAttributeProperties(ScreenManager.ScreenAttribute attrib, float value1, bool value2, ScreenManager.ScreenAspectRatio aspRatio = ScreenManager.ScreenAspectRatio._16x9, ScreenColorUtil.ScreenColorEnum scrColor = ScreenColorUtil.ScreenColorEnum.White)
         {
 
-            Plugin.Logger.Debug("... SetScreenAttributeProperties()");
+          //  Plugin.Logger.Debug("... SetScreenAttributeProperties()");
             switch (ScreenManager.screenControllers[(int)selectedScreen].screenType)
             {
                 case ScreenManager.ScreenType.primary:
@@ -1936,7 +1954,7 @@ namespace CustomVideoPlayer
 
             if(stopPreviewMusic)
             {
-                songPreviewPlayer.FadeOut();
+                songPreviewPlayer.FadeOut(1.0f); // .FadeOut();  ... value added randomly
             }
 
             SetPreviewButtonText();
@@ -2682,8 +2700,8 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
-                songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+             ///   songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
             }
         }
 
@@ -2742,8 +2760,8 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();   // this is now done from
-                songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+             ///   songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
             }
         }
 
@@ -2760,8 +2778,8 @@ namespace CustomVideoPlayer
 
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
-                songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, 1f);
+             ///   songPreviewPlayer.volume = 1;
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
             }
 
             SetPreviewButtonText();
@@ -2809,7 +2827,7 @@ namespace CustomVideoPlayer
             selectedLevel = level;
             selectedVideo = null;
             ChangeView(false, false, false);
-			Plugin.Logger.Debug($"HandleDidSelectLevel : Selected Level: {level.songName}");
+            Plugin.Logger.Debug($"HandleDidSelectLevel : Selected Level: {level.songName}");
         }
 
         private void GameSceneLoaded()

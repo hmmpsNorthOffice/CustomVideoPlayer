@@ -60,13 +60,13 @@ namespace CustomVideoPlayer
 
 		public void ShowBody()
 		{
-			Plugin.Logger.Debug("Showing body");
+		//	Plugin.Logger.Debug("Showing body");
 			_screenBodyGameObject.SetActive(true);
 		}
 
 		public void HideBody()
 		{
-			Plugin.Logger.Debug("Hiding body");
+		//	Plugin.Logger.Debug("Hiding body");
 			_screenBodyGameObject.SetActive(false);
 		}
 
@@ -86,7 +86,7 @@ namespace CustomVideoPlayer
 			_screenGameObject.transform.eulerAngles = rot;
 
 			float _polarRadius = (float) Math.Sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
-			InitializeSurfaces(width, height, pos.z, curvatureDegrees); // vz : changed pos.z to _polarRadius
+			InitializeSurfaces(width, height, _polarRadius, curvatureDegrees); // vz : changed pos.z to _polarRadius
 			RegenerateScreenSurfaces();
 		}
 

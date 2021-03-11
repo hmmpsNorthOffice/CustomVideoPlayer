@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reflection;
 using IPA;
 using UnityEngine.SceneManagement;
 using CustomVideoPlayer.Util;
 using CustomVideoPlayer.UI;
+using HarmonyLib;
 // using CustomVideoPlayer.YT;
 using BeatSaberMarkupLanguage.Settings;
 using BS_Utils.Utilities;
@@ -20,6 +22,9 @@ namespace CustomVideoPlayer
     public sealed class Plugin
     {
         public static IPA.Logging.Logger Logger;
+        private const string HARMONY_ID = "com.github.hmmpsNorthOffice.CustomVideoPlayer";
+        internal const string CAPABILITY = "CVP";
+        private Harmony _harmonyInstance = null!;
         
 
         [Init]
@@ -36,6 +41,8 @@ namespace CustomVideoPlayer
             GameplaySetup.instance.AddTab("CustomVideo", "CustomVideoPlayer.Views.video-menu.bsml", VideoMenu.instance);
             BSEvents.OnLoad();
             BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+            _harmonyInstance = new Harmony(HARMONY_ID);
+            ApplyHarmonyPatches();
 
             Base64Sprites.ConvertToSprites();
         }
@@ -56,7 +63,7 @@ namespace CustomVideoPlayer
             CVPSettings.CustomPosition = CVPSettings.customPlacementPosition; 
             CVPSettings.CustomRotation = CVPSettings.customPlacementRotation;
             CVPSettings.CustomScale = CVPSettings.customPlacementScale;
-
+            RemoveHarmonyPatches();
             RemoveEvents();
         }
 
@@ -70,7 +77,33 @@ namespace CustomVideoPlayer
 
         public void OnFixedUpdate() { }
 
+ 		private void ApplyHarmonyPatches()
+        {
+            try
+            {
+                Plugin.Logger.Debug("Applying Harmony patches");
+                _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.Error("Error applying Harmony patches: " + ex.Message);
+                Plugin.Logger.Debug(ex);
+            }
+        }
 
+        private void RemoveHarmonyPatches()
+        {
+            try
+            {
+                Plugin.Logger.Debug("Removing Harmony patches");
+                _harmonyInstance.UnpatchAll(HARMONY_ID);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.Error("Error removing Harmony patches: " + ex.Message);
+                Plugin.Logger.Debug(ex);
+            }
+        }
         private void AddEvents()
         {
             RemoveEvents();

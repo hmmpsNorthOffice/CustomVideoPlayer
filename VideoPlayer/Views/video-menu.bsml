@@ -41,8 +41,8 @@
           <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement"></dropdown-list-setting>
         </horizontal>
         <horizontal pad-right='3' spacing='1' pad-top='2'>
-          <modifier text='RVQ'  bind-value='true' value='rollingVideoQueueEnableUI' on-change="set-rolling-video-queue" hover-hint='Rolling Video Queue - Video queue advances each play' source="CustomVideoPlayer.Resources.arrow ring white.png" pref-height='6' font-size='3' pad-right='1'/>
-          <modifier id='chooseReflectButton' text="Refl Scr : Off"  bind-value='true' value="reflection-screen-button-value" on-change="reflection-screen-button-action"  hover-hint="Selects between no reflection, mirror reflection, or 360 reflection" source="CustomVideoPlayer.Resources.reflect128.png" pref-height='6' pref-width='8' font-size='3'/>
+          <modifier text='RVQ'  bind-value='true' value='rollingVideoQueueEnableUI' on-change="set-rolling-video-queue" hover-hint='Rolling Video Queue - Video queue advances each play' source="CustomVideoPlayer.Resources.arrow ring white.png" pref-height='6' align='Right' pref-width='3' />
+          <modifier id='chooseReflectButton' text="Refl Scr : Off"  bind-value='true' value="reflection-screen-button-value" on-change="reflection-screen-button-action"  hover-hint="Selects between no reflection, mirror reflection, or 360 reflection" source="CustomVideoPlayer.Resources.reflect128.png" pref-height='6' pref-width='5'/>
         </horizontal>
       </vertical>
     </horizontal>
@@ -53,8 +53,8 @@
          <horizontal pad-right='40' child-control-width='false' spacing='1' pad-top='2'>
             <button id='video-source-priority-button'  text='Local' hover-hint='Choose video source location priority' on-click='on-video-source-priority-action' all-uppercase='false' pad='1' pref-width='18' preferred-height='7' font-size='3'/>
             <button id='previous-screen-button' font-size='3' hover-hint='Select Previous Screen' text='-' pad='1' on-click='on-previous-screen-action-preview-on'/>
-            <vertical preferred-width='30' pad-top='4'>
-              <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" source="CustomVideoPlayer.Resources.power button white.png" preferred-height='5' font-size='3' />
+            <vertical preferred-width='25' pad-top='2'>
+              <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" align='Right' source="CustomVideoPlayer.Resources.power button white.png" preferred-height='3' />
             </vertical>
             <button id='next-screen-button' font-size='3' hover-hint='Select Next Screen' text='+' pad='1' on-click='on-next-screen-action-preview-on'/>
            
@@ -79,9 +79,9 @@
             
       <horizontal spacing='2'>
         <text id='mvp-use-sequence-text' text='MSP Preset Video Selection' align='Left' font-size='4'></text>
-        <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="A" hover-hint="If enabled, MSP Preset A uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
-        <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="B" hover-hint="If enabled, MSP Preset B uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
-        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="C" hover-hint="If enabled, MSP Preset C uses a sequence of videos rather than one repeatedly" font-size='3' pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
+        <modifier value="useMVSequenceA" on-change="set-mvSequenceA"  text="A" hover-hint="If enabled, MSP Preset A uses a sequence of videos rather than one repeatedly" pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
+        <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="B" hover-hint="If enabled, MSP Preset B uses a sequence of videos rather than one repeatedly" pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
+        <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="C" hover-hint="If enabled, MSP Preset C uses a sequence of videos rather than one repeatedly" pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
       </horizontal>
       <horizontal pad-bottom='3' spacing='3'>
         <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4"  pref-width='55' hover-hint='Sets the size of 360 Screen Spheres. Helpful when using other mods affecting skybox.  Setting effects both 360 screens' />
