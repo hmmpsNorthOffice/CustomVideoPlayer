@@ -48,15 +48,9 @@ namespace CustomVideoPlayer.Util
             //   and edited values ( player override ) (easiest to get)
 
 
-
-            // ->unrelated, found in SongCore, need to find out what it does
-            // SongCore.Utilities.Utils.ColorFromMapColor(SongCore.Data.ExtraSongData.MapColor)
-
-
-
             // -----------------------------------------------------------------------------------------
-            // method #1 - moved out of Harmony Patch ExposeColorSettings.cs (not using in this build)
-            /*  
+            // method #1 - moved out of Harmony Patch ExposeColorSettings.cs  <-- edited: now using again!
+            /*                  (using method #1 for info.dat color data and method #3 for current ColorScheme while preparing videos in ScreenManager)
              * Allows accessing local map color data (info.dat) using IDifficultyBeatmap class
              * Allows accessing current selected color scheme using :
 
