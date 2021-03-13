@@ -1,3 +1,7 @@
+**Added to Version 2.28**
+
+* Added screen bloom control to screen attributes menu.
+
 **Added to Version 2.27**
 
 * Updates for game version 1.13.4.  Added Environment and Cube(Saber) colors to screen dropdown list.

@@ -21,10 +21,10 @@ namespace CustomVideoPlayer.Util
         /* List of colors from : https://www.rapidtables.com/web/color/RGB_Color.html */
         public enum ScreenColorEnum { LeftLight, RightLight, LeftCube, RightCube, White, Red, Lime, Blue, Yellow, Cyan, Majenta, Silver, Gray, Maroon, Olive, Green, Purple, Teal, Navy, screenColorOn, screenColorOff };
 
-        internal static readonly Color _WHITE = new Color32(255, 255, 255, 255);  // old _screenOn used 0 alpha ... need to test this out still
-        private static readonly Color _RED = new Color32(255, 0, 0, 255);
-        private static readonly Color _LIME = new Color32(0, 255, 0, 255);
-        private static readonly Color _BLUE = new Color32(0, 0, 255, 255);
+        internal static readonly Color _WHITE = new Color32(255, 255, 255, 0);  // old _screenOn used 0 alpha ... need to test this out still
+        private static readonly Color _RED = new Color32(255, 0, 0, 0);
+        private static readonly Color _LIME = new Color32(0, 255, 0, 255);  // (0, 255, 0, 255);
+        private static readonly Color _BLUE = new Color32(0, 0, 255, 0);
         private static readonly Color _YELLOW = new Color32(255, 255, 0, 255);
         private static readonly Color _CYAN = new Color32(0, 255, 255, 255);
         private static readonly Color _MAGENTA = new Color32(255, 0, 255, 255);
@@ -48,9 +48,15 @@ namespace CustomVideoPlayer.Util
             //   and edited values ( player override ) (easiest to get)
 
 
+
+            // ->unrelated, found in SongCore, need to find out what it does
+            // SongCore.Utilities.Utils.ColorFromMapColor(SongCore.Data.ExtraSongData.MapColor)
+
+
+
             // -----------------------------------------------------------------------------------------
-            // method #1 - moved out of Harmony Patch ExposeColorSettings.cs  <-- edited: now using again!
-            /*                  (using method #1 for info.dat color data and method #3 for current ColorScheme while preparing videos in ScreenManager)
+            // method #1 - moved out of Harmony Patch ExposeColorSettings.cs (not using in this build)
+            /*  
              * Allows accessing local map color data (info.dat) using IDifficultyBeatmap class
              * Allows accessing current selected color scheme using :
 

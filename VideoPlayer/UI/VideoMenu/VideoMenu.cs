@@ -444,6 +444,7 @@ namespace CustomVideoPlayer
             ScrGamma = VideoConfig.ColorCorrection.DEFAULT_GAMMA;
             ScrHue = VideoConfig.ColorCorrection.DEFAULT_HUE;
             ScrSaturation = VideoConfig.ColorCorrection.DEFAULT_SATURATION;
+            ScrBloom = VideoConfig.DEFAULT_BLOOM;
             SetTransparency = false;
 
             ScreenManager.screenControllers[0].SetShaderFloat(ScreenManager.ScreenController.Contrast, VideoConfig.ColorCorrection.DEFAULT_CONTRAST, VideoConfig.ColorCorrection.MIN_CONTRAST, VideoConfig.ColorCorrection.MAX_CONTRAST, VideoConfig.ColorCorrection.DEFAULT_CONTRAST);
@@ -452,6 +453,7 @@ namespace CustomVideoPlayer
             ScreenManager.screenControllers[0].SetShaderFloat(ScreenManager.ScreenController.Gamma, VideoConfig.ColorCorrection.DEFAULT_GAMMA, VideoConfig.ColorCorrection.MIN_GAMMA, VideoConfig.ColorCorrection.MAX_GAMMA, VideoConfig.ColorCorrection.DEFAULT_GAMMA);
             ScreenManager.screenControllers[0].SetShaderFloat(ScreenManager.ScreenController.Hue, VideoConfig.ColorCorrection.DEFAULT_HUE, VideoConfig.ColorCorrection.MIN_HUE, VideoConfig.ColorCorrection.MAX_HUE, VideoConfig.ColorCorrection.DEFAULT_HUE);
             ScreenManager.screenControllers[0].SetShaderFloat(ScreenManager.ScreenController.Saturation, VideoConfig.ColorCorrection.DEFAULT_SATURATION, VideoConfig.ColorCorrection.MIN_SATURATION, VideoConfig.ColorCorrection.MAX_SATURATION, VideoConfig.ColorCorrection.DEFAULT_SATURATION);
+            ScreenManager.screenControllers[0].screen.SetBloomIntensity(VideoConfig.DEFAULT_BLOOM);
             ScreenManager.screenControllers[0].screen.ShowBody();
 
             ScreenManager.screenControllers[0].colorCorrection.contrast = VideoConfig.ColorCorrection.DEFAULT_CONTRAST;
@@ -460,6 +462,7 @@ namespace CustomVideoPlayer
             ScreenManager.screenControllers[0].colorCorrection.gamma = VideoConfig.ColorCorrection.DEFAULT_GAMMA;
             ScreenManager.screenControllers[0].colorCorrection.hue = VideoConfig.ColorCorrection.DEFAULT_HUE;
             ScreenManager.screenControllers[0].colorCorrection.saturation = VideoConfig.ColorCorrection.DEFAULT_SATURATION;
+            ScreenManager.screenControllers[0].bloom = VideoConfig.DEFAULT_BLOOM;
             ScreenManager.screenControllers[0].isTransparent = false;
 
         }
@@ -760,6 +763,62 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[0].SetShaderFloat(ScreenManager.ScreenController.Hue, val, VideoConfig.ColorCorrection.MIN_HUE, VideoConfig.ColorCorrection.MAX_HUE, VideoConfig.ColorCorrection.DEFAULT_HUE);
             }
         }
+
+        private float screenBloom = VideoConfig.DEFAULT_BLOOM;
+        [UIValue("ScreenBloom")]
+        public float ScrBloom
+        {
+            get => screenBloom;
+            set
+            {
+                //   Plugin.Logger.Debug("... [UIValue(ScreenBloom)]");
+                SetScreenAttributeProperties(ScreenManager.ScreenAttribute.screen_bloom_attrib, value, false);
+                screenBloom = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        [UIAction("change-screen-bloom")]
+        void ChangeScreenBloom(float val)
+        {
+            Plugin.Logger.Debug("... [UIAction(change-screen-bloom)]");
+            if (ScreenManager.screenControllers[0].bloom != val)
+            {
+                ScreenManager.screenControllers[0].bloom = val;
+                ScreenManager.screenControllers[0].screen.SetBloomIntensity(val);
+            }
+        }
+
+        [UIAction("on-bloom-decrement-action")]
+        private void OnBloomDecrementAction()
+        {
+            // Plugin.Logger.Debug("... OnBloomDecrementAction()");
+            // It is important that we do not set ScrBloom until after the conditional ... 
+
+            float tempScrBloom = ((ScrBloom - 0.1f) < VideoConfig.MIN_BLOOM) ? VideoConfig.MIN_BLOOM : ScrBloom - 0.1f;
+
+            if (ScreenManager.screenControllers[0].bloom != tempScrBloom)
+            {
+                ScreenManager.screenControllers[0].bloom = tempScrBloom;
+                ScreenManager.screenControllers[0].screen.SetBloomIntensity(tempScrBloom);
+                ScrBloom = tempScrBloom;
+            }
+        }
+
+        [UIAction("on-bloom-increment-action")]
+        private void OnBloomIncrementAction()
+        {
+            // Plugin.Logger.Debug("... OnBloomIncrementAction()");
+
+            float tempScrBloom = ((ScrBloom + 0.1f) > VideoConfig.MAX_BLOOM) ? VideoConfig.MAX_BLOOM : ScrBloom + 0.1f;
+            if (ScreenManager.screenControllers[0].bloom != tempScrBloom)
+            {
+                ScreenManager.screenControllers[0].bloom = tempScrBloom;
+                ScreenManager.screenControllers[0].screen.SetBloomIntensity(tempScrBloom);
+                ScrBloom = tempScrBloom;
+            }
+        }
+
 
         private float screenBrightness = 1.0f;
         [UIValue("ScreenBrightness")]
@@ -1629,6 +1688,10 @@ namespace CustomVideoPlayer
                             ScreenManager.screenControllers[(int)selectedScreen].screenColor = scrColor;
                             ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenColor = scrColor;
                             break;
+                        case ScreenManager.ScreenAttribute.screen_bloom_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].bloom = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].bloom = value1;
+                            break;
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch default option reached");
                             break;
@@ -1842,6 +1905,19 @@ namespace CustomVideoPlayer
                                 ScreenManager.screenControllers[screenNumber].screenColor = scrColor;
                             }
                             break;
+                        case ScreenManager.ScreenAttribute.screen_bloom_attrib:
+
+                            // either add parameter to helper function, or do the work in UIAction.
+                            ScreenManager.screenControllers[(int)selectedScreen].bloom = value1;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].bloom = value1;
+                            }
+                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            {
+                                ScreenManager.screenControllers[screenNumber].bloom = value1;
+                            }
+                            break;
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch default option reached");
                             break;
@@ -1885,6 +1961,9 @@ namespace CustomVideoPlayer
                             break;
                         case ScreenManager.ScreenAttribute.screen_color_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].screenColor = scrColor;
+                            break;
+                        case ScreenManager.ScreenAttribute.screen_bloom_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].bloom = value1;
                             break;
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch 360 video default option reached");
@@ -2000,6 +2079,7 @@ namespace CustomVideoPlayer
 
 
             ScreenColorUISetting = ScreenManager.screenControllers[0].screenColor = ScreenManager.screenControllers[(int)selectedScreen].screenColor;
+            ScrBloom = ScreenManager.screenControllers[0].bloom = ScreenManager.screenControllers[(int)selectedScreen].bloom;
 
             ScrContrast = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast;
             ScrBrightness = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness;
@@ -2008,7 +2088,6 @@ namespace CustomVideoPlayer
             ScrHue = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue;
             ScrSaturation = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation;
             SetTransparency = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
-            //   MSPSequence = ScreenManager.screenControllers[(int)selectedScreen].mspSequence;
 
             // also initialize preview screen
             ScreenManager.screenControllers[0].colorCorrection = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection;
@@ -2017,6 +2096,7 @@ namespace CustomVideoPlayer
 
             // actualize those values for preview screen
             ScreenManager.screenControllers[0].SetShaderParameters();
+            ScreenManager.screenControllers[0].screen.SetBloomIntensity(ScreenManager.screenControllers[0].bloom);
             ScreenManager.screenControllers[0].SetScreenColor(ScreenColorUtil.ColorFromEnum(ScreenManager.screenControllers[0].screenColor));
 
             if (ScreenManager.screenControllers[0].isTransparent) ScreenManager.screenControllers[0].screen.HideBody();
@@ -2701,7 +2781,7 @@ namespace CustomVideoPlayer
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
              ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
             }
         }
 
@@ -2761,7 +2841,7 @@ namespace CustomVideoPlayer
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();   // this is now done from
              ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
             }
         }
 
@@ -2779,7 +2859,7 @@ namespace CustomVideoPlayer
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
              ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration, true);
+                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
             }
 
             SetPreviewButtonText();

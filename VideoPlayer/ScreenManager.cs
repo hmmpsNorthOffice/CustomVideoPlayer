@@ -85,7 +85,7 @@ namespace CustomVideoPlayer
         // a 'helper method' in VideoMenu does this job
         public enum ScreenAttribute {brightness_attrib, contrast_attrib, saturation_attrib, hue_attrib, gamma_attrib, exposure_attib, 
             vignette_radius_attrib, vignette_softness_attrib, use_vignette_attrib, use_opalVignette_attrib, transparent_attrib, // mspSequence_attrib,
-            use_curvature_attrib, use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib
+            use_curvature_attrib, use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib, screen_bloom_attrib
         };
         internal static List<ScreenController> screenControllers { get; set; }
 
@@ -101,6 +101,7 @@ namespace CustomVideoPlayer
 
             public VideoConfig.ColorCorrection colorCorrection;
             public VideoConfig.Vignette vignette;
+            public float bloom;
             public ScreenColorUtil.ScreenColorEnum screenColor = ScreenColorUtil.ScreenColorEnum.White;
 
             public bool isCurved = false;           
@@ -160,27 +161,25 @@ namespace CustomVideoPlayer
                 this.vsRenderer.material.color = color;
             }
 
-            internal void SetShaderParameters()  // need to declare objects in ScreenManager class as colorCorrection and Vignette and then pass ScreenController here.
+            internal void SetShaderParameters() 
             {
-                // ... had some issues using 'PropertyBlock' method, 99% chance just a minor programming bug on my part.  I will investigate when things are stable.
-                // ... using multiple calls to shader float for now.
 
-                SetShaderFloat(Brightness, this.colorCorrection?.brightness, 0f, 2f, 1f);
-                SetShaderFloat(Contrast, this.colorCorrection?.contrast, 0f, 5f, 1f);
-                SetShaderFloat(Saturation, this.colorCorrection?.saturation, 0f, 5f, 1f);
-                SetShaderFloat(Hue, this.colorCorrection?.hue, -360f, 360f, 0f);
-                SetShaderFloat(Exposure, this.colorCorrection?.exposure, 0f, 5f, 1f);
-                SetShaderFloat(Gamma, this.colorCorrection?.gamma, 0f, 5f, 1f);
+                SetShaderFloat(Brightness, this.colorCorrection?.brightness, VideoConfig.ColorCorrection.MIN_BRIGHTNESS, VideoConfig.ColorCorrection.MAX_BRIGHTNESS, VideoConfig.ColorCorrection.DEFAULT_BRIGHTNESS);  
+                SetShaderFloat(Contrast, this.colorCorrection?.contrast, VideoConfig.ColorCorrection.MIN_CONTRAST, VideoConfig.ColorCorrection.MAX_CONTRAST, VideoConfig.ColorCorrection.DEFAULT_CONTRAST);
+                SetShaderFloat(Saturation, this.colorCorrection?.saturation, VideoConfig.ColorCorrection.MIN_SATURATION, VideoConfig.ColorCorrection.MAX_SATURATION, VideoConfig.ColorCorrection.DEFAULT_SATURATION);
+                SetShaderFloat(Hue, this.colorCorrection?.hue, VideoConfig.ColorCorrection.MIN_HUE, VideoConfig.ColorCorrection.MAX_HUE, VideoConfig.ColorCorrection.DEFAULT_HUE);
+                SetShaderFloat(Exposure, this.colorCorrection?.exposure, VideoConfig.ColorCorrection.MIN_EXPOSURE, VideoConfig.ColorCorrection.MAX_EXPOSURE, VideoConfig.ColorCorrection.DEFAULT_EXPOSURE);
+                SetShaderFloat(Gamma, this.colorCorrection?.gamma, VideoConfig.ColorCorrection.MIN_GAMMA, VideoConfig.ColorCorrection.MAX_GAMMA, VideoConfig.ColorCorrection.DEFAULT_GAMMA);
 
                 if(this.vignette.vignetteEnabled)
                 {
-                    SetShaderFloat(VignetteRadius, this.vignette.radius, 0f, 1f, 1f);
-                    SetShaderFloat(VignetteSoftness, this.vignette.softness, 0f, 1f, 0.05f);                 
+                    SetShaderFloat(VignetteRadius, this.vignette.radius, VideoConfig.Vignette.MIN_VIGRADIUS, VideoConfig.Vignette.MAX_VIGRADIUS, VideoConfig.Vignette.DEFAULT_VIGRADIUS);
+                    SetShaderFloat(VignetteSoftness, this.vignette.softness, VideoConfig.Vignette.MIN_VIGSOFTNESS, VideoConfig.Vignette.MAX_VIGSOFTNESS, VideoConfig.Vignette.DEFAULT_VIGSOFTNESS);                 
                 }
                 else
                 {
                     SetShaderFloat(VignetteRadius, 1f, 0f, 1f, 1f);
-                    SetShaderFloat(VignetteSoftness, 0.001f, 0f, 1f, 0.001f);
+                    SetShaderFloat(VignetteSoftness, 0.001f, 0f, 1f, 0.001f);  // values set less than "enabled" min 
                 }
                 this.vsRenderer.material.SetInt(VignetteElliptical, this.vignette.type == "rectangular" ? 0 : 1);
             }
@@ -459,6 +458,7 @@ namespace CustomVideoPlayer
             scrControl.vignette = new VideoConfig.Vignette();
             scrControl.isTransparent = false;
             scrControl.curvatureDegrees = 0.01f;
+            scrControl.bloom = 1.0f;
             scrControl.useAutoCurvature = false;
             scrControl.isCurved = false;
             scrControl.mspSequence = false;
@@ -552,6 +552,7 @@ namespace CustomVideoPlayer
             scrControl.curvatureDegrees = 0.01f;
             scrControl.useAutoCurvature = false;
             scrControl.isCurved = false;
+            scrControl.bloom = 0f;
             scrControl.mspSequence = false;
 
             scrControl.videoPlayer.isLooping = true;
@@ -635,6 +636,7 @@ namespace CustomVideoPlayer
             }
 
             screenControllers[0].SetShaderParameters();
+            screenControllers[0].screen.SetBloomIntensity(screenControllers[0].bloom);  
 
             screenControllers[0].videoPlayer.isLooping = true;
 
@@ -831,7 +833,7 @@ namespace CustomVideoPlayer
 
             screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
             screenControllers[screenNumber].vsRenderer.material.color = ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor);
-
+            screenControllers[screenNumber].screen.SetBloomIntensity(screenControllers[screenNumber].bloom);
 
             if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
             screenControllers[screenNumber].videoPlayer.Play();
@@ -1738,6 +1740,7 @@ namespace CustomVideoPlayer
 
                     
                     screenControllers[screenNumber].SetScreenColor(ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor));    // ScreenColorEnum.screenColorOn)); // screenControllers[screenNumber].screenColor); // _screenColorOn);   // was _onColor  ...this actually works!  kinda redundant to 'hue' setting but creates drastic effect
+                    screenControllers[screenNumber].screen.SetBloomIntensity(screenControllers[screenNumber].bloom);
                     // screenControllers[screenNumber].vsRenderer.material.color = _screenColorOn;
 
 

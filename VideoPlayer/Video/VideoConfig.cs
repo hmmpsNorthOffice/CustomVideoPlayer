@@ -32,6 +32,10 @@ namespace CustomVideoPlayer
 		public bool? forceEnvironmentModifications;
 		public float? bloom;
 
+		internal static readonly float MIN_BLOOM = 0.1f;              
+		internal static readonly float DEFAULT_BLOOM = 1.0f;
+		internal static readonly float MAX_BLOOM = 5.0f;   // still must manage bsml slider control max separately
+
 		internal ColorCorrection? colorCorrection;     // changed from public
 		internal Vignette? vignette;
 		public EnvironmentModification[]? environment;
@@ -174,7 +178,7 @@ namespace CustomVideoPlayer
 		internal class ColorCorrection
 		{
 
-			internal static readonly float MIN_BRIGHTNESS = 0.1f;
+			internal static readonly float MIN_BRIGHTNESS = 0.1f;         // parameters in bsml must be set independently if changes are made
 			internal static readonly float DEFAULT_BRIGHTNESS = 1.0f;
 			internal static readonly float MAX_BRIGHTNESS = 1.0f;
 			internal static readonly float MIN_CONTRAST = 0.1f;

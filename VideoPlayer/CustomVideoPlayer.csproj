@@ -51,6 +51,10 @@
     <Reference Include="HMLib">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
     </Reference>
+    <Reference Include="HMRendering, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>G:\Steam Games\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+    </Reference>
     <Reference Include="HMUI">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
     </Reference>
@@ -59,6 +63,10 @@
     </Reference>
     <Reference Include="Main">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
+    </Reference>
+    <Reference Include="Rendering, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>G:\Steam Games\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Rendering.dll</HintPath>
     </Reference>
     <Reference Include="SongCore">
       <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
@@ -135,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HarmonyPatches\ExposeColorSettings.cs" />
+    <Compile Include="Screen\CustomBloomPrePass.cs" />
     <Compile Include="Util\ScreenColorUtil.cs" />
     <Compile Include="Video\VideoConfig.cs" />
     <Compile Include="Video\VideoConfigBackCompat.cs" />

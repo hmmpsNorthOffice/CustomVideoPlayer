@@ -150,6 +150,11 @@
         <button id='brightness-decrement-button' font-size='3' text='-' pad='1' on-click='on-brightness-decrement-action'/>
         <button id='brightness-increment-button' font-size='3' text='+' pad='1' on-click='on-brightness-increment-action'/>
       </horizontal>
+      <horizontal>
+        <slider-setting text='Bloom' value='ScreenBloom' on-change="change-screen-bloom"  bind-value='true' apply-on-change='true' integer-only='false' min='0.0' max='5.0' increment='0.1' all-uppercase='false' font-size="4" hover-hint='Adjusts screen bloom intensity' />
+        <button id='bloom-decrement-button' font-size='3' text='-' pad='1' on-click='on-bloom-decrement-action'/>
+        <button id='bloom-increment-button' font-size='3' text='+' pad='1' on-click='on-bloom-increment-action'/>
+      </horizontal>
 
     </vertical>
 

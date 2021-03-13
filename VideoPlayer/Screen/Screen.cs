@@ -20,7 +20,7 @@ namespace CustomVideoPlayer
 		internal CurvedSurface _screenSurface;
 		internal Renderer _screenRenderer;
 		internal CurvedSurface _screenBodySurface = null!;
-		///	private readonly CustomBloomPrePass _screenBloomPrePass;
+		private readonly CustomBloomPrePass _screenBloomPrePass;
 
 		public Screen()
 		{
@@ -29,7 +29,7 @@ namespace CustomVideoPlayer
 			_screenGameObject.layer = LayerMask.NameToLayer("Environment");
 			_screenRenderer = _screenGameObject.GetComponent<Renderer>();
 			_screenBodyGameObject = CreateBody();
-		///	_screenBloomPrePass = _screenGameObject.AddComponent<CustomBloomPrePass>();
+			_screenBloomPrePass = _screenGameObject.AddComponent<CustomBloomPrePass>();
 
 			Hide();
 		}
@@ -94,26 +94,26 @@ namespace CustomVideoPlayer
 		{
 			_screenSurface.Initialize(width, height, distance, curvatureDegrees);
 			_screenBodySurface.Initialize(width, height, distance, curvatureDegrees);
-		///	_screenBloomPrePass.UpdateScreenDimensions(width, height);
+			_screenBloomPrePass.UpdateScreenDimensions(width, height);
 		}
 
 		public void RegenerateScreenSurfaces()
 		{
 			_screenSurface.Generate();
 			_screenBodySurface.Generate();
-		///	_screenBloomPrePass.UpdateMesh();
+			_screenBloomPrePass.UpdateMesh();
 		}
 
 		public void RegenerateReflectionScreenSurfaces()
 		{
 			_screenSurface.ReversUVs();
 			_screenBodySurface.Generate();
-			///	_screenBloomPrePass.UpdateMesh();
+				_screenBloomPrePass.UpdateMesh();
 		}
 
 		public void SetBloomIntensity(float? bloomIntensity)
 		{
-		///	_screenBloomPrePass.SetBloomIntensityConfigSetting(bloomIntensity);
+			_screenBloomPrePass.SetBloomIntensityConfigSetting(bloomIntensity);
 		}
 
 		public void SetDistance(float distance)
