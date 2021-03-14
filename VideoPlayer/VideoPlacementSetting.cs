@@ -13,7 +13,7 @@ namespace CustomVideoPlayer.Util
     internal enum VideoPlacement                      // placement of '_r' (reflection screen position) in the enum must be +1 of the original position
     {
         PreviewScreenInMenu, PreviewScreenLeft,
-        MVP_Background, MVP_BackgroundLow,                                     // MusicVideoPlayer compatible
+        MVP_Background, MVP_BackgroundLow, Cinema,                                // MVP, Cinema compatible
         Center, Center_r, Back_Medium, Back_Medium_r, Back_Huge, Back_Huge_r,               // vertical
         Slant_Small, Slant_Small_r, Slant_Large, Slant_Large_r,                             // slanted
         Left_Small, Left_Small_r, Right_Small, Right_Small_r,                               // left/right small
@@ -67,6 +67,10 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(0, 20, 50);
                 case VideoPlacement.MVP_BackgroundLow:
                     return new Vector3(0, 4.5f, 50);
+
+                case VideoPlacement.Cinema:
+                    return new Vector3(0, 12.4f, 67.8f);
+
                 case VideoPlacement.Center:
                     return new Vector3(0, 5, 75);   
                 case VideoPlacement.Center_r:
@@ -468,6 +472,8 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.MVP_BackgroundLow:
                 case VideoPlacement.MVP_Background:
                     return new Vector3(0, 0, 0);
+                case VideoPlacement.Cinema:
+                    return new Vector3(-8, 0, 0);
                 case VideoPlacement.Center:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Center_r:
@@ -836,6 +842,8 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.MVP_BackgroundLow:
                 case VideoPlacement.MVP_Background:
                     return 30;
+                case VideoPlacement.Cinema:
+                    return 25;   
                 case VideoPlacement.Center:
                     return 40;
                 case VideoPlacement.Center_r:

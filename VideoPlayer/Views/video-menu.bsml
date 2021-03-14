@@ -75,7 +75,7 @@
   </bg>
  
   <bg id='extras-menu'>
-    <vertical pad-bottom='30' pad-top='5' preferred-width='95' spacing='3'>
+    <vertical pad-bottom='20' pad-top='5' preferred-width='95' spacing='3'>
             
       <horizontal spacing='2'>
         <text id='mvp-use-sequence-text' text='MSP Preset Video Selection' align='Left' font-size='4'></text>
@@ -83,9 +83,13 @@
         <modifier value="useMVSequenceB" on-change="set-mvSequenceB"  text="B" hover-hint="If enabled, MSP Preset B uses a sequence of videos rather than one repeatedly" pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
         <modifier value="useMVSequenceC" on-change="set-mvSequenceC"  text="C" hover-hint="If enabled, MSP Preset C uses a sequence of videos rather than one repeatedly" pad='1' source="CustomVideoPlayer.Resources.video_sequence_white.png" />
       </horizontal>
-      <horizontal pad-bottom='3' spacing='3'>
+      <horizontal spacing='3'>
         <slider-setting text='360 Sphere Size' value='ThreeSixtySphereSize' on-change="change-sphere-size" integer-only='false' min='100' max='3000' increment='100' all-uppercase='false' font-size="4"  pref-width='55' hover-hint='Sets the size of 360 Screen Spheres. Helpful when using other mods affecting skybox.  Setting effects both 360 screens' />
         <modifier value='play-preview-audio' on-change="previewAudioUIAction" text='Play Audio In Preview' hover-hint='Play audio during video preview, allows for easier syncing' source="CustomVideoPlayer.Resources.video_frame_128.png" pref-width='18'/>
+      </horizontal>
+        
+      <horizontal pad-bottom='3' pad-right='30'>
+        <bool-setting apply-on-change="true" bind-value='true' text='Enable Screen Bloom' value='SetBloomOn' on-change="use-bloom" all-uppercase='false' font-size="4" pref-width='30' hover-hint='Enable screen bloom effect.'></bool-setting>
       </horizontal>
 
     </vertical>
@@ -151,7 +155,8 @@
         <button id='brightness-increment-button' font-size='3' text='+' pad='1' on-click='on-brightness-increment-action'/>
       </horizontal>
       <horizontal>
-        <slider-setting text='Bloom' value='ScreenBloom' on-change="change-screen-bloom"  bind-value='true' apply-on-change='true' integer-only='false' min='0.0' max='5.0' increment='0.1' all-uppercase='false' font-size="4" hover-hint='Adjusts screen bloom intensity' />
+        
+        <slider-setting text='Set Bloom Intensity' value='ScreenBloomIntensity' on-change="change-screen-bloom"  bind-value='true' apply-on-change='true' integer-only='false' min='0.0' max='200.0' increment='5' all-uppercase='false' font-size="4" hover-hint='Adjusts screen bloom intensity' />
         <button id='bloom-decrement-button' font-size='3' text='-' pad='1' on-click='on-bloom-decrement-action'/>
         <button id='bloom-increment-button' font-size='3' text='+' pad='1' on-click='on-bloom-increment-action'/>
       </horizontal>

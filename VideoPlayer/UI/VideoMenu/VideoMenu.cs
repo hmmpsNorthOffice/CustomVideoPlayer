@@ -158,6 +158,7 @@ namespace CustomVideoPlayer
             VideoPlacement.Center,
             VideoPlacement.Back_Medium,
             VideoPlacement.Back_Huge,
+            VideoPlacement.Cinema,
             VideoPlacement.Slant_Small,
             VideoPlacement.Slant_Large,
             VideoPlacement.Left_Small,
@@ -384,6 +385,27 @@ namespace CustomVideoPlayer
                 {
                    // MSPSequenceA = val;
                 } */
+
+
+        private static bool globalEnableBloomBool = true;
+        [UIValue("SetBloomOn")]
+        internal static bool BloomOn
+        {
+            get => globalEnableBloomBool;
+            set
+            {
+                globalEnableBloomBool = value;
+               // NotifyPropertyChanged();
+            }
+        }
+
+
+        [UIAction("use-bloom")]
+        void SetBloomEnabledParameterAction(bool val)
+        {
+            // no action needed
+        }
+
 
         private bool screenTransparencyBool = false;
         [UIValue("setTransparency")]
@@ -765,7 +787,7 @@ namespace CustomVideoPlayer
         }
 
         private float screenBloom = VideoConfig.DEFAULT_BLOOM;
-        [UIValue("ScreenBloom")]
+        [UIValue("ScreenBloomIntensity")]
         public float ScrBloom
         {
             get => screenBloom;
@@ -781,11 +803,12 @@ namespace CustomVideoPlayer
         [UIAction("change-screen-bloom")]
         void ChangeScreenBloom(float val)
         {
-            Plugin.Logger.Debug("... [UIAction(change-screen-bloom)]");
+            
             if (ScreenManager.screenControllers[0].bloom != val)
             {
                 ScreenManager.screenControllers[0].bloom = val;
                 ScreenManager.screenControllers[0].screen.SetBloomIntensity(val);
+             //   Plugin.Logger.Debug("... [UIAction(change-screen-bloom)]");
             }
         }
 
@@ -795,7 +818,7 @@ namespace CustomVideoPlayer
             // Plugin.Logger.Debug("... OnBloomDecrementAction()");
             // It is important that we do not set ScrBloom until after the conditional ... 
 
-            float tempScrBloom = ((ScrBloom - 0.1f) < VideoConfig.MIN_BLOOM) ? VideoConfig.MIN_BLOOM : ScrBloom - 0.1f;
+            float tempScrBloom = ((ScrBloom - 5f) < VideoConfig.MIN_BLOOM) ? VideoConfig.MIN_BLOOM : ScrBloom - 5.0f;
 
             if (ScreenManager.screenControllers[0].bloom != tempScrBloom)
             {
@@ -810,7 +833,7 @@ namespace CustomVideoPlayer
         {
             // Plugin.Logger.Debug("... OnBloomIncrementAction()");
 
-            float tempScrBloom = ((ScrBloom + 0.1f) > VideoConfig.MAX_BLOOM) ? VideoConfig.MAX_BLOOM : ScrBloom + 0.1f;
+            float tempScrBloom = ((ScrBloom + 5f) > VideoConfig.MAX_BLOOM) ? VideoConfig.MAX_BLOOM : ScrBloom + 5.0f;
             if (ScreenManager.screenControllers[0].bloom != tempScrBloom)
             {
                 ScreenManager.screenControllers[0].bloom = tempScrBloom;
@@ -1368,10 +1391,12 @@ namespace CustomVideoPlayer
         public static Color selectedCubeColorRight = ScreenColorUtil._WHITE;
 
         // I suppose there could be maps missing colors ...
-        public static bool mapHasEnvColors = false;
+        public static bool mapHasEnvLeftColor = false;
+        public static bool mapHasEnvRightColor = false;
         public static Color mapEnvColorLeft = ScreenColorUtil._WHITE;
         public static Color mapEnvColorRight = ScreenColorUtil._WHITE;
-        public static bool mapHasCubeColors = false;
+        public static bool mapHasCubeLeftColor = false;
+        public static bool mapHasCubeRightColor = false;
         public static Color mapCubeColorLeft = ScreenColorUtil._WHITE;
         public static Color mapCubeColorRight = ScreenColorUtil._WHITE;
 
@@ -2091,7 +2116,7 @@ namespace CustomVideoPlayer
 
             // also initialize preview screen
             ScreenManager.screenControllers[0].colorCorrection = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection;
-            ScreenManager.screenControllers[0].isTransparent = ScreenManager.screenControllers[(int)selectedScreen].isTransparent; 
+            ScreenManager.screenControllers[0].isTransparent = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
 
 
             // actualize those values for preview screen

@@ -80,14 +80,14 @@ namespace CustomVideoPlayer
 			_screenGameObject.transform.parent = parentTransform;
 		}
 
-		public void SetPlacement(Vector3 pos, Vector3 rot, float width, float height, float? curvatureDegrees = null)
+		public void SetPlacement(Vector3 pos, Vector3 rot, float width, float height, bool bloomOn, float? curvatureDegrees = null)
 		{
 			_screenGameObject.transform.position = pos;
 			_screenGameObject.transform.eulerAngles = rot;
 
 			float _polarRadius = (float) Math.Sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
 			InitializeSurfaces(width, height, _polarRadius, curvatureDegrees); // vz : changed pos.z to _polarRadius
-			RegenerateScreenSurfaces();
+			RegenerateScreenSurfaces(bloomOn);
 		}
 
 		public void InitializeSurfaces(float width, float height, float distance, float? curvatureDegrees)
@@ -97,18 +97,18 @@ namespace CustomVideoPlayer
 			_screenBloomPrePass.UpdateScreenDimensions(width, height);
 		}
 
-		public void RegenerateScreenSurfaces()
+		public void RegenerateScreenSurfaces(bool bloomOn)
 		{
 			_screenSurface.Generate();
 			_screenBodySurface.Generate();
-			_screenBloomPrePass.UpdateMesh();
+			if(bloomOn) _screenBloomPrePass.UpdateMesh();
 		}
 
-		public void RegenerateReflectionScreenSurfaces()
+		public void RegenerateReflectionScreenSurfaces(bool bloomOn)
 		{
 			_screenSurface.ReversUVs();
 			_screenBodySurface.Generate();
-				_screenBloomPrePass.UpdateMesh();
+			if(bloomOn) _screenBloomPrePass.UpdateMesh();
 		}
 
 		public void SetBloomIntensity(float? bloomIntensity)
@@ -124,11 +124,11 @@ namespace CustomVideoPlayer
 			_screenBodySurface.Distance = distance;
 		}
 
-		public void SetAspectRatio(float ratio)
+		public void SetAspectRatio(float ratio, bool bloomOn)
 		{
 			_screenSurface.Width = _screenSurface.Height * ratio;
 			_screenBodySurface.Width = _screenSurface.Height * ratio;
-			RegenerateScreenSurfaces();
+			RegenerateScreenSurfaces(bloomOn);
 		}
 	}
 }

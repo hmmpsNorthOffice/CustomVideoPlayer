@@ -161,10 +161,10 @@ namespace CustomVideoPlayer.Util
             switch (colorEnum)
             {
                 
-                case ScreenColorEnum.LeftLight: screenColor = VideoMenu.mapHasEnvColors ? VideoMenu.mapEnvColorLeft : VideoMenu.selectedEnvColorLeft; break;
-                case ScreenColorEnum.RightLight: screenColor = VideoMenu.mapHasEnvColors ? VideoMenu.mapEnvColorRight : VideoMenu.selectedEnvColorRight; break;
-                case ScreenColorEnum.LeftCube: screenColor = VideoMenu.mapHasCubeColors ? VideoMenu.mapCubeColorLeft : VideoMenu.selectedCubeColorLeft; break;
-                case ScreenColorEnum.RightCube: screenColor = VideoMenu.mapHasCubeColors ? VideoMenu.mapCubeColorRight : VideoMenu.selectedCubeColorRight; break;
+                case ScreenColorEnum.LeftLight: screenColor = VideoMenu.mapHasEnvLeftColor ? VideoMenu.mapEnvColorLeft : VideoMenu.selectedEnvColorLeft; break;
+                case ScreenColorEnum.RightLight: screenColor = VideoMenu.mapHasEnvRightColor ? VideoMenu.mapEnvColorRight : VideoMenu.selectedEnvColorRight; break;
+                case ScreenColorEnum.LeftCube: screenColor = VideoMenu.mapHasCubeLeftColor ? VideoMenu.mapCubeColorLeft : VideoMenu.selectedCubeColorLeft; break;
+                case ScreenColorEnum.RightCube: screenColor = VideoMenu.mapHasCubeRightColor ? VideoMenu.mapCubeColorRight : VideoMenu.selectedCubeColorRight; break;
 
                 /*
                     case ScreenColorEnum.LeftLight: screenColor = VideoMenu.selectedEnvColorLeft; break;

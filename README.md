@@ -1,3 +1,7 @@
+**Added to Version 2.29**
+
+* Added bloom global enable bool in 'Extras' menu.  Added Cinema screen location to placement list.  Fixed screen color routine to allow for maps with only left or right color initialization.
+
 **Added to Version 2.28**
 
 * Added screen bloom control to screen attributes menu.

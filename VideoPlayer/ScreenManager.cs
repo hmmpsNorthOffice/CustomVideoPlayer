@@ -84,8 +84,8 @@ namespace CustomVideoPlayer
         // this enum is neccessary since properties must be propogated from controlling screens to their children (... reflections & MSPscreens)
         // a 'helper method' in VideoMenu does this job
         public enum ScreenAttribute {brightness_attrib, contrast_attrib, saturation_attrib, hue_attrib, gamma_attrib, exposure_attib, 
-            vignette_radius_attrib, vignette_softness_attrib, use_vignette_attrib, use_opalVignette_attrib, transparent_attrib, // mspSequence_attrib,
-            use_curvature_attrib, use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib, screen_bloom_attrib
+            vignette_radius_attrib, vignette_softness_attrib, use_vignette_attrib, use_opalVignette_attrib, transparent_attrib, use_curvature_attrib,
+            use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib, screen_bloom_attrib
         };
         internal static List<ScreenController> screenControllers { get; set; }
 
@@ -276,9 +276,9 @@ namespace CustomVideoPlayer
                 // ... toggling 'Curve Enabled' off while 'Auto Curve' is enabled 
 
                 if (this.useAutoCurvature && this.isCurved)
-                    this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height);
+                    this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height, VideoMenu.BloomOn);
                 else
-                    this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height, curvature);
+                    this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height, VideoMenu.BloomOn, curvature);
                
                 // for reflection screens. This must be done each time since _curvedSurface mesh is regenerated each time radius,z changes
                 // Note: This should be moved into public method in 'screen' class.
@@ -332,9 +332,9 @@ namespace CustomVideoPlayer
                 if (!this.isCurved) curvature = 0f;
 
                 if (this.useAutoCurvature && this.isCurved)
-                    this.screen.SetPlacement(position, rotation, width, height);
+                    this.screen.SetPlacement(position, rotation, width, height, VideoMenu.BloomOn);
                 else
-                    this.screen.SetPlacement(position, rotation, width, height, curvature);
+                    this.screen.SetPlacement(position, rotation, width, height, VideoMenu.BloomOn, curvature);
                 
                 // for reflection screens, this must be done since _curvedSurface mesh is regenerated each time radius,z changes
                 if(reverseNormals)

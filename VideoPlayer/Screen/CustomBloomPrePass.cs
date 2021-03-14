@@ -22,7 +22,7 @@ namespace CustomVideoPlayer
 		private Mesh _mesh = null!;
 		private static readonly int Alpha = Shader.PropertyToID("_Alpha");
 		private const int DOWNSAMPLE = 2;
-		private const float BLOOM_BOOST_FACTOR = 0.11f;
+		private const float BLOOM_BOOST_FACTOR = 0.11f; // 0.22f;  // orig 0.11f;
 		private float? _bloomIntensityConfigSetting;
 		private Vector2 _screnDimensions;
 
@@ -60,30 +60,38 @@ namespace CustomVideoPlayer
 			var fov = camera.fieldOfView;
 
 			//Base calculation scales down with screen width and up with distance
-			// var boost = (BLOOM_BOOST_FACTOR / (float)Math.Sqrt(_screnDimensions.x / GetCameraDistance(camera)));
+			var boost = (BLOOM_BOOST_FACTOR / (float)Math.Sqrt(_screnDimensions.x / GetCameraDistance(camera)));
 			// what if we tried it based on the inverse of the ((Screen Area)^2)?  ... 
-			var boost = (BLOOM_BOOST_FACTOR / (float)(_screnDimensions.x * _screnDimensions.y * _screnDimensions.x * _screnDimensions.y));
+			//var boost = (BLOOM_BOOST_FACTOR / (float)(_screnDimensions.x * _screnDimensions.y * _screnDimensions.x * _screnDimensions.y));
+			// var boost = (BLOOM_BOOST_FACTOR / (float)Math.Sqrt((_screnDimensions.x*_screnDimensions.y) / GetCameraDistance(camera)));
 
 			//Apply map/user setting on top
-			//	if (_bloomIntensityConfigSetting != null)     // until we can import cinema.json
-			{
-				_bloomIntensityConfigSetting = Math.Min(1f, Math.Max(0f, _bloomIntensityConfigSetting.Value));    // vz changed min from 2 to 1
-				boost *= (float)Math.Sqrt(_bloomIntensityConfigSetting.Value);
-			}
-		//	else
-		//	{
-		//		boost *= (float)Math.Sqrt(SettingsStore.Instance.BloomIntensity / 100f);
-		//	}
 
+			if (_bloomIntensityConfigSetting == null)  // (vz changed != to ==)
+			{
+				_bloomIntensityConfigSetting = Math.Min(2f, Math.Max(0f, _bloomIntensityConfigSetting.Value));  // limits range of json input from 0 to 2
+				boost *= (float)Math.Sqrt(_bloomIntensityConfigSetting.Value);
+				//Plugin.Logger.Debug("value init from json");  //  this gets fired if conditional left as is ...
+			}
+			else
+			{
+				boost *= (float)Math.Sqrt(_bloomIntensityConfigSetting.Value / 100f);  // slider values currently set 0-200
+				//Plugin.Logger.Debug("value init from slider");
+			}
 
 			//Mitigate extreme amounts of bloom at the edges of the camera frustum when not looking directly at the screen
-			var distance = Vector3.Distance(camera.transform.forward, Vector3.forward);
+			var targetDirection = gameObject.transform.position - camera.transform.position;
+			var angle = Vector3.Angle(targetDirection, camera.transform.forward);
+			angle /= (fov / 2);
 			const float threshold = 0.3f;
-			distance = Math.Max(threshold, distance); //Prevent brightness from fluctuating when looking close to the center
-			boost /= ((distance + (1 - threshold)) * (fov / 100f));
+			//Prevent brightness from fluctuating when looking close to the center
+			angle = Math.Max(threshold, angle);
+			boost /= ((angle + (1 - threshold)) * (fov / 100f));
 
 			//Adjust for FoV
 			boost *= fov / 100f;
+
+		//	Plugin.Logger.Debug("logging boost factor = " + boost.ToString());
 			return boost;
 		}
 
@@ -99,20 +107,15 @@ namespace CustomVideoPlayer
 				return;
 			}
 
-			BloomPrePass bloomPrePass;
-			try
+
+			var bloomPrePass = camera.GetComponent<BloomPrePass>();
+			_bloomPrePassDict.Add(camera, bloomPrePass);
+			if (bloomPrePass == null)
 			{
-				bloomPrePass = camera.GetComponent<BloomPrePass>();
-			}
-			catch (Exception e)
-			{
-				_bloomPrePassDict.Add(camera, null);
 				Plugin.Logger.Info($"Failed to find BloomPrePass for camera {camera.name}");
-				Plugin.Logger.Debug(e);
 				return;
 			}
 
-			_bloomPrePassDict.Add(camera, bloomPrePass);
 			_bloomPrePassRendererDict.Add(camera, bloomPrePass.GetField<BloomPrePassRendererSO, BloomPrePass>("_bloomPrepassRenderer"));
 			_bloomPrePassRenderDataDict.Add(camera, bloomPrePass.GetField<BloomPrePassRenderDataSO.Data, BloomPrePass>("_renderData"));
 			var effectsContainer = bloomPrePass.GetField<BloomPrePassEffectContainerSO, BloomPrePass>("_bloomPrePassEffectContainer");
@@ -133,7 +136,7 @@ namespace CustomVideoPlayer
 
 			try
 			{
-				ApplyBloomEffect(camera);
+				if(VideoMenu.BloomOn) ApplyBloomEffect(camera);      // global enable/disable patch 
 			}
 			catch (Exception e)
 			{
@@ -157,6 +160,7 @@ namespace CustomVideoPlayer
 			//Mirror cam has no BloomPrePass
 			if (camera.name == "SmoothCamera" || camera.name.StartsWith("MirrorCam"))
 			{
+				Plugin.Logger.Debug("camera name == smooth || Mirror");
 				return;
 			}
 
@@ -173,6 +177,7 @@ namespace CustomVideoPlayer
 			_bloomPrePassDict.TryGetValue(camera, out var bloomPrePass);
 			if (bloomPrePass == null)
 			{
+				Plugin.Logger.Debug("bloomPrePass == null");
 				return;
 			}
 

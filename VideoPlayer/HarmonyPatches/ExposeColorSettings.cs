@@ -51,12 +51,14 @@ namespace CustomVideoPlayer
 			var level = ____selectedDifficultyBeatmap.level is CustomBeatmapLevel ? ____selectedDifficultyBeatmap.level as CustomPreviewBeatmapLevel : null;
 			if (level == null)
 			{
+				Plugin.Logger.Debug("hey, level == null!");
 				return;
 			}
 
 			var songData = Collections.RetrieveExtraSongData(SongCore.Utilities.Hashing.GetCustomLevelHash(level), level.customLevelPath);
 			if (songData == null)
 			{
+				Plugin.Logger.Debug("hey, songData == null!");
 				return;
 			}
 
@@ -64,31 +66,52 @@ namespace CustomVideoPlayer
 			SongCore.Data.ExtraSongData.DifficultyData diffData = Collections.RetrieveDifficultyData(selectedDiff);
 			if (diffData == null)
 			{
+				Plugin.Logger.Debug("hey, diffData == null!");
 				return;
 			}
 
-			if (diffData._envColorLeft == null || diffData._envColorRight == null)    // shows it is null unless initialized in the maps info.dat file.
+			// maps are out there with only left or right color data ...
+
+			if (diffData._envColorLeft == null)    // shows it is null unless initialized in the maps info.dat file.
 			{
-				VideoMenu.mapHasEnvColors = false;
-				// Plugin.Logger.Debug("hey, envColorleft was null!");
+				VideoMenu.mapHasEnvLeftColor = false;
+				Plugin.Logger.Debug("hey, envColorleft was null!");
 			}
 			else
 			{
 				VideoMenu.mapEnvColorLeft = SongCore.Utilities.Utils.ColorFromMapColor(diffData._envColorLeft); 
-				VideoMenu.mapEnvColorRight = SongCore.Utilities.Utils.ColorFromMapColor(diffData._envColorRight);
-				VideoMenu.mapHasEnvColors = true;
-				// Plugin.Logger.Debug("This map has color data");
+				VideoMenu.mapHasEnvLeftColor = true;
+				Plugin.Logger.Debug("This map has  env color data");
 			}
 
-			if (diffData._colorLeft == null || diffData._colorRight == null)   
+			if (diffData._envColorRight == null)   
 			{
-				VideoMenu.mapHasCubeColors = false;
+				VideoMenu.mapHasEnvRightColor = false;
+			}
+			else
+			{
+				VideoMenu.mapEnvColorRight = SongCore.Utilities.Utils.ColorFromMapColor(diffData._envColorRight);
+				VideoMenu.mapHasEnvRightColor = true;
+			}
+
+			if (diffData._colorLeft == null)   
+			{
+				VideoMenu.mapHasCubeLeftColor = false;
 			}
 			else
 			{
 				VideoMenu.mapCubeColorLeft = SongCore.Utilities.Utils.ColorFromMapColor(diffData._colorLeft); 
+				VideoMenu.mapHasCubeLeftColor = true;
+			}
+
+			if (diffData._colorRight == null)
+			{
+				VideoMenu.mapHasCubeRightColor = false;
+			}
+			else
+			{
 				VideoMenu.mapCubeColorRight = SongCore.Utilities.Utils.ColorFromMapColor(diffData._colorRight);
-				VideoMenu.mapHasCubeColors = true;
+				VideoMenu.mapHasCubeRightColor = true;
 			}
 		}
 	}
