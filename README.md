@@ -28,7 +28,7 @@
 * Video offset control:  Just like the original mod, a timing offset is associated with each video.
 * Video speed control:  There is a video playback speed control that is a property associated with each screen.
 * User defined screen placement:  Custom screen placement has returned and is configurable in CustomVideoPlayer.ini.
-* Video color attribute control:  The following properties can be adjusted: Saturation, Contrast, Hue, Gamma, Brightness.  
+* Video color attribute control:  The following properties can be adjusted: Saturation, Contrast, Exposure, Hue, Gamma, Brightness.  
 * Screen shape control:  Screen curvature and video vignetting can be adjusted.
 * Screen placement:  The six primary screens can be adjusted by scale, position, rotation, and aspect ratio.
 
