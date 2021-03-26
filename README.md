@@ -151,7 +151,7 @@ UI elements in the Screen Shapes menu:
  
  UI elements in the Screen Placement menu:
 
-- 'Screen Selection' - Determines which screen the placement settings are adjusting.  It should be noted that while the 360 and MSP screens are selectable, none of the adjustments in the shapes menu affect them.
+- 'Screen Selection' - Determines which screen the placement settings are adjusting.
 
 - Reset - Resets values to default
 
