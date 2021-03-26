@@ -1,63 +1,21 @@
-**Added to Version 2.29**
-
-* Added bloom global enable bool in 'Extras' menu.  Added Cinema screen location to placement list.  Fixed screen color routine to allow for maps with only left or right color initialization.
-
-**Added to Version 2.28**
-
-* Added screen bloom control to screen attributes menu.
-
-**Added to Version 2.27**
-
-* Updates for game version 1.13.4.  Added Environment and Cube(Saber) colors to screen dropdown list.
-
-**Added to Version 2.26**
-
-* Added screen curvature and screen color.  Game environment captures screen reflection properly.  Updated this readme file with new images.
-
-**Added to Version 2.25**
-
-* Added two submenus that process screen properties made accessible by the new Cinema shader.
-
-**Added to Version 2.24**
-
-* Changing from MVP shader to BeatSaberCinema shader.
-
-**Added to Version 2.23**
-
-* Changed menu screen position to work with Beat Saber v1.13.2.  Added a slider control in 'Extras' to set video screen brightness.
-
-**Added to Version 2.22**
-
-* Fixed a bug where the preview screen would appear in the main scene.  There is still a minor glitch where the preview is screen is sometimes invisible in the settings menu.  The screen will appear when the user interacts with the UI.
-
-**Added to Version 2.21**
-
-* Tweaked a couple reflection placement settings.
-
-**Added to Version 2.2**
-
-* Added a checkbox in 'Extras' menu that changes the way reflection screens work.  Type 1 reflections (bool unchecked) adds a screen to create either a mirror effect (vertical-horizontal) or between left-right, top-bottom.
-  Type 2 reflections (bool checked) mirrors the screen behind the player (inverts x and z coordinates).
-* Added another MSP (Multi-screen placement) preset for 6 screens in a hexagon shape.  This behaves similarly to the existing 8 screen octagon configuration.
-* Removed reflection ability from Cardinal/Ordinal MSP presets.  These used to create a huge floor/ceiling.  Now that there are three MSP controller screens, creating a floor or ceiling can be done by just using another MSP.
-
-**Added to Version 2.1**
-
-* Ability to layer two 360 videos (Added second 360 video screen).
-* Added additional MSP Controller screen for a total of three.
-* New placements:  Floor/Ceiling H90.
-  - The old Floor_H, Ceiling_H placement were unique because they put the video at floor level, which suited the 90/360 environments well.  The player was placed however in the center of the screen which was not ideal for 90 maps.
-    I renamed the placements to Floor_H360, and Ceiling_H360 and added two complimentary configurations (H90) where the screen is in front of the player.
-
 **What this is**
 
-* CustomVideoPlayer is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP.
-* It plays videos from a CustomVideo directory as well from a map’s local directory.
+* CustomVideoPlayer is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP or BeatSaberCinema.
+* It plays videos from a CustomVideo directory.
 * It extends MVP’s functionality with three added features: 
 1. Plays multiple videos at once.
 2. Plays 360 videos.
 3. Adds ‘Multiple Screen Placement’ (MSP) functionality with multiple preset combinations.
 * The benefits of this mod improve as one collects more videos and discovers creative ways to layer them or let them interact with the platform.
+
+**Caveats**
+
+* Local video import (from the map level's directory) is not fully functional.  I plan to add both MVP and BeatSaberCinema compatibility soon but the feature got pushed down the todo list.
+* Many of the MSP screens that aligned themselves to create a larger screen need to be realigned.  A small gap now appears after the introdution of curved screens.  Now that a working placement editor is finished I should be able to rectify this issue.
+* The introduction of the bloom effect will cause issues for screens with large surface areas.  
+* The screen color can be set to mimic either the cube(saber) or environment light colors.  This feature only works when the player overrides the default environment colors or when the colors are provided by the level map.  The functionality does not yet support the default environment colors, maps that envoke boost color events, or maps that use chroma.
+* The introduction of screen placement editing breaks type1 (pond mirroring) screen reflection which was based on fixed screen positions.  A dynamic algorithm will be added shortly.  Type 2 reflection (for 360 maps) still works.
+* Placement editing for MSP screens is not possible.
 
 **Feature List**
 
@@ -70,6 +28,9 @@
 * Video offset control:  Just like the original mod, a timing offset is associated with each video.
 * Video speed control:  There is a video playback speed control that is a property associated with each screen.
 * User defined screen placement:  Custom screen placement has returned and is configurable in CustomVideoPlayer.ini.
+* Video color attribute control:  The following properties can be adjusted: Saturation, Contrast, Hue, Gamma, Brightness.  
+* Screen shape control:  Screen curvature and video vignetting can be adjusted.
+* Screen placement:  The six primary screens can be adjusted by scale, position, rotation, and aspect ratio.
 
 **Things Missing**
 
@@ -98,9 +59,10 @@ Video files must be pre installed by the user in the following directories:
 
 Prerequisite Mods:
 
-    BS Utils: 1.5.0
-    BeatSaberMarkupLanguage: 1.3.5
-    BSIPA: 4.1.3
+    BS Utils v1.8.0
+    BeatSaberMarkupLanguage: v1.5.2
+    BSIPA: v4.1.6
+	SongCore v3.2.2
 
 Videos must have an .mp4 extension.  Other extensions (.mkv, .mov, avi) will not be recognized. 
 Videos with more advanced codecs will not work.  I haven't been able to get Unity to recognise the AV1 codec.  
@@ -177,11 +139,37 @@ UI elements in the Screen Shapes menu:
 
 - Reset - Resets values to default
 
-- Aspect Ratio - Dropdown list selects screen aspect ratio.
+- Aspect Ratio - Dropdown list selects screen default aspect ratio.  If the aspect ratio is edited using controls in the placement menu, that value will be used to set screen dimension.  If the user resets screen placement values, the default aspect ratio will be restored the setting of this dropdown list.
 
 - Screen Vignette controls - Enables/disables vignetting.  The shape can be toggled between elliptical and rectangular.  The radius and softness can be adjusted.  Softness of zero removes vignetting completely while a larger number has significant effect.  
 
 - Screen Curvature controls - Enables/disables screen curvature.  The 'Auto-Adjustment' bool calculates the degree of curvature from the distance from the origin of the scene.  The manual adjustment slider will be applied if 'auto' is disabled.
+
+
+**Screen Placement Menu:**
+ ![](VideoPlayer/Resources/menu230a2.jpg)
+ 
+ UI elements in the Screen Placement menu:
+
+- 'Screen Selection' - Determines which screen the placement settings are adjusting.  It should be noted that while the 360 and MSP screens are selectable, none of the adjustments in the shapes menu affect them.
+
+- Reset - Resets values to default
+
+- Position.X/Rotaion.X - Changing Position.X axis move the screen left or right.  Changing Rotation.X rotates the screen so that the top/bottom move closer/further from the player.  This is the rotation used for the 'slanted' screen presets.
+
+- Position.Y/Rotaion.Y - Changing Position.Y axis move the screen up or down.  Changing Rotation.Y rotates the screen so that the left/right edges move closer/further from the player.  This is the rotation used to force left/right presets to face the player.
+
+- Position.Z/Rotaion.Z - Changing Position.Z axis move the screen closer or further away.  Changing Rotation.Z rotates the screen clockwise and counter clockwise.
+
+- Height - Controls screen height.  When aspect ratio is locked, this slider will also effect screen width.
+
+- Width - Controls screen width.  When aspect ratio is locked, this slider will be disabled.
+
+- Lock/Unlock Aspect Ratio - toggle aspect ratio locking.
+
+- Toggle Position/Rotation controls - This repurposes the position slider controls to act as rotational slider controls.  This just helps to save menu space.
+
+- Set -,+ step size - Adjust the amount the -,+ will affect the slider values.  The step size can be 10 , 1, 0.1, 0.01.
 
 
 **Primary Screens:**
@@ -343,19 +331,66 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 - The methods and coroutines for the rest of screens follow a different path.  For anyone unfamiliar with the original code arrangement, this knowledge may help clear up what may seem like arbitrary design decisions.
 
-- Hidden placement utility.  There is a hidden subroutine that can be turned on using a bool in VideoMenu.cs.  It changes the UI elements normally associated with the offset setting into controls that allow adjustment of a designated screen placement.  This was used to precision place the MSP preset screens.
-
 - When I first tested this mod along side of MVP, it would hang during startup and termination of the game.  Both MVP and CVP competed for access of the local map's .json files.  I circumvented this by delaying the retrieval of local map data until the user request a local video by hitting the local/custom priority button.  I also removed persistence of the video offset value.
 
-- I may publish a version with search functionality intact when I feel the other features are mature and bug free.
 
-**On the roadmap:**
+** Version History **
 
-- Add a screen placement editor in game and make more screen position values customizable and persistant.
+**Added to Version 2.30**
 
-- Add user customization of MSP presets in CustomVideoPlayer.ini.
+* Added Screen Placement editor menu.  Changed CVP enable/disable button to a modifier for better menu uniformity and visibility.
 
-- Add 180 video capability.
+**Added to Version 2.29**
+
+* Added bloom global enable bool in 'Extras' menu.  Added Cinema screen location to placement list.  Fixed screen color routine to allow for maps with only left or right color initialization.
+
+**Added to Version 2.28**
+
+* Added screen bloom control to screen attributes menu.
+
+**Added to Version 2.27**
+
+* Updates for game version 1.13.4.  Added Environment and Cube(Saber) colors to screen dropdown list.
+
+**Added to Version 2.26**
+
+* Added screen curvature and screen color.  Game environment captures screen reflection properly.  Updated this readme file with new images.
+
+**Added to Version 2.25**
+
+* Added two submenus that process screen properties made accessible by the new Cinema shader.
+
+**Added to Version 2.24**
+
+* Changing from MVP shader to BeatSaberCinema shader.
+
+**Added to Version 2.23**
+
+* Changed menu screen position to work with Beat Saber v1.13.2.  Added a slider control in 'Extras' to set video screen brightness.
+
+**Added to Version 2.22**
+
+* Fixed a bug where the preview screen would appear in the main scene.  There is still a minor glitch where the preview is screen is sometimes invisible in the settings menu.  The screen will appear when the user interacts with the UI.
+
+**Added to Version 2.21**
+
+* Tweaked a couple reflection placement settings.
+
+**Added to Version 2.2**
+
+* Added a checkbox in 'Extras' menu that changes the way reflection screens work.  Type 1 reflections (bool unchecked) adds a screen to create either a mirror effect (vertical-horizontal) or between left-right, top-bottom.
+  Type 2 reflections (bool checked) mirrors the screen behind the player (inverts x and z coordinates).
+* Added another MSP (Multi-screen placement) preset for 6 screens in a hexagon shape.  This behaves similarly to the existing 8 screen octagon configuration.
+* Removed reflection ability from Cardinal/Ordinal MSP presets.  These used to create a huge floor/ceiling.  Now that there are three MSP controller screens, creating a floor or ceiling can be done by just using another MSP.
+
+**Added to Version 2.1**
+
+* Ability to layer two 360 videos (Added second 360 video screen).
+* Added additional MSP Controller screen for a total of three.
+* New placements:  Floor/Ceiling H90.
+  - The old Floor_H, Ceiling_H placement were unique because they put the video at floor level, which suited the 90/360 environments well.  The player was placed however in the center of the screen which was not ideal for 90 maps.
+    I renamed the placements to Floor_H360, and Ceiling_H360 and added two complimentary configurations (H90) where the screen is in front of the player.
+
 
 Here is the batch file I used to crop 3k, 4k, 6k, and 8k videos into separate 1080 parts.
 

@@ -31,7 +31,7 @@ namespace CustomVideoPlayer.UI
             config = new BS_Utils.Utilities.Config(configName);
 
             // Load config values from CustomVideoPlayer.ini
-            CVPEnabled = EnableCVP;
+            VideoMenu.instance.CVPEnabled = EnableCVP;
 
             customPlacementPosition = CustomPosition;
             customPlacementRotation = CustomRotation;

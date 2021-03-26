@@ -57,6 +57,13 @@ namespace CustomVideoPlayer.Util
     {
         public static Vector3 Position(VideoPlacement placement)
         {
+
+            // when adding persistance, a call to check if .ini data is valid will precede the original switch.
+            // this will be made only when the placement object list is created (during startup) or when 'resetting' to original values.
+
+            // before persistance gets added, the placement menu will only be effect the members of the current instance of the screenController object.
+            // later implementation will provide the Placement Menu the option to edit both 'screen' and 'defaultPlacement' values. 
+
             switch (placement)
             {
                 case VideoPlacement.PreviewScreenInMenu:

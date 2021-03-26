@@ -75,13 +75,13 @@ namespace CustomVideoPlayer
 			if (diffData._envColorLeft == null)    // shows it is null unless initialized in the maps info.dat file.
 			{
 				VideoMenu.mapHasEnvLeftColor = false;
-				Plugin.Logger.Debug("hey, envColorleft was null!");
+			//	Plugin.Logger.Debug("map data had no colors");
 			}
 			else
 			{
 				VideoMenu.mapEnvColorLeft = SongCore.Utilities.Utils.ColorFromMapColor(diffData._envColorLeft); 
 				VideoMenu.mapHasEnvLeftColor = true;
-				Plugin.Logger.Debug("This map has  env color data");
+			//	Plugin.Logger.Debug("This map has  env color data");
 			}
 
 			if (diffData._envColorRight == null)   

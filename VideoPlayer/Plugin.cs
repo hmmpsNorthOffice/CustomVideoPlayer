@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using CustomVideoPlayer.Util;
 using CustomVideoPlayer.UI;
 using HarmonyLib;
-// using CustomVideoPlayer.YT;
 using BeatSaberMarkupLanguage.Settings;
 using BS_Utils.Utilities;
 using System.Collections;
@@ -59,7 +58,7 @@ namespace CustomVideoPlayer
         public void OnApplicationQuit()
         {
             // Save to .ini (Even though some of these haven't changed, we want to init values)
-            CVPSettings.EnableCVP = CVPSettings.CVPEnabled;
+            CVPSettings.EnableCVP = VideoMenu.instance.CVPEnabled;
             CVPSettings.CustomPosition = CVPSettings.customPlacementPosition; 
             CVPSettings.CustomRotation = CVPSettings.customPlacementRotation;
             CVPSettings.CustomScale = CVPSettings.customPlacementScale;

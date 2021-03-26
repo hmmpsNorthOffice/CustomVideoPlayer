@@ -16,15 +16,19 @@ namespace CustomVideoPlayer
 		private readonly Dictionary<Camera, IBloomPrePassParams> _bloomPrePassParamsDict = new Dictionary<Camera, IBloomPrePassParams>();
 
 		private Material _additiveMaterial = null!;
-		private KawaseBlurRendererSO _kawaseBlurRenderer = null!;
+		private KawaseBlurRendererSO _kawaseBlurRenderer = null!; 
 
 		private Renderer _renderer = null!;
 		private Mesh _mesh = null!;
 		private static readonly int Alpha = Shader.PropertyToID("_Alpha");
 		private const int DOWNSAMPLE = 2;
-		private const float BLOOM_BOOST_FACTOR = 0.11f; // 0.22f;  // orig 0.11f;
+		private const float BLOOM_BOOST_BASE_FACTOR = 0.09f;
 		private float? _bloomIntensityConfigSetting;
-		private Vector2 _screnDimensions;
+		private Vector2 _screenDimensions;
+
+		private float BloomIntensity =>
+		//	Mathf.Clamp(_bloomIntensityConfigSetting ?? SettingsStore.Instance.BloomIntensity / 100f, 0f, 2f);
+		Mathf.Clamp(_bloomIntensityConfigSetting.Value / 100f, 0f, 2f);
 
 		private void Start()
 		{
@@ -47,7 +51,7 @@ namespace CustomVideoPlayer
 
 		public void UpdateScreenDimensions(float width, float height)
 		{
-			_screnDimensions = new Vector2(width, height);
+			_screenDimensions = new Vector2(width, height);
 		}
 
 		public void SetBloomIntensityConfigSetting(float? bloomIntensity)
@@ -55,6 +59,34 @@ namespace CustomVideoPlayer
 			_bloomIntensityConfigSetting = bloomIntensity;
 		}
 
+		private float GetBloomBoost(Camera camera)
+		{
+			//Base calculation scales down with screen area and up with distance
+			var area = _screenDimensions.x * _screenDimensions.y;
+			var boost = (BLOOM_BOOST_BASE_FACTOR / (float) Math.Sqrt(Math.Sqrt(area)/GetCameraDistance(camera)));
+
+			//Apply map/user setting on top
+			//User-facing setting uses scale of 0-200 (in percent), so divide by 100
+			boost *= (float) Math.Sqrt(BloomIntensity);
+
+			//Mitigate extreme amounts of bloom at the edges of the camera frustum when not looking directly at the screen
+			var fov = camera.fieldOfView;
+			var cameraTransform = camera.transform;
+			var targetDirection = gameObject.transform.position - cameraTransform.position;
+			var angle = Vector3.Angle(targetDirection, cameraTransform.forward);
+			var attenuation = angle / (fov/2);
+			//Prevent attenuation from causing brightness fluctuations when looking close to the center
+			const float threshold = 0.3f;
+			attenuation = Math.Max(threshold, attenuation);
+			boost /= ((attenuation + (1 - threshold)));
+
+			//Adjust for FoV
+			boost *= fov / 100f;
+
+			return boost;
+		}
+		
+		/*
 		private float GetBloomBoost(Camera camera)
 		{
 			var fov = camera.fieldOfView;
@@ -94,7 +126,7 @@ namespace CustomVideoPlayer
 		//	Plugin.Logger.Debug("logging boost factor = " + boost.ToString());
 			return boost;
 		}
-
+*/
 		private float GetCameraDistance(Camera camera)
 		{
 			return (gameObject.transform.position - camera.transform.position).magnitude;
@@ -163,6 +195,11 @@ namespace CustomVideoPlayer
 				Plugin.Logger.Debug("camera name == smooth || Mirror");
 				return;
 			}
+			
+			if (BloomIntensity == 0)
+			{
+				return;
+			}
 
 			try
 			{
@@ -171,7 +208,10 @@ namespace CustomVideoPlayer
 			catch (Exception e)
 			{
 				Plugin.Logger.Error(e);
-				_bloomPrePassDict.Add(camera, null);
+				if (!_bloomPrePassDict.ContainsKey(camera))
+				{
+					_bloomPrePassDict.Add(camera, null);
+				}
 			}
 
 			_bloomPrePassDict.TryGetValue(camera, out var bloomPrePass);
