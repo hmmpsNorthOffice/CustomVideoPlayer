@@ -22,7 +22,6 @@
 * Multiple Screens: Ability to play multiple videos simultaneously.
 * 360 Screen:  The mod accepts monoscopic equirectangular 360 videos.  Two 360 videos can be played alongside the primary or MSP screens.  Screen radius can be dynamically resized using a slider control in the Extras Menu.
 * Multi Screen Placement Presets: Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements.  This is useful to quickly create environments suited for 90/360 maps and to allow higher resolution videos.
-* Screen reflection:  Each of the primary screens and most of the MSP configurations have reflection ability.  They can either be relected with a second screen to create a 'pond mirror' effect or they can be duplicated behind the player for 360 level play.
 * Hide/Show screen body:  This creates screen transparency. 
 * Rolling video queue:  Each primary and MSP screen can be set to automatically increment the video queue after each game play.
 * Video offset control:  Just like the original mod, a timing offset is associated with each video.
@@ -31,6 +30,7 @@
 * Video color attribute control:  The following properties can be adjusted: Saturation, Contrast, Exposure, Hue, Gamma, Brightness.  
 * Screen shape control:  Screen curvature and video vignetting can be adjusted.
 * Screen placement:  The six primary screens can be adjusted by scale, position, rotation, and aspect ratio.
+* Screen mirroring:  Each of the primary screens can be cloned and then mimicked across a given access.  This makes it easy to set up two screens with duplicate color and shape attributes.
 
 **Things Missing**
 
@@ -38,6 +38,7 @@
 * Ability to delete videos.
 * Video offsets are currently not saved between sessions.
 * Rolling Offset.  This was a feature in a previous version that would play a video from where it ended during the last play session.
+* Pond mirroring.  This was an option from a previous version that placed a screen below the original to reflect the image.  True perspective projection was not properly achieved however and the introduction of screen placement editing broke the algorithm.
 
 **CustomVideoPlayer, MusicVideoPlayer, AND BeatSaberCinema mod!**
 
@@ -97,7 +98,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 * For the 360 screen there is no placement, but the radius can be controlled by a slider in the Extras menu.
 5. **Choose a video** using (Previous/Next).
 
-6. Set optional screen parameters Speed, Offset, RVQ, Reflection Screen.
+6. Set optional screen parameters Speed, Offset, RVQ, Screen Mirroring.
    
     (note:  If using MSP A, B, or C, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
 
@@ -264,13 +265,12 @@ The idea of ‘multi-screen placement’ presets began when I wanted to create a
    - 4 screens (Larger than those in P7)  Cardinal configuration puts screens at major compass points (North, South, East, West).
    - Ordinal setting locates screens at minor compass points (NorthEast, SouthEast, NorthWest, SouthWest)
 
-**Screen Reflection:**
+**Screen Mirroring:**
 
-Screen reflection can be added in two different ways.  The original mode, 'type1', creates a mirror effect by using a second screen at a 90 degree angle to mimic the first, creating a 'mirrored pond' effect.  The second mode, 'type2' creates a second screen behind the player in the exact orientation of the original.  It is designed for use in 360 maps ... (hurry up Beat Sage!)  The original idea arose as an answer to the question:  Now that I have mutliple screens, what can I do with them?   The overall concept was hit and miss depending on the type of video.  It was also very easy to implement when there were only a half dozen or so screen placements.  For many of the screen configurations, a reflection does not make sense and looks out of place.  In those arrangements, the reflection placement acts to add a quick way to add a second screen in left/right or floor/ceiling arrangements.    For the pedestal and the large slant screen, the reflection is placed behind the original at a slightly larger size, creating a video frame.
+Each of the primary screens can be cloned and represented across each of the x, y, and z axes.  This makes it easy to create scene symmetry while adding multiple color and shape property changes.  Mirroring across the X axis (Mirror_X) will create a left/right pair.  The selection of Mirror_Y is suitable for floor/ceiling arrangements.  Finally, using Mirror_Z will create a front/back pair suited for 360 maps.  In early testing, experiments using overlapping videos with lasers and kaleidoscopes have produced some cool results.
 
-The reflection concept works for both Primary and MSP screens with the following exceptions.
+Screen mirroring only works for primary screens.
 
-P4_3x3, P4_4x4, P7_Hexagon, P7_Octagon : Reflection isn’t activated.
 
 **360 Videos:**
 

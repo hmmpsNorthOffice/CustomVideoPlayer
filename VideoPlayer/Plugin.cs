@@ -59,9 +59,10 @@ namespace CustomVideoPlayer
         {
             // Save to .ini (Even though some of these haven't changed, we want to init values)
             CVPSettings.EnableCVP = VideoMenu.instance.CVPEnabled;
-            CVPSettings.CustomPosition = CVPSettings.customPlacementPosition; 
-            CVPSettings.CustomRotation = CVPSettings.customPlacementRotation;
-            CVPSettings.CustomScale = CVPSettings.customPlacementScale;
+            CVPSettings.CustomPositionInConfig = CVPSettings.customPlacementPosition; 
+            CVPSettings.CustomRotationInConfig = CVPSettings.customPlacementRotation;
+            CVPSettings.CustomHeightInConfig = CVPSettings.customPlacementScale;
+            CVPSettings.CustomWidthInConfig = CVPSettings.customPlacementWidth;
             RemoveHarmonyPatches();
             RemoveEvents();
         }

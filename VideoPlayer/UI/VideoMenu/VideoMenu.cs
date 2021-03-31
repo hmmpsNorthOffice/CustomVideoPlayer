@@ -144,9 +144,10 @@ namespace CustomVideoPlayer
         private List<object> screenPositionsList = (new object[]
         {
             VideoPlacement.Center,
+            VideoPlacement.Custom,
+            VideoPlacement.Cinema,
             VideoPlacement.Back_Medium,
             VideoPlacement.Back_Huge,
-            VideoPlacement.Cinema,
             VideoPlacement.Slant_Small,
             VideoPlacement.Slant_Large,
             VideoPlacement.Left_Small,
@@ -159,9 +160,7 @@ namespace CustomVideoPlayer
             VideoPlacement.Ceiling_Huge90,
             VideoPlacement.Floor_Huge360,
             VideoPlacement.Ceiling_Huge360,
-            VideoPlacement.Pedestal,
-            VideoPlacement.Custom
-
+            VideoPlacement.Pedestal
         }).ToList();
 
         [UIObject("select-placement-list")]    // can we use this to change properties of dropdownlist?
@@ -184,9 +183,28 @@ namespace CustomVideoPlayer
         [UIAction("setPlacementUIAction")]
         void SetPlacementUIAction(VideoPlacement pm2)
         {
+            ScreenManager.screenControllers[(int)selectedScreen].videoPlacement = pm2;
             ScreenManager.screenControllers[(int)selectedScreen].screenPosition = VideoPlacementSetting.Position(pm2);
             ScreenManager.screenControllers[(int)selectedScreen].screenRotation = VideoPlacementSetting.Rotation(pm2);
             ScreenManager.screenControllers[(int)selectedScreen].screenScale = VideoPlacementSetting.Scale(pm2);
+
+            // the following order of initialization is important since Width is just an intermediate value used to compute aspect ratio.
+            // for custom placements ... ar is derived from width, in the other placements ... width is derived from ar.
+            if (pm2 == VideoPlacement.Custom)
+            {
+                ScreenManager.screenControllers[(int)selectedScreen].screenWidth = CVPSettings.CustomWidthInConfig;
+                ScreenManager.screenControllers[(int)selectedScreen].ComputeAspectRatioFromDefault();
+            }
+            else
+            {
+                ScreenManager.screenControllers[(int)selectedScreen].ComputeAspectRatioFromDefault();
+                ScreenManager.screenControllers[(int)selectedScreen].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenScale * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+            }
+
+            // Only aspectratio is relavent for preview screen since it will be placed in or near the menu.
+            ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees, false);
+
 
             MessageifNotPrimary(pm2);  // update GeneralInfoMessage if currently selected screen is not primary
         }
@@ -1189,7 +1207,11 @@ namespace CustomVideoPlayer
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
-            }  
+            }
+
+            // This is a dev utility for precision placement of the MSP screens
+            if( devHighPrecisionPlacementUtility )  placementSlider1Text.text = isPositionPlacement ?
+                "Position.X = " + tempSliderValue.ToString("F3") : "Rotation.X = " + tempSliderValue.ToString("F3"); 
         }
 
         [UIAction("on-slider1-decrement-action")]
@@ -1211,6 +1233,9 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
             }
+
+            if (devHighPrecisionPlacementUtility) placementSlider1Text.text = isPositionPlacement ?
+                "Position.X = " + tempSliderValue.ToString("F3") : "Rotation.X = " + tempSliderValue.ToString("F3");
         }
 
         private float placementSlider2Value = 0f;
@@ -1261,6 +1286,9 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
+
+            if (devHighPrecisionPlacementUtility) placementSlider2Text.text = isPositionPlacement ?
+                 "Position.Y = " + tempSliderValue.ToString("F3") : "Rotation.Y = " + tempSliderValue.ToString("F3");
         }
 
         [UIAction("on-slider2-decrement-action")]
@@ -1282,6 +1310,9 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
+
+            if (devHighPrecisionPlacementUtility) placementSlider2Text.text = isPositionPlacement ?
+                "Position.Y = " + tempSliderValue.ToString("F3") : "Rotation.Y = " + tempSliderValue.ToString("F3");
         }
 
         private float placementSlider3Value = 0f;
@@ -1332,6 +1363,9 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
+
+            if (devHighPrecisionPlacementUtility) placementSlider3Text.text = isPositionPlacement ?
+                "Position.Z = " + tempSliderValue.ToString("F3") : "Rotation.Z = " + tempSliderValue.ToString("F3");
         }
 
         [UIAction("on-slider3-decrement-action")]
@@ -1353,6 +1387,9 @@ namespace CustomVideoPlayer
                     ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
+
+            if (devHighPrecisionPlacementUtility) placementSlider3Text.text = isPositionPlacement ?
+                "Position.Z = " + tempSliderValue.ToString("F3") : "Rotation.Z = " + tempSliderValue.ToString("F3");
         }
 
         private float placementSlider4Value = 0f;          // slider4 is screen height (scale)
@@ -1418,6 +1455,8 @@ namespace CustomVideoPlayer
 
             ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
 
+            if (devHighPrecisionPlacementUtility) placementSlider4Text.text = "Height = " + tempSliderValue.ToString("F3");
+
         }
 
         [UIAction("on-slider4-decrement-action")]
@@ -1444,6 +1483,8 @@ namespace CustomVideoPlayer
             ScrHeightSliderValue = tempSliderValue;
 
             ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+
+            if (devHighPrecisionPlacementUtility) placementSlider4Text.text = "Height = " + tempSliderValue.ToString("F3");
         }
 
 
@@ -1483,6 +1524,8 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             ScrWidthSliderValue = tempSliderValue;
+
+            if (devHighPrecisionPlacementUtility) placementSlider5Text.text = "Width = " + tempSliderValue.ToString("F3");
         }
 
         [UIAction("on-slider5-decrement-action")]
@@ -1494,6 +1537,8 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             ScrWidthSliderValue = tempSliderValue;
+
+            if (devHighPrecisionPlacementUtility) placementSlider5Text.text = "Width = " + tempSliderValue.ToString("F3");
         }
 
         [UIAction("on-aspect-ratio-lock-button-click")]
@@ -1514,6 +1559,29 @@ namespace CustomVideoPlayer
         }
 
 
+        [UIAction("on-save-placement-action")]
+        private void OnSavePlacementClick()
+        {
+            CVPSettings.customPlacementPosition = ScreenManager.screenControllers[(int)selectedScreen].screenPosition;
+            CVPSettings.customPlacementRotation = ScreenManager.screenControllers[(int)selectedScreen].screenRotation;
+            CVPSettings.customPlacementScale = ScreenManager.screenControllers[(int)selectedScreen].screenScale;
+            CVPSettings.customPlacementWidth = ScreenManager.screenControllers[(int)selectedScreen].screenScale * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+
+            CVPSettings.CustomPositionInConfig = ScreenManager.screenControllers[(int)selectedScreen].screenPosition;
+            CVPSettings.CustomRotationInConfig = ScreenManager.screenControllers[(int)selectedScreen].screenRotation;
+            CVPSettings.CustomHeightInConfig = ScreenManager.screenControllers[(int)selectedScreen].screenScale;
+            CVPSettings.CustomWidthInConfig = ScreenManager.screenControllers[(int)selectedScreen].screenScale * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+
+            savePlacementButtonText.text = "Saving";
+            StartCoroutine(SavePlacementButtonResponse());
+            
+        }
+
+        private IEnumerator SavePlacementButtonResponse()
+        {
+            yield return new WaitForSeconds(1);
+            savePlacementButtonText.text = "Set as Custom Placement Default";
+        }
 
         [UIAction("on-placement-step-granularity-click")]
         private void OnPlacementStepGranularityClick()
@@ -1527,9 +1595,19 @@ namespace CustomVideoPlayer
                     placementStepDeltaValue = 10f;
                     break;
                 case placementStepDeltaEnum.hundredth:
-                    placementStepDelta = placementStepDeltaEnum.ten;
-                    placementStepGranularityButtonText.text = " 10 ";
-                    placementStepDeltaValue = 10f;
+                    if (devHighPrecisionPlacementUtility)
+                    {
+                        placementStepDelta = placementStepDeltaEnum.thousandth;
+                        placementStepGranularityButtonText.text = " 0.001 ";
+                        placementStepDeltaValue = 0.001f;
+                    }
+                    
+                    else
+                    {
+                        placementStepDelta = placementStepDeltaEnum.ten;
+                        placementStepGranularityButtonText.text = " 10 ";
+                        placementStepDeltaValue = 10f;
+                    }
                     break;
                 case placementStepDeltaEnum.tenth:
                     placementStepDelta = placementStepDeltaEnum.hundredth;
@@ -1605,11 +1683,14 @@ namespace CustomVideoPlayer
             }
         }
 
+        // vv ----------------------- old ---------------------------------------
+        // ----------------------------------------------------------------------
+        /*
         public enum ReflScreenType { Refl_Off, Mirror_Refl, ThreeSixty_Refl };
 
         private static ReflScreenType ReflButtonState = ReflScreenType.Refl_Off;
 
-        private bool addScreenReflection=false;
+        private bool addScreenReflection = false;
         [UIValue("reflection-screen-button-value")]
         public bool AddScreenRefBool
         {
@@ -1617,8 +1698,8 @@ namespace CustomVideoPlayer
             set
             {
                 addScreenReflection = (ReflButtonState != ReflScreenType.Refl_Off);
-               // ScreenManager.screenControllers[(int)selectedScreen].reflectType = ReflButtonState;
-                NotifyPropertyChanged();  
+                // ScreenManager.screenControllers[(int)selectedScreen].reflectType = ReflButtonState;
+                NotifyPropertyChanged();
             }
         }
 
@@ -1629,8 +1710,8 @@ namespace CustomVideoPlayer
         [UIAction("reflection-screen-button-action")]
         void SetAddScreenReflection(bool val)
         {
-            if(!SilenceUIAction)
-            { 
+            if (!SilenceUIAction)
+            {
                 switch (ReflButtonState)
                 {
                     case ReflScreenType.Refl_Off:
@@ -1643,7 +1724,7 @@ namespace CustomVideoPlayer
                         ReflButtonState = ReflScreenType.Refl_Off;
                         break;
                 }
-            
+
 
                 // update currentScreen members (.AddScreenRefl was deprecated -> using 3 state enum instead)
                 // AddScreenRefBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl = (ReflButtonState != ReflScreenType.Refl_Off);
@@ -1652,19 +1733,82 @@ namespace CustomVideoPlayer
                 UpdateReflectionScreenButtonText(ReflButtonState);
             }
         }
+        */
+        // ------------------------------------------------
 
-        internal void UpdateReflectionScreenButtonText(VideoMenu.ReflScreenType reflectScreenType)
+        // Mirror_Refl to be deprecated
+        public enum MirrorScreenType { Mirror_Off, Mirror_Refl, Mirror_X, Mirror_Y, Mirror_Z };
+
+        private static MirrorScreenType MirrorButtonState = MirrorScreenType.Mirror_Off;
+
+        private static bool addScreenMirror = false;
+        [UIValue("mirror-screen-button-value")]
+        public bool AddScreenMirBool
         {
-            switch (reflectScreenType)
+            get => addScreenMirror;
+            set
             {
-                case ReflScreenType.Refl_Off:
-                    ReflectTypeButtonText.text = "Refl Scr : Off";
+                Plugin.Logger.Debug("Add Mirror Value");
+                addScreenMirror = (MirrorButtonState  != MirrorScreenType.Mirror_Off);
+                // UpdateMirrorScreenButtonText();
+                NotifyPropertyChanged();  
+            }
+        }
+
+        // had to find a better way to fire only when button is pressed ...
+        // button action is 3 way toggle ... but value is a bool
+        internal static bool SilenceUIAction = false;
+
+        [UIAction("mirror-screen-button-action")]
+        void SetAddScreenMirror(bool val)
+        {
+            Plugin.Logger.Debug("Add Mirror Action");
+            if(!SilenceUIAction)
+            { 
+                switch (MirrorButtonState)
+                {
+                    case MirrorScreenType.Mirror_Off:
+                        MirrorButtonState = MirrorScreenType.Mirror_X;
+                        break;
+                    case MirrorScreenType.Mirror_Refl:                      // to be deprecated
+                        MirrorButtonState = MirrorScreenType.Mirror_X;
+                        break;
+                    case MirrorScreenType.Mirror_X:
+                        MirrorButtonState = MirrorScreenType.Mirror_Y;
+                        break;
+                    case MirrorScreenType.Mirror_Y:
+                        MirrorButtonState = MirrorScreenType.Mirror_Z;
+                        break;
+                    case MirrorScreenType.Mirror_Z:
+                        MirrorButtonState = MirrorScreenType.Mirror_Off;
+                        break;
+                }
+                SilenceUIAction = true;
+                ScreenManager.screenControllers[(int)selectedScreen].MirrorType = MirrorButtonState;  
+            }
+            else SilenceUIAction = false;
+            UpdateMirrorScreenButtonText();
+
+        }
+
+        internal void UpdateMirrorScreenButtonText()
+        {
+            switch (MirrorButtonState)
+            {
+                case MirrorScreenType.Mirror_Off:
+                    MirrorTypeButtonText.text = "Mirror : Off";
                     break;
-                case ReflScreenType.Mirror_Refl:
-                    ReflectTypeButtonText.text = "Refl Scr : Mir";
+                case MirrorScreenType.Mirror_Refl:
+                    MirrorTypeButtonText.text = "Mirror : T1";
                     break;
-                case ReflScreenType.ThreeSixty_Refl:
-                    ReflectTypeButtonText.text = "Refl Scr : 360";
+                case MirrorScreenType.Mirror_X:
+                    MirrorTypeButtonText.text = "Mirror : X";
+                    break;
+                case MirrorScreenType.Mirror_Y:
+                    MirrorTypeButtonText.text = "Mirror : Y";
+                    break;
+                case MirrorScreenType.Mirror_Z:
+                    MirrorTypeButtonText.text = "Mirror : Z";
                     break;
             }
         }
@@ -1721,6 +1865,12 @@ namespace CustomVideoPlayer
 
         [UIComponent("placement-slider3")]
         private TextMeshProUGUI placementSlider3Text;
+
+        [UIComponent("placement-slider4")]
+        private TextMeshProUGUI placementSlider4Text;
+
+        [UIComponent("placement-slider5")]
+        private TextMeshProUGUI placementSlider5Text;
 
         [UIComponent("placement-slider1")]
         private RangeValuesTextSlider placementSlider1;           // usage is incorrect ... trying to change min/max values (
@@ -1785,6 +1935,9 @@ namespace CustomVideoPlayer
         [UIComponent("aspect-ratio-lock-toggle-button")]
         private TextMeshProUGUI aspectRatioLockButtonText;
 
+        [UIComponent("save-placement-button")]
+        private TextMeshProUGUI savePlacementButtonText;
+
         [UIComponent("placement-step-granularity-button")]
         private TextMeshProUGUI placementStepGranularityButtonText;
 
@@ -1816,9 +1969,8 @@ namespace CustomVideoPlayer
         #region Buttons
 
 
-        [UIComponent("chooseReflectButton")]
-        private TextMeshProUGUI ReflectTypeButtonText;
-
+        [UIComponent("selectMirrorButton")]
+        private TextMeshProUGUI MirrorTypeButtonText;
 
         [UIComponent("offset-decrease-button")]
         private Button offsetDecreaseButton;
@@ -1840,6 +1992,9 @@ namespace CustomVideoPlayer
 
         [UIComponent("aspect-ratio-lock-toggle-button")]
         private Button aspectRatioLockButton;
+
+        [UIComponent("save-placement-button")]
+        private Button savePlacementButton;
 
         [UIComponent("placement-step-granularity-button")]
         private Button placementStepGranularityButton;
@@ -1911,6 +2066,9 @@ namespace CustomVideoPlayer
 
         private enum manualOffsetDeltaEnum { tenth, one, ten, onehundred };
         private enum placementStepDeltaEnum { thousandth, hundredth, tenth, one, ten, onehundred };
+
+        // this turns on a dev only routine that adds additional info to the placement slider's text and added precision in their step size.
+        private bool devHighPrecisionPlacementUtility = false;
 
         private enum menuEnum { main, extras, attributes, shape, placement };
 
@@ -2812,15 +2970,15 @@ namespace CustomVideoPlayer
             currentVideoSpeedText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].videoSpeed);
             RollingVideoQueue = ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue;
             //        RollingOffset = ScreenManager.screenControllers[(int)selectedScreen].rollingOffsetEnable;  // will return in 2023!
-            //        AddScreenRefBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl;
-
-            SilenceUIAction = true;
-            ReflButtonState = ScreenManager.screenControllers[(int)selectedScreen].reflectType;
-            UpdateReflectionScreenButtonText(ScreenManager.screenControllers[(int)selectedScreen].reflectType);     // this will set button text
-            AddScreenRefBool = (ReflButtonState != ReflScreenType.Refl_Off);                                     // this will toggle the button on/off
-            SilenceUIAction = false;
-
+            // AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl;
             
+            SilenceUIAction = true;
+            MirrorButtonState = ScreenManager.screenControllers[(int)selectedScreen].MirrorType;  
+            AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].MirrorType != MirrorScreenType.Mirror_Off;  
+            SilenceUIAction = false;
+            
+            UpdateMirrorScreenButtonText();     // redundant?
+
             UpdateOffset(true, true, false);  
         }
 

@@ -168,7 +168,6 @@ namespace CustomVideoPlayer
 			var theta = -0.5f + segmentDistance;
 
 			var x = Mathf.Sin(theta * arcDegrees) * _radius;
-		//	var z = Math.Abs((Mathf.Cos(theta * arcDegrees) * _radius)) - _radius;        // added -Math.Abs() to correct orientation for type2 reflection.
 			var z = Mathf.Cos(theta * arcDegrees) * _radius - _radius;
 
 			surface.Vertices[i] = new Vector3(x, Height / 2f, z);

@@ -21,10 +21,12 @@ namespace CustomVideoPlayer.UI
         internal static Vector3 customPlacementPosition;
         internal static Vector3 customPlacementRotation;
         internal static float customPlacementScale;
+        internal static float customPlacementWidth;
 
-        public static Vector3 GetCustomPos() { return customPlacementPosition; }
-        public static Vector3 GetCustomRot() { return customPlacementRotation; }
-        public static float GetCustomScale() { return customPlacementScale; }
+        public static Vector3 GetCustomPosition() { return customPlacementPosition; }
+        public static Vector3 GetCustomRotation() { return customPlacementRotation; }
+        public static float GetCustomScale() { return customPlacementScale; }   // Height = Scale
+        public static float GetCustomWidth() { return customPlacementWidth; }
 
         internal static void Init()
         {
@@ -33,9 +35,10 @@ namespace CustomVideoPlayer.UI
             // Load config values from CustomVideoPlayer.ini
             VideoMenu.instance.CVPEnabled = EnableCVP;
 
-            customPlacementPosition = CustomPosition;
-            customPlacementRotation = CustomRotation;
-            customPlacementScale = CustomScale;
+            customPlacementPosition = CustomPositionInConfig;
+            customPlacementRotation = CustomRotationInConfig;
+            customPlacementScale = CustomHeightInConfig;
+            customPlacementWidth = CustomWidthInConfig;
         }
 
         internal static bool EnableCVP
@@ -45,22 +48,28 @@ namespace CustomVideoPlayer.UI
         }
 
 
-        internal static Vector3 CustomPosition
+        internal static Vector3 CustomPositionInConfig
         {
-            get => ToVector3(config.GetString(sectionPlacement, "CustomPosition", "0, 5, 75"));  // starting default is "Center"
-            set => config.SetString(sectionPlacement, "CustomPosition", value.ToString());
+            get => ToVector3(config.GetString(sectionPlacement, "CustomPosition", "0, 5, 75"));  // starting default is "Center" 
+            set => config.SetString(sectionPlacement, "CustomPosition", value.ToString("F3")); //  String.Format("({0,0:0.000}, {0,0:0.000}, {0,0:0.000})", value.x, value.y, value.z));  
         }
 
-        internal static Vector3 CustomRotation
+        internal static Vector3 CustomRotationInConfig
         {
             get => ToVector3(config.GetString(sectionPlacement, "CustomRotation", "0,0,0"));
-            set => config.SetString(sectionPlacement, "CustomRotation", value.ToString());
+            set => config.SetString(sectionPlacement, "CustomRotation", value.ToString("F3"));
         }
 
-        internal static float CustomScale
+        internal static float CustomHeightInConfig
         {
-            get => (float)Convert.ToDouble(config.GetString(sectionPlacement, "CustomScale", "40.0"));
-            set => config.SetString(sectionPlacement, "CustomScale", value.ToString());
+            get => (float)Convert.ToDouble(config.GetString(sectionPlacement, "CustomHeight", "40.0"));
+            set => config.SetString(sectionPlacement, "CustomHeight", value.ToString("F3"));
+        }
+
+        internal static float CustomWidthInConfig
+        {
+            get => (float)Convert.ToDouble(config.GetString(sectionPlacement, "CustomWidth", "71.11"));
+            set => config.SetString(sectionPlacement, "CustomWidth", value.ToString("F3"));
         }
 
         public static Vector3 ToVector3(string sVector)

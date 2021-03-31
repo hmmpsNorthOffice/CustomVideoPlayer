@@ -13,15 +13,15 @@ namespace CustomVideoPlayer.Util
     internal enum VideoPlacement                      // placement of '_r' (reflection screen position) in the enum must be +1 of the original position
     {
         PreviewScreenInMenu, PreviewScreenLeft,
-        MVP_Background, MVP_BackgroundLow, Cinema,                                // MVP, Cinema compatible
-        Center, Center_r, Back_Medium, Back_Medium_r, Back_Huge, Back_Huge_r,               // vertical
-        Slant_Small, Slant_Small_r, Slant_Large, Slant_Large_r,                             // slanted
-        Left_Small, Left_Small_r, Right_Small, Right_Small_r,                               // left/right small
-        Left_Medium, Left_Medium_r, Right_Medium, Right_Medium_r,                           // left/right medium
+        MVP_Background, MVP_BackgroundLow, Cinema,                                                                  // MVP, Cinema compatible
+        Center, Center_r, Back_Medium, Back_Medium_r, Back_Huge, Back_Huge_r,                                       // vertical
+        Slant_Small, Slant_Small_r, Slant_Large, Slant_Large_r,                                                     // slanted
+        Left_Small, Left_Small_r, Right_Small, Right_Small_r,                                                       // left/right small
+        Left_Medium, Left_Medium_r, Right_Medium, Right_Medium_r,                                                   // left/right medium
         Floor_Medium, Floor_Medium_r, Floor_Huge90, Floor_Huge90_r, Floor_Huge360, Floor_Huge360_r,                 // floor
-        Ceiling_Medium, Ceiling_Medium_r, Ceiling_Huge90, Ceiling_Huge90_r, Ceiling_Huge360, Ceiling_Huge360_r,      // ceiling
-        Pedestal, Pedestal_r,                                                               // pedestal
-        Center_Left, Center_Left_r,  Center_Right, Center_Right_r,                          // center (3x1)
+        Ceiling_Medium, Ceiling_Medium_r, Ceiling_Huge90, Ceiling_Huge90_r, Ceiling_Huge360, Ceiling_Huge360_r,     // ceiling
+        Pedestal, Pedestal_r,                                                                                       // pedestal
+        Center_Left, Center_Left_r,  Center_Right, Center_Right_r,                                                  // center (3x1)
         
         // designed for MSP
         Center_TopL, Center_Top, Center_TopR, Center_BottomL, Center_Bottom, Center_BottomR,                                    // center_top, center_bottom (3x3)
@@ -39,10 +39,11 @@ namespace CustomVideoPlayer.Util
         Floor_4k_H90_3, Floor_4k_H90_3_r, Floor_4k_H90_4, Floor_4k_H90_4_r,
         Floor_4k_H360_1, Floor_4k_H360_1_r, Floor_4k_H360_2, Floor_4k_H360_2_r,                                                 // 4k floor Huge (360)
         Floor_4k_H360_3, Floor_4k_H360_3_r, Floor_4k_H360_4, Floor_4k_H360_4_r,
-        Ceiling_4k_H90_1, Ceiling_4k_H90_1_r, Ceiling_4k_H90_2, Ceiling_4k_H90_2_r,                                                     // 4k Ceiling Huge (90)
+        Ceiling_4k_H90_1, Ceiling_4k_H90_1_r, Ceiling_4k_H90_2, Ceiling_4k_H90_2_r,                                             // 4k Ceiling Huge (90)
         Ceiling_4k_H90_3, Ceiling_4k_H90_3_r, Ceiling_4k_H90_4, Ceiling_4k_H90_4_r,
-        Ceiling_4k_H360_1, Ceiling_4k_H360_1_r, Ceiling_4k_H360_2, Ceiling_4k_H360_2_r,                                                     // 4k Ceiling Huge (360)
+        Ceiling_4k_H360_1, Ceiling_4k_H360_1_r, Ceiling_4k_H360_2, Ceiling_4k_H360_2_r,                                         // 4k Ceiling Huge (360)
         Ceiling_4k_H360_3, Ceiling_4k_H360_3_r, Ceiling_4k_H360_4, Ceiling_4k_H360_4_r,
+       
         Northwest, Northwest_r, Northeast, Northeast_r, Southwest, Southwest_r, Southeast, Southeast_r,                         // 8 Scr Ring
         North, North_r, West, West_r, South, South_r, East, East_r,
         HexNorth, HexNorth_r, HexNE, HexNE_r, HexSouth, HexSouth_r, HexSE, HexSE_r, HexSW, HexSW_r, HexNW, HexNW_r,             // 6 Scr Octagon
@@ -69,7 +70,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.PreviewScreenInMenu:
                     return new Vector3(-3.7f, 1.35f, 1.2f);
                 case VideoPlacement.PreviewScreenLeft:
-                    return new Vector3(-4.7f, 1.50f, -1.2f); // x was -3.7
+                    return new Vector3(-4.7f, 1.50f, -1.2f); 
                 case VideoPlacement.MVP_Background:
                     return new Vector3(0, 20, 50);
                 case VideoPlacement.MVP_BackgroundLow:
@@ -81,7 +82,7 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Center:
                     return new Vector3(0, 5, 75);   
                 case VideoPlacement.Center_r:
-                    return new Vector3(0, -11.44f, 43.2f);
+                    return new Vector3(0, -11.34f, 42.9f);
                 case VideoPlacement.Back_Medium:        
                     return new Vector3(0, 10, 200);
                 case VideoPlacement.Back_Medium_r:
@@ -143,46 +144,46 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Ceiling_Huge360_r:
                     return new Vector3(0, 0.01f, 0);
                 case VideoPlacement.Pedestal:
-                    return new Vector3(0, 0.1f, 0);   // changed in v2.1 from y=0
+                    return new Vector3(0, 0.1f, 0); 
                 case VideoPlacement.Pedestal_r:
                     return new Vector3(0, -0.5f, 0);
 
                 case VideoPlacement.Center_Left:
-                    return new Vector3(-71.11f, 5, 75); 
+                    return new Vector3(-71.060f, 5, 75); 
                 case VideoPlacement.Center_Left_r:
-                    return new Vector3(-55.82f, -11.44f, 43.2f);
+                    return new Vector3(-56.02f, -11.34f, 43.2f);
                 case VideoPlacement.Center_Right:
-                    return new Vector3(71.11f, 5, 75);
+                    return new Vector3(71.060f, 5, 75);
                 case VideoPlacement.Center_Right_r:
-                    return new Vector3(55.82f, -11.44f, 43.2f);
+                    return new Vector3(56.02f, -11.34f, 43.2f);
 
                 case VideoPlacement.Center_TopL:           // not reflecting (3x3, 4x4)
-                    return new Vector3(-71.11f, 45, 75);
+                    return new Vector3(-71.060f, 44.95f, 75);
                 case VideoPlacement.Center_Top:
-                    return new Vector3(0, 45, 75);
+                    return new Vector3(0, 44.95f, 75);
                 case VideoPlacement.Center_TopR:
-                    return new Vector3(71.11f, 45, 75);
+                    return new Vector3(71.060f, 44.95f, 75);
                 case VideoPlacement.Center_BottomL:
-                    return new Vector3(-71.11f, -35, 75);
+                    return new Vector3(-71.065f, -34.960f, 75);
                 case VideoPlacement.Center_Bottom:
-                    return new Vector3(0, -35, 75);
+                    return new Vector3(0, -34.960f, 75);
                 case VideoPlacement.Center_BottomR:
-                    return new Vector3(71.11f, -35, 75);
+                    return new Vector3(71.060f, -34.960f, 75);
 
                 case VideoPlacement.Back_4k_M_1:
-                    return new Vector3(-35.55f, 20, 85);
+                    return new Vector3(-35.53f, 19.965f, 85);
                 case VideoPlacement.Back_4k_M_1_r:
                     return new Vector3(-30.88f, -34.35f, 21.3f);
                 case VideoPlacement.Back_4k_M_2:
-                    return new Vector3(35.55f, 20f, 85);
+                    return new Vector3(35.53f, 19.965f, 85);
                 case VideoPlacement.Back_4k_M_2_r:
                     return new Vector3(30.88f, -34.35f, 21.3f);
                 case VideoPlacement.Back_4k_M_3:
-                    return new Vector3(-35.55f, -20f, 85);
+                    return new Vector3(-35.53f, -20f, 85);
                 case VideoPlacement.Back_4k_M_3_r:
                     return new Vector3(-30.88f, -34.35f, 56.1f);
                 case VideoPlacement.Back_4k_M_4:
-                    return new Vector3(35.55f, -20f, 85);
+                    return new Vector3(35.53f, -20f, 85);
                 case VideoPlacement.Back_4k_M_4_r:
                     return new Vector3(30.88f, -34.35f, 56.1f);
 
@@ -195,173 +196,173 @@ namespace CustomVideoPlayer.Util
                 case VideoPlacement.Slant_4k_L_2_r:
                     return new Vector3(-111.11f, 30f, 160);
                 case VideoPlacement.Slant_4k_L_3:
-                    return new Vector3(-71.06f, -31.4f, 58.59f);
+                    return new Vector3(-71.07f, -31.380f, 58.59f);
                 case VideoPlacement.Slant_4k_L_3_r:
                     return new Vector3(111.11f, -50.32f, 64.05f);  
                 case VideoPlacement.Slant_4k_L_4:
-                    return new Vector3(71.06f, -31.4f, 58.59f);
+                    return new Vector3(71.07f, -31.380f, 58.59f);
                 case VideoPlacement.Slant_4k_L_4_r:
                     return new Vector3(-111.11f, -50.32f, 64.05f);
 
                 case VideoPlacement.Back_4k_L_1:
-                    return new Vector3(-71.11f, 40f, 120);
+                    return new Vector3(-71.065f, 40f, 120);
                 case VideoPlacement.Back_4k_L_1_r:
                     return new Vector3(-73.33f, -83f, 0.5f);
                 case VideoPlacement.Back_4k_L_2:
-                    return new Vector3(71.11f, 40f, 120);
+                    return new Vector3(71.065f, 40f, 120);
                 case VideoPlacement.Back_4k_L_2_r:
                     return new Vector3(73.33f, -83f, 0.5f);
                 case VideoPlacement.Back_4k_L_3:
-                    return new Vector3(-71.11f, -40f, 120);
+                    return new Vector3(-71.065f, -39.960f, 120);
                 case VideoPlacement.Back_4k_L_3_r:
                     return new Vector3(-73.33f, -83f, 83.0f);
                 case VideoPlacement.Back_4k_L_4:
-                    return new Vector3(71.11f, -40f, 120);
+                    return new Vector3(71.065f, -39.960f, 120);
                 case VideoPlacement.Back_4k_L_4_r:
                     return new Vector3(73.33f, -83f, 83.0f);
 
                 case VideoPlacement.Back_4k_H_1:
-                    return new Vector3(-355.55f, 140f, 250);
+                    return new Vector3(-355.35f, 140f, 250);
                 case VideoPlacement.Back_4k_H_1_r:
-                    return new Vector3(-355.55f, -460f, -345f);
+                    return new Vector3(-355.35f, -460f, -345f);
                 case VideoPlacement.Back_4k_H_2:
-                    return new Vector3(355.55f, 140f, 250);
+                    return new Vector3(355.35f, 140f, 250);
                 case VideoPlacement.Back_4k_H_2_r:
-                    return new Vector3(355.55f, -460f, -345f);
+                    return new Vector3(355.35f, -460f, -345f);
                 case VideoPlacement.Back_4k_H_3:
-                    return new Vector3(-355.55f, -260f, 250);
+                    return new Vector3(-355.35f, -259.80f, 250);
                 case VideoPlacement.Back_4k_H_3_r:
-                    return new Vector3(-355.55f, -460f, 54.8f);
+                    return new Vector3(-355.35f, -460f, 54.8f);
                 case VideoPlacement.Back_4k_H_4:
-                    return new Vector3(355.55f, -260f, 250);
+                    return new Vector3(355.35f, -259.80f, 250);
                 case VideoPlacement.Back_4k_H_4_r:
-                    return new Vector3(355.55f, -460f, 54.8f);
+                    return new Vector3(355.35f, -460f, 54.8f);
 
                 case VideoPlacement.Back_8k_1a:             // 8k placements (12 screens surrounding 4k 2x2 above)
-                    return new Vector3(-106.65f, 60f, 85);
+                    return new Vector3(-106.580f, 59.925f, 85);
                 case VideoPlacement.Back_8k_1b:
-                    return new Vector3(-35.55f, 60f, 85);
+                    return new Vector3(-35.53f, 59.945f, 85);
                 case VideoPlacement.Back_8k_1c:
-                    return new Vector3(35.55f, 60f, 85);
+                    return new Vector3(35.53f, 59.945f, 85);
                 case VideoPlacement.Back_8k_1d:
-                    return new Vector3(106.65f, 60f, 85);
+                    return new Vector3(106.580f, 59.925f, 85);
 
                 case VideoPlacement.Back_8k_2a:
-                    return new Vector3(-106.65f, 20f, 85);
+                    return new Vector3(-106.580f, 19.965f, 85);
                 case VideoPlacement.Back_8k_2d:
-                    return new Vector3(106.65f, 20f, 85);
+                    return new Vector3(106.580f, 19.965f, 85);
                 case VideoPlacement.Back_8k_3a:
-                    return new Vector3(-106.65f, -20f, 85);
+                    return new Vector3(-106.580f, -20f, 85);
                 case VideoPlacement.Back_8k_3d:
-                    return new Vector3(106.65f, -20f, 85);
+                    return new Vector3(106.580f, -20f, 85);
                 case VideoPlacement.Back_8k_4a:
-                    return new Vector3(-106.65f, -60f, 85);
+                    return new Vector3(-106.580f, -59.95f, 85);
                 case VideoPlacement.Back_8k_4b:
-                    return new Vector3(-35.55f, -60f, 85);
+                    return new Vector3(-35.53f, -59.95f, 85);
                 case VideoPlacement.Back_8k_4c:
-                    return new Vector3(35.55f, -60f, 85);
+                    return new Vector3(35.53f, -59.95f, 85);
                 case VideoPlacement.Back_8k_4d:
-                    return new Vector3(106.65f, -60f, 85);
+                    return new Vector3(106.580f, -59.95f, 85);
 
                 case VideoPlacement.Floor_4k_M_1:
-                    return new Vector3(-26.665f, -25f, 65);
+                    return new Vector3(-26.650f, -25f, 64.96f);
                 case VideoPlacement.Floor_4k_M_1_r:
                     return new Vector3(-26.665f, 25f, 65);
                 case VideoPlacement.Floor_4k_M_2:
-                    return new Vector3(26.665f, -25f, 65);
+                    return new Vector3(26.650f, -25f, 64.96f);
                 case VideoPlacement.Floor_4k_M_2_r:
                     return new Vector3(26.665f, 25f, 65);
                 case VideoPlacement.Floor_4k_M_3:
-                    return new Vector3(-26.665f, -25f, 35);
+                    return new Vector3(-26.650f, -25f, 35);
                 case VideoPlacement.Floor_4k_M_3_r:
                     return new Vector3(-26.665f, 25f, 35);
                 case VideoPlacement.Floor_4k_M_4:
-                    return new Vector3(26.665f, -25f, 35);
+                    return new Vector3(26.650f, -25f, 35);
                 case VideoPlacement.Floor_4k_M_4_r:
                     return new Vector3(26.665f, 25f, 35);
 
                 case VideoPlacement.Ceiling_4k_M_1:
-                    return new Vector3(26.665f, 25f, 65);
+                    return new Vector3(26.650f, 25f, 64.96f);
                 case VideoPlacement.Ceiling_4k_M_1_r:
                     return new Vector3(26.665f, -25f, 65);
                 case VideoPlacement.Ceiling_4k_M_2:
-                    return new Vector3(-26.665f, 25f, 65);
+                    return new Vector3(-26.650f, 25f, 64.96f);
                 case VideoPlacement.Ceiling_4k_M_2_r:
                     return new Vector3(-26.665f, -25f, 65);
                 case VideoPlacement.Ceiling_4k_M_3:
-                    return new Vector3(26.665f, 25f, 35);
+                    return new Vector3(26.650f, 25f, 35);
                 case VideoPlacement.Ceiling_4k_M_3_r:
                     return new Vector3(26.665f, -25f, 35);
                 case VideoPlacement.Ceiling_4k_M_4:
-                    return new Vector3(-26.665f, 25f, 35);
+                    return new Vector3(-26.650f, 25f, 35);
                 case VideoPlacement.Ceiling_4k_M_4_r:
                     return new Vector3(-26.665f, -25f, 35);
 
                 case VideoPlacement.Floor_4k_H90_1:
-                    return new Vector3(-17.7778f, 0.2f, 28);
+                    return new Vector3(-17.765f, 0.2f, 27.985f);
                 case VideoPlacement.Floor_4k_H90_1_r:
                     return new Vector3(-88.8883f, 30f, 140);
                 case VideoPlacement.Floor_4k_H90_2:
-                    return new Vector3(17.7778f, 0.2f, 28);
+                    return new Vector3(17.765f, 0.2f, 27.985f);
                 case VideoPlacement.Floor_4k_H90_2_r:
                     return new Vector3(88.8883f, 30f, 140);
                 case VideoPlacement.Floor_4k_H90_3:
-                    return new Vector3(-17.7778f, 0.2f, 8);
+                    return new Vector3(-17.765f, 0.2f, 8);
                 case VideoPlacement.Floor_4k_H90_3_r:
                     return new Vector3(-88.8883f, 30f, 40);
                 case VideoPlacement.Floor_4k_H90_4:
-                    return new Vector3(17.7778f, 0.2f, 8);
+                    return new Vector3(17.765f, 0.2f, 8);
                 case VideoPlacement.Floor_4k_H90_4_r:
                     return new Vector3(88.8883f, 30f, 40);
 
                 case VideoPlacement.Floor_4k_H360_1:
-                    return new Vector3(-17.7778f, 0.2f, 10);
+                    return new Vector3(-17.765f, 0.2f, 9.985f);
                 case VideoPlacement.Floor_4k_H360_1_r:
                     return new Vector3(-88.8883f, 30f, 50);
                 case VideoPlacement.Floor_4k_H360_2:
-                    return new Vector3(17.7778f, 0.2f, 10);
+                    return new Vector3(17.765f, 0.2f, 9.985f);
                 case VideoPlacement.Floor_4k_H360_2_r:
                     return new Vector3(88.8883f, 30f, 50);
                 case VideoPlacement.Floor_4k_H360_3:
-                    return new Vector3(-17.7778f, 0.2f, -10);
+                    return new Vector3(-17.765f, 0.2f, -10);
                 case VideoPlacement.Floor_4k_H360_3_r:
                     return new Vector3(-88.8883f, 30f, -50);
                 case VideoPlacement.Floor_4k_H360_4:
-                    return new Vector3(17.7778f, 0.2f, -10);
+                    return new Vector3(17.765f, 0.2f, -10);
                 case VideoPlacement.Floor_4k_H360_4_r:
                     return new Vector3(88.8883f, 30f, -50);
 
                 case VideoPlacement.Ceiling_4k_H90_1:
-                    return new Vector3(88.8883f, 30f, 140);
+                    return new Vector3(88.83f, 30f, 139.9f);
                 case VideoPlacement.Ceiling_4k_H90_1_r:
                     return new Vector3(17.7778f, 0.1f, 28);
                 case VideoPlacement.Ceiling_4k_H90_2:
-                    return new Vector3(-88.8883f, 30f, 140);
+                    return new Vector3(-88.83f, 30f, 139.9f);
                 case VideoPlacement.Ceiling_4k_H90_2_r:
                     return new Vector3(-17.7778f, 0.1f, 28);
                 case VideoPlacement.Ceiling_4k_H90_3:
-                    return new Vector3(88.8883f, 30f, 40);
+                    return new Vector3(88.83f, 30f, 40);
                 case VideoPlacement.Ceiling_4k_H90_3_r:
                     return new Vector3(17.7778f, 0.1f, 8);
                 case VideoPlacement.Ceiling_4k_H90_4:
-                    return new Vector3(-88.8883f, 30f, 40);
+                    return new Vector3(-88.83f, 30f, 40);
                 case VideoPlacement.Ceiling_4k_H90_4_r:
                     return new Vector3(-17.7778f, 0.1f, 8);
 
                 case VideoPlacement.Ceiling_4k_H360_1:
-                    return new Vector3(88.8883f, 30f, 50);
+                    return new Vector3(88.83f, 30f, 49.93f);
                 case VideoPlacement.Ceiling_4k_H360_1_r:
                     return new Vector3(17.7778f, 0.1f, 10);
                 case VideoPlacement.Ceiling_4k_H360_2:
-                    return new Vector3(-88.8883f, 30f, 50);
+                    return new Vector3(-88.83f, 30f, 49.93f);
                 case VideoPlacement.Ceiling_4k_H360_2_r:
                     return new Vector3(-17.7778f, 0.1f, 10);
                 case VideoPlacement.Ceiling_4k_H360_3:
-                    return new Vector3(88.8883f, 30f, -50);
+                    return new Vector3(88.83f, 30f, -50);
                 case VideoPlacement.Ceiling_4k_H360_3_r:
                     return new Vector3(17.7778f, 0.1f, -10);
                 case VideoPlacement.Ceiling_4k_H360_4:
-                    return new Vector3(-88.8883f, 30f, -50);
+                    return new Vector3(-88.83f, 30f, -50);
                 case VideoPlacement.Ceiling_4k_H360_4_r:
                     return new Vector3(-17.7778f, 0.1f, -10);
 
@@ -459,11 +460,10 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(-88.8883f, 30f, -50);
 
                 case VideoPlacement.Custom:
-                    return CVPSettings.GetCustomPos();
-                // return new Vector3(0, 0, 0) + Plugin.customPlacementPosition;
+                    return CVPSettings.GetCustomPosition();
 
                 default:
-                   // return CVPSettings.ToVector3(config.GetString("CVP.ini", "CustomPosition", new Vector3(-71.11f, 5, 75).ToString(), true));  
+                   // return CVPSettings.ToVector3(config.GetString("CVP.ini", "CustomPositionInConfig", new Vector3(-71.11f, 5, 75).ToString(), true));  
                      return new Vector3(0, -20, 400);
             }
         }
@@ -827,17 +827,14 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(270, 0, 180);
 
                 case VideoPlacement.Custom:
-                    return CVPSettings.GetCustomRot();
-
-                   
-                   // return new Vector3(Plugin.customPlacementRotation[0], Plugin.customPlacementRotation[1], Plugin.customPlacementRotation[2]);
+                    return CVPSettings.GetCustomRotation();
 
                 default:
-                 //   return CVPSettings.ToVector3(config.GetString("CVP.ini", "CustomRotation", new Vector3(0, 0, 0).ToString(), true));
                     return new Vector3(50, 0, 0);
             }
         }
 
+        // All of these default placement settings were built with a constant aspect ratio = (16:9)
         public static float Scale(VideoPlacement placement)
         {
             switch (placement)
@@ -918,7 +915,7 @@ namespace CustomVideoPlayer.Util
 
                 case VideoPlacement.Pedestal:
                     return 2.5f;
-                case VideoPlacement.Pedestal_r:    // maybe on the ceiling?
+                case VideoPlacement.Pedestal_r:    // underneath original, slightly larger
                     return 4f;
 
                 case VideoPlacement.Center_Left:
@@ -1235,7 +1232,6 @@ namespace CustomVideoPlayer.Util
                     return CVPSettings.GetCustomScale();
 
                 default:
-                  //  return (float)Convert.ToDouble(CVPSettings.ToVector3(config.GetString("CVP.ini", "CustomPosition", "40.0", true)));
                     return 400;
             }
         }
