@@ -336,6 +336,14 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 ** Version History **
 
+**Added to Version 2.32**
+
+* Fixed min/max values for rotational sliders in placement menu.  Added extra 'hoverhint' messages for 'Primary Placement' and 'Aspect Ratio' dropdown lists to warn that they will reset any changes made in the placement menu.  This is by design since these UI controls are essentially setting the default placement of the screen.
+
+**Added to Version 2.31**
+
+* Removed screen reflection and added mirroring across x, y, and z axes. Made the feature 'Primary screens only'. Multiple UI cosmetic changes.  Fixed all MSP (Multiple Screen Placement) screen positions.
+
 **Added to Version 2.30**
 
 * Added Screen Placement editor menu.  Changed CVP enable/disable button to a modifier for better menu uniformity and visibility.

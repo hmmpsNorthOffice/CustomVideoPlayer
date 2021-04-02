@@ -1214,6 +1214,7 @@ namespace CustomVideoPlayer
                 "Position.X = " + tempSliderValue.ToString("F3") : "Rotation.X = " + tempSliderValue.ToString("F3"); 
         }
 
+
         [UIAction("on-slider1-decrement-action")]
         private void OnPlacementSlider1DecrementAction()
         {
@@ -1236,6 +1237,10 @@ namespace CustomVideoPlayer
 
             if (devHighPrecisionPlacementUtility) placementSlider1Text.text = isPositionPlacement ?
                 "Position.X = " + tempSliderValue.ToString("F3") : "Rotation.X = " + tempSliderValue.ToString("F3");
+
+            // learning normalized value routine
+          //  if (devHighPrecisionPlacementUtility) placementSlider1Text.text = isPositionPlacement ?
+          //    "Position.X = " + placementSlider1.slider.normalizedValue.ToString("F3") : "Rotation.X = " + placementSlider1.slider.normalizedValue.ToString("F3");
         }
 
         private float placementSlider2Value = 0f;
@@ -1873,7 +1878,7 @@ namespace CustomVideoPlayer
         private TextMeshProUGUI placementSlider5Text;
 
         [UIComponent("placement-slider1")]
-        private RangeValuesTextSlider placementSlider1;           // usage is incorrect ... trying to change min/max values (
+        private SliderSetting placementSlider1;
 
         [UIComponent("placement-slider2")]
         private SliderSetting placementSlider2;
@@ -2879,17 +2884,22 @@ namespace CustomVideoPlayer
 
             if (isPositionPlacement)
             {
+                // init value before min/max change to ensure they are in proper range
                 PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x;
                 PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y;
                 PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z;
 
-                /*    placementSlider1.minValue = -1000.0f; 
-                    placementSlider1.maxValue = 1000.0f;
-                    placementSlider2.minValue = -1000.0f;
-                    placementSlider2.maxValue = 1000.0f;
-                    placementSlider3.minValue = -1000.0f;
-                    placementSlider3.maxValue = 1000.0f; */
+                placementSlider1.slider.minValue = -1000.0f;    
+                placementSlider1.slider.maxValue = 1000.0f;
+                placementSlider2.slider.minValue = -1000.0f;
+                placementSlider2.slider.maxValue = 1000.0f;
+                placementSlider3.slider.minValue = -1000.0f;
+                placementSlider3.slider.maxValue = 1000.0f; 
 
+                // need to init slider values again so that UI is updated with correct formatting
+                PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x;
+                PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y;
+                PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z;
                 placementSlider1Text.text = "Position.X";
                 placementSlider2Text.text = "Position.Y";
                 placementSlider3Text.text = "Position.Z";
@@ -2898,17 +2908,22 @@ namespace CustomVideoPlayer
             }
             else
             {
+
                 PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x;
                 PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y;
                 PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z;
 
-                /*  placementSlider1.minValue = -180.0f;
-                  placementSlider1.maxValue = 180.0f;
-                     placementSlider2.minValue = -180.0f;
-                     placementSlider2.maxValue = 180.0f;
-                     placementSlider3.minValue = -180.0f;
-                     placementSlider3.maxValue = 180.0f; */
 
+                placementSlider1.slider.minValue = -180.0f;    // works but scrambles normalization and doesn't update format correctly
+                placementSlider1.slider.maxValue = 180.0f;
+                placementSlider2.slider.minValue = -180.0f;
+                placementSlider2.slider.maxValue = 180.0f;
+                placementSlider3.slider.minValue = -180.0f;
+                placementSlider3.slider.maxValue = 180.0f; 
+
+                PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x;
+                PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y;
+                PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z;
                 placementSlider1Text.text = "Rotation.X";
                 placementSlider2Text.text = "Rotation.Y";
                 placementSlider3Text.text = "Rotation.Z";

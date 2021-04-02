@@ -38,7 +38,7 @@
           <button id='speed-reset-button' hover-hint='Resets speed to one' text='R' on-click='on-speed-reset-action' pad='1' font-size='3' />
         </horizontal>
         <horizontal align='left' pad-right='5' pad-left='15'>
-          <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement"></dropdown-list-setting>
+          <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement - This will reset any adjustments made in the placement menu."></dropdown-list-setting>
         </horizontal>
         <horizontal pad-right='3' spacing='1' pad-top='2'>
           <modifier text='RVQ'  bind-value='true' value='rollingVideoQueueEnableUI' on-change="set-rolling-video-queue" hover-hint='Rolling Video Queue - Video queue advances each play' source="CustomVideoPlayer.Resources.arrow ring white.png" pref-height='6' align='Right' pref-width='3' />
@@ -186,25 +186,25 @@
       </horizontal>
 
       <horizontal align='left' pad-right='25' pad-top='2'>
-        <dropdown-list-setting id='select-aspect-ratio-dropdownlist' text='Screen Aspect Ratio' on-change="aspectRatio-list-Action" bind-value='true' apply-on-change='true' font-size='3' options="aspect-ratio-list" value="aspectRatio-list-value" pref-width='15' hover-hint="Select default screen aspect ratio, it can be adjusted further in the Placement Menu"></dropdown-list-setting>
+        <dropdown-list-setting id='select-aspect-ratio-dropdownlist' text='Screen Aspect Ratio' on-change="aspectRatio-list-Action" bind-value='true' apply-on-change='true' font-size='3' options="aspect-ratio-list" value="aspectRatio-list-value" pref-width='15' hover-hint="Select default screen aspect ratio.  This will reset any adjustments made in the placement menu."></dropdown-list-setting>
       </horizontal>
-      <horizontal pad-top='3'>
+      <horizontal pad-top='2'>
         <bool-setting apply-on-change="true" bind-value='true' text='Vignette Enabled' value='vignetteEnabled' on-change='on-vignette-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Enabling Vignette softens the edges of the screen.'></bool-setting>
-        <bool-setting apply-on-change="true" bind-value='true' text='Elliptical Vignette' value='useOpalShapeVignette' on-change='on-use-elliptical-vignette-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Determines if vignette shape is elliptical or rectangular.'></bool-setting>
+        <bool-setting apply-on-change="true" bind-value='true' text='Elliptical Vignette' align='Right' value='useOpalShapeVignette' on-change='on-use-elliptical-vignette-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Determines if vignette shape is elliptical or rectangular.'></bool-setting>
       </horizontal>
       <horizontal>
       <slider-setting text='Vignette Radius' value='VignetteRadius' on-change="change-vignette-radius"  bind-value='true' apply-on-change='true' integer-only='false' min='0.05' max='1.0' increment='0.05' all-uppercase='false' font-size='3' hover-hint='Adjusts geometry of vignette effect' />
       <button id='vigRadius-decrement-button' font-size='3' text='-' pad='1' on-click='on-vigRadius-decrement-action'/>
       <button id='vigRadius-increment-button' font-size='3' text='+' pad='1' on-click='on-vigRadius-increment-action'/>
       </horizontal>
-      <horizontal pad-bottom='3'>
+      <horizontal>
         <slider-setting text='Vignette Softness' value='VignetteSoftness' on-change="change-vignette-softness"  bind-value='true' apply-on-change='true' integer-only='false' min='0.05' max='1.0' increment='0.05' all-uppercase='false' font-size='3' hover-hint='Adjusts severity of vignette effect' />
         <button id='vigSoftness-decrement-button' font-size='3' text='-' pad='1' on-click='on-vigSoftness-decrement-action'/>
         <button id='vigSoftness-increment-button' font-size='3' text='+' pad='1' on-click='on-vigSoftness-increment-action'/>
       </horizontal>
-      <horizontal>
+      <horizontal pad-top='2'>
         <bool-setting apply-on-change="true" bind-value='true' text='Curvature Enabled' value='CurvatureEnabled' on-change='on-curvature-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Enables curved screen shape.'></bool-setting>
-        <bool-setting apply-on-change="true" bind-value='true' text='Auto Adjustment' value='UseAutoCurvature' on-change='on-auto-curvature-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Amount of curvature set by distance from screen. (Disables manual curvature setting)'></bool-setting>
+        <bool-setting apply-on-change="true" bind-value='true' text='Auto Adjustment' align='Right' value='UseAutoCurvature' on-change='on-auto-curvature-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Amount of curvature set by distance from screen. (Disables manual curvature setting)'></bool-setting>
       </horizontal>
       <horizontal pad-bottom='5'>
         <slider-setting text='Extent of Curvature' value='CurvatureValue' on-change="change-curve-value" bind-value='true' apply-on-change='true' integer-only='false' min='0' max='180' increment='5' all-uppercase='false' font-size='3' hover-hint='Sets the extent of curvature in degrees' />
