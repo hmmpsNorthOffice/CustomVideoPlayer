@@ -1688,58 +1688,6 @@ namespace CustomVideoPlayer
             }
         }
 
-        // vv ----------------------- old ---------------------------------------
-        // ----------------------------------------------------------------------
-        /*
-        public enum ReflScreenType { Refl_Off, Mirror_Refl, ThreeSixty_Refl };
-
-        private static ReflScreenType ReflButtonState = ReflScreenType.Refl_Off;
-
-        private bool addScreenReflection = false;
-        [UIValue("reflection-screen-button-value")]
-        public bool AddScreenRefBool
-        {
-            get => addScreenReflection;
-            set
-            {
-                addScreenReflection = (ReflButtonState != ReflScreenType.Refl_Off);
-                // ScreenManager.screenControllers[(int)selectedScreen].reflectType = ReflButtonState;
-                NotifyPropertyChanged();
-            }
-        }
-
-        // had to find a better way to fire only when button is pressed ...
-        // button action is 3 way toggle ... but value is a bool
-        internal static bool SilenceUIAction = false;
-
-        [UIAction("reflection-screen-button-action")]
-        void SetAddScreenReflection(bool val)
-        {
-            if (!SilenceUIAction)
-            {
-                switch (ReflButtonState)
-                {
-                    case ReflScreenType.Refl_Off:
-                        ReflButtonState = ReflScreenType.Mirror_Refl;
-                        break;
-                    case ReflScreenType.Mirror_Refl:
-                        ReflButtonState = ReflScreenType.ThreeSixty_Refl;
-                        break;
-                    case ReflScreenType.ThreeSixty_Refl:
-                        ReflButtonState = ReflScreenType.Refl_Off;
-                        break;
-                }
-
-
-                // update currentScreen members (.AddScreenRefl was deprecated -> using 3 state enum instead)
-                // AddScreenRefBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl = (ReflButtonState != ReflScreenType.Refl_Off);
-                ScreenManager.screenControllers[(int)selectedScreen].reflectType = ReflButtonState;
-                AddScreenRefBool = (ReflButtonState != ReflScreenType.Refl_Off);
-                UpdateReflectionScreenButtonText(ReflButtonState);
-            }
-        }
-        */
-        // ------------------------------------------------
 
         // Mirror_Refl to be deprecated
         public enum MirrorScreenType { Mirror_Off, Mirror_Refl, Mirror_X, Mirror_Y, Mirror_Z };
@@ -2884,11 +2832,6 @@ namespace CustomVideoPlayer
 
             if (isPositionPlacement)
             {
-                // init value before min/max change to ensure they are in proper range
-                PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x;
-                PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y;
-                PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z;
-
                 placementSlider1.slider.minValue = -1000.0f;    
                 placementSlider1.slider.maxValue = 1000.0f;
                 placementSlider2.slider.minValue = -1000.0f;
@@ -2896,7 +2839,7 @@ namespace CustomVideoPlayer
                 placementSlider3.slider.minValue = -1000.0f;
                 placementSlider3.slider.maxValue = 1000.0f; 
 
-                // need to init slider values again so that UI is updated with correct formatting
+                
                 PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x;
                 PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y;
                 PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z;
@@ -2908,19 +2851,18 @@ namespace CustomVideoPlayer
             }
             else
             {
-
+				// init value before min/max change to ensure they are in proper range
                 PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x;
                 PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y;
                 PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z;
 
-
-                placementSlider1.slider.minValue = -180.0f;    // works but scrambles normalization and doesn't update format correctly
+                placementSlider1.slider.minValue = -180.0f;
                 placementSlider1.slider.maxValue = 180.0f;
                 placementSlider2.slider.minValue = -180.0f;
                 placementSlider2.slider.maxValue = 180.0f;
                 placementSlider3.slider.minValue = -180.0f;
                 placementSlider3.slider.maxValue = 180.0f; 
-
+				// need to init slider values again so that UI is updated with correct formatting
                 PSlider1Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x;
                 PSlider2Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y;
                 PSlider3Value = ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z;
