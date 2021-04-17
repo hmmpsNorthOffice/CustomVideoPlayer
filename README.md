@@ -1,20 +1,18 @@
 **What this is**
 
 * CustomVideoPlayer is a Beat Saber addon created from a fork of the original MusicVideoPlayer mod.  It can work independently and alongside MVP or BeatSaberCinema.
-* It plays videos from a CustomVideo directory.
-* It extends MVP’s functionality with three added features: 
-1. Plays multiple videos at once.
-2. Plays 360 videos.
-3. Adds ‘Multiple Screen Placement’ (MSP) functionality with multiple preset combinations.
+* It plays videos from a CustomVideos directory.
+* It allows you to: 
+1. Play multiple videos at once.
+2. Play 360 videos.
+3. Use preset arrangements of screens using ‘Multiple Screen Placement’ (MSP) functionality.
 * The benefits of this mod improve as one collects more videos and discovers creative ways to layer them or let them interact with the platform.
 
 **Caveats**
 
-* Local video import (from the map level's directory) is not fully functional.  I plan to add both MVP and BeatSaberCinema compatibility soon but the feature got pushed down the todo list.
-* Many of the MSP screens that aligned themselves to create a larger screen need to be realigned.  A small gap now appears after the introdution of curved screens.  Now that a working placement editor is finished I should be able to rectify this issue.
+* Does not import map's local video.  This feature was removed to make it less dependent on other mods and more future proof.
 * The introduction of the bloom effect will cause issues for screens with large surface areas.  
 * The screen color can be set to mimic either the cube(saber) or environment light colors.  This feature only works when the player overrides the default environment colors or when the colors are provided by the level map.  The functionality does not yet support the default environment colors, maps that envoke boost color events, or maps that use chroma.
-* The introduction of screen placement editing breaks type1 (pond mirroring) screen reflection which was based on fixed screen positions.  A dynamic algorithm will be added shortly.  Type 2 reflection (for 360 maps) still works.
 * Placement editing for MSP screens is not possible.
 
 **Feature List**
@@ -23,7 +21,6 @@
 * 360 Screen:  The mod accepts monoscopic equirectangular 360 videos.  Two 360 videos can be played alongside the primary or MSP screens.  Screen radius can be dynamically resized using a slider control in the Extras Menu.
 * Multi Screen Placement Presets: Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements.  This is useful to quickly create environments suited for 90/360 maps and to allow higher resolution videos.
 * Hide/Show screen body:  This creates screen transparency. 
-* Rolling video queue:  Each primary and MSP screen can be set to automatically increment the video queue after each game play.
 * Video offset control:  Just like the original mod, a timing offset is associated with each video.
 * Video speed control:  There is a video playback speed control that is a property associated with each screen.
 * User defined screen placement:  Custom screen placement has returned and is configurable in CustomVideoPlayer.ini.
@@ -31,6 +28,7 @@
 * Screen shape control:  Screen curvature and video vignetting can be adjusted.
 * Screen placement:  The six primary screens can be adjusted by scale, position, rotation, and aspect ratio.
 * Screen mirroring:  Each of the primary screens can be cloned and then mimicked across a given access.  This makes it easy to set up two screens with duplicate color and shape attributes.
+* Screen image reversal: Each of the primary screens as well as the primary screen reflections can have their images reversed.  This allows the user more flexibility to find creative ways and produce symmetry throughout the play area.
 
 **Things Missing**
 
@@ -38,17 +36,17 @@
 * Ability to delete videos.
 * Video offsets are currently not saved between sessions.
 * Rolling Offset.  This was a feature in a previous version that would play a video from where it ended during the last play session.
+* Rolling Video Queue.  This would automatically play the next video in the CustomVideos directory at each level restart.
 * Pond mirroring.  This was an option from a previous version that placed a screen below the original to reflect the image.  True perspective projection was not properly achieved however and the introduction of screen placement editing broke the algorithm.
 
 **CustomVideoPlayer, MusicVideoPlayer, AND BeatSaberCinema mod!**
 
-* Since the CV mod is just a branch of MVP it shares a common framework.
-* Up until recently, all of the features of MVP were present in CV but there was overlap which created resource allocation problems during initialization and termination of the two mods when both were installed.
-* I created this version, which I termed CVLite during development so that I could pay attention to adding new features and allow both mods to behave independently.
-* CV will recognize the new json file format used by BRad’s current MVP mod.  
-* If several local videos are allocated locally to a map, CV will allow the user to play them all simultaneously.  
-* A great deal of thanks goes to the mysterious and almighty Rolo who created the original mod and to Rie Kumar, BRad and others who have maintained it. 
-* [2021 addition]  The new BeatSaberCinema mod has added many new features and configuration options when importing videos to the game.  It should be considered the 'de facto' video player and really points a bright future for the game.  I have made use of several of these features in recent updates and will try to maintain compatibility with its config files going forward.  
+* I created this mod as a branch of Rolo's MVP mod with the intention of just hardcoding the video path to a location other than the map level's directory.
+* The branch was used (and still is) as a testbed for new ideas for using videos in the game.
+* Dakari's BeatSaberCinema mod introduced a ton of features such as curved screens and vignetting to the mix.
+* I have begun consolidating the mod by removing compatibility with MVP videos and dropping several features that were underutilitized.
+* The progression of branching off of one mod and adding/deleting functionality has led to a very messy and bloated codebase.  I plan to reorganize the code for readability and trim out deprecated code fragments in the near future.
+* A great deal of thanks goes to the mysterious and almighty Rolo who created the original MVP and to Rie Kumar, BRad, and Dakari for their mods.  
 
 **Mod Requirements:**
 
@@ -76,7 +74,7 @@ The executables youtube-dl.exe and ffmpeg.exe were included in earlier releases 
 CVP was tested on an Odyssey Plus HMD in WMR and on a Quest2 using Virtual Desktop.  System specs: 6700k / 2070s / 16GB  and Windows 10.  The performance and stability of gameplay will set the limit to how many videos should be allowed to play simultaneously.
 
 **Main Menu:**
- ![](VideoPlayer/Resources/menu226a.jpg)
+ ![](VideoPlayer/Resources/menu233ac.jpg)
 
 These are the necessary steps needed to configure this mod:  (*Essential steps in bold*)
 
@@ -88,23 +86,30 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 * For multi-screen placement, choose MSP A, B, or C.  
 
 * For 360 videos, choose 360 Video Screen.
-3. **Enable** that screen.  (In version 12.1, the screen button will be highlighted in pink.)
+3. **Enable** that screen.  (In version 1.13.4, the screen button will be highlighted in blue.)
 
 4. **Choose a screen placement or MSP preset**.
 * For primary screens use the top dropdown list “Primary Screen Placement”
 
-* For MSP screens use the lower dropdown list “Multi-Screen Placement”
+* For MSP screens use the lower dropdown list “Multi-Screen Placement”*
 
 * For the 360 screen there is no placement, but the radius can be controlled by a slider in the Extras menu.
 5. **Choose a video** using (Previous/Next).
 
-6. Set optional screen parameters Speed, Offset, RVQ, Screen Mirroring.
+
+Optional parameters: Speed, Offset, Primary Screen Image Reversed, Screen Mirrored X/Y/Z, Mirror Screen Image Reversed.
+
+- 'Rev Pri' - This will reverse the image of the video for currently selected Primary Screen.
+
+- 'No Mir/Mirror X/Mirror Y/Mirror Z' - This will create a second screen with the same parameters as the current screen (Primary screens only) and place it across the x, y, or z axis.  Mirroring x will place it left/right.  Mirroring Y will place it top/bottom.  Mirroring Z will place it front/back (good for 360 maps).
+
+- 'Rev Mir' - This will reverse the image of the second mirrored (cloned) screen, if enabled.  This helps to add symmetry and adds flexiblity for creating interesting screen configurations.
    
-    (note:  If using MSP A, B, or C, decide if a single video is repeated or if multiple videos will play in a sequence using the UI element in Extras Menu.)
+    *(note:  If using MSP A/B/C, decide if a single video is repeated or if multiple videos will play in a sequence using the UI elements in Extras Menu.)
 
 
 **Extras Menu:**
- ![](VideoPlayer/Resources/menu226b.jpg)
+ ![](VideoPlayer/Resources/menu233bc.jpg)
 
 UI elements in the Extras menu:
 
@@ -114,9 +119,11 @@ UI elements in the Extras menu:
 
 - Play Audio In Preview - User can choose to play or mute audio during video preview.
 
+- Enable Screen Bloom - Globally Enable/Disable screen bloom.
+
 
 **Screen Attributes Menu:**
- ![](VideoPlayer/Resources/menu226c.jpg)
+ ![](VideoPlayer/Resources/menu233cc.jpg)
 
 UI elements in the Screen Attributes Menu menu:
 
@@ -130,9 +137,11 @@ UI elements in the Screen Attributes Menu menu:
 
 - Color correction attributes : Contrast, Saturation, Exposure, Gamma, Hue, Brightness
 
+- Set Bloom Intensity : This will adjust amount of bloom effect.  The intensity of this effect will increase with screen size.
+
 
 **Screen Shapes Menu:**
- ![](VideoPlayer/Resources/menu226d.jpg)
+ ![](VideoPlayer/Resources/menu233dc.jpg)
 
 UI elements in the Screen Shapes menu:
 
@@ -148,7 +157,7 @@ UI elements in the Screen Shapes menu:
 
 
 **Screen Placement Menu:**
- ![](VideoPlayer/Resources/menu230a2.jpg)
+ ![](VideoPlayer/Resources/menu233ec.jpg)
  
  UI elements in the Screen Placement menu:
 
@@ -170,6 +179,8 @@ UI elements in the Screen Shapes menu:
 
 - Toggle Position/Rotation controls - This repurposes the position slider controls to act as rotational slider controls.  This just helps to save menu space.
 
+- Set as Custom Placement Default - This will copy the current screen size/placement to the default 'Custom' placement setting, which is accessible in the 'Primary Screen Placement' dropdown list found on the main menu.  It also saves it in the CustomVideoPlayer.ini mod settings file found in the [Beat Saber/UserData] directory.
+
 - Set -,+ step size - Adjust the amount the -,+ will affect the slider values.  The step size can be 10 , 1, 0.1, 0.01.
 
 
@@ -183,6 +194,8 @@ There are six primary screens which can be configured with their own set of para
   
   - Center
   
+  - Cinema
+   
   - Back_Medium
   
   - Back_Huge
@@ -331,10 +344,12 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 - The methods and coroutines for the rest of screens follow a different path.  For anyone unfamiliar with the original code arrangement, this knowledge may help clear up what may seem like arbitrary design decisions.
 
-- When I first tested this mod along side of MVP, it would hang during startup and termination of the game.  Both MVP and CVP competed for access of the local map's .json files.  I circumvented this by delaying the retrieval of local map data until the user request a local video by hitting the local/custom priority button.  I also removed persistence of the video offset value.
-
-
 ** Version History **
+
+
+**Added to Version 2.33**
+
+* Added 'Reverse Image' capability for both Primary Screens and their reflection (if enabled).  The property is not transitive ... if you reverse both, the reflection will not be the original image, both will be the reversed.  Removed 'Rolling Video Queue' functionality by removing UI button.  Removed local video access by removing 'Source Priority' button.
 
 **Added to Version 2.32**
 

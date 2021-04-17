@@ -133,6 +133,8 @@ namespace CustomVideoPlayer
             public ScreenType screenType = ScreenType.primary;
             public bool localVideosFirst = false;
             public bool rollingVideoQueue = false;
+            public bool reverseReflection = false;
+            public bool reverseUV = false;
             public bool rollingOffsetEnable = false;
             
             internal VideoMenu.MSPreset msPreset = VideoMenu.MSPreset.Preset_Off;   // only utilized for mspControllerScreens
@@ -299,9 +301,11 @@ namespace CustomVideoPlayer
 
 
             // screen placement methods (overloaded) - This method is used for the Preview screen and during initialization of the other screens.
-            internal void SetScreenPlacement(VideoPlacement placement, float curvature, bool reverseNormals)
+            internal void SetScreenPlacement(VideoPlacement placement, float curvature)
             {
-                
+
+                Plugin.Logger.Debug("preview screen placed");
+
                 if(this.aspectRatio > 3f) placement = VideoPlacement.PreviewScreenLeft;  // so wide curved screens don't give us trouble 
                                                                                           // the above patch must be removed if placing other than PreviewMenu
 
@@ -321,7 +325,7 @@ namespace CustomVideoPlayer
                
                 // for reflection screens. This must be done each time since _curvedSurface mesh is regenerated each time radius,z changes
                 // Note: This should be moved into public method in 'screen' class.
-                if (reverseNormals)
+                if (this.reverseUV)
                 {
                     Mesh mesh = this.screen._screenSurface.GetComponent<MeshFilter>().mesh;
                     mesh.uv = mesh.uv.Select(o => new Vector2(1 - o.x, o.y)).ToArray();
@@ -332,6 +336,7 @@ namespace CustomVideoPlayer
             // This method is used for non-preview screens
             internal void SetScreenPlacement(Vector3 position, Vector3 rotation, float scale, float curvature, bool reverseNormals)
             {
+
                 float width = scale * this.aspectRatio; 
                 float height = scale;
 
@@ -348,9 +353,7 @@ namespace CustomVideoPlayer
                 {
                     Mesh mesh = this.screen._screenSurface.GetComponent<MeshFilter>().mesh;
                     mesh.uv = mesh.uv.Select(o => new Vector2(1 - o.x, o.y)).ToArray();
-
-                //    if(VideoMenu.use360ReflectionBool) mesh.triangles = mesh.triangles.Reverse().ToArray(); // 360reflection hack
-
+                    // mesh.triangles = mesh.triangles.Reverse().ToArray();
                     mesh.normals = mesh.normals.Select(o => -o).ToArray();
                 }
                 
@@ -370,7 +373,6 @@ namespace CustomVideoPlayer
 
         public static void OnLoad()
         {
-
             if (Instance == null)
             {
                 new GameObject("VideoManager").AddComponent<ScreenManager>();
@@ -415,7 +417,7 @@ namespace CustomVideoPlayer
 
             //  screenControllers[0].videoPlacement = VideoMenu.instance.PlacementUISetting;
 
-            screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, 0f, false);
+            /// APRIL14 XXX screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, 0f);
 
             // SetScale(defaultPreviewScreenScale);          // older placement method
             // SetPosition(defaultPreviewScreenPosition);
@@ -425,7 +427,6 @@ namespace CustomVideoPlayer
 
         private ScreenController InitController(ScreenController scrControl, int screenNumber)
         {
-
             var screenName = "Screen" + screenNumber;
 
         //    _screen = gameObject.AddComponent<Screen>();
@@ -507,7 +508,7 @@ namespace CustomVideoPlayer
             scrControl.aspectRatioDefault = ScreenAspectRatio._16x9;
             scrControl.ComputeAspectRatioFromDefault();
             scrControl.screenWidth = scrControl.screenScale * scrControl.aspectRatio;
-            scrControl.SetScreenPlacement(scrControl.videoPlacement, 0f, false);
+            scrControl.SetScreenPlacement(scrControl.videoPlacement, 0f);
             
             ///scrControl.screen.transform.position = VideoPlacementSetting.Position(scrControl.videoPlacement);
             ///scrControl.screen.transform.eulerAngles = VideoPlacementSetting.Rotation(scrControl.videoPlacement);
@@ -625,6 +626,9 @@ namespace CustomVideoPlayer
 
         private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
         {
+            //    VideoMenu.selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1; // xxx apr14 trying to init preview screen
+            //    VideoMenu.instance.ChangeView(VideoMenu.menuEnum.main);
+
             if (currentVideo != null) PreparePreviewScreen(currentVideo);  
             HideScreens(false);  
             PauseVideo();
@@ -1519,12 +1523,13 @@ namespace CustomVideoPlayer
                 if (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].enabled && (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType != VideoMenu.MirrorScreenType.Mirror_Off)) 
                 {
                     screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = true;
-                    
+                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].reverseReflection = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].reverseReflection;
+
                     // short explanation of class placement value members:
                     //  videoPlacement is the old enum value that is used by the PlacementMenu to reset values to original setting
                     //  screenPosition/Rotation/Scale are members that allow editing on a per screen instance
 
-                    if(screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Refl)
+                        if (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Refl)
                     {
                         // this is the older version (pond reflection) which relied on fixed values set in VideoPlacementSettings.cs
                         screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].InitPlacementFromEnum((VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoPlacement + 1));
@@ -1551,7 +1556,8 @@ namespace CustomVideoPlayer
             }
 
 
-            // Only the first 4 MSP screens are currently reflected.
+            // Only the first 4 MSP screens are currently reflected. <--- No longer applies.  The implementation code is left here but reflection of MSP's is not used anymore.
+            // It is disabled by setting MirrorType to 'Mirror_Off' for the MSP's.
             for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             { 
                 int firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
@@ -1681,10 +1687,12 @@ namespace CustomVideoPlayer
 
                         scrScalefloat = screenControllers[screenNumber].screenScale;
 
-                        // set placement for all nonPreviewScreens and reverse uv's for type1 (mirror) reflection screens.
-                        screenControllers[screenNumber].SetScreenPlacement(posVector, rotVector, scrScalefloat, screenControllers[screenNumber].curvatureDegrees, 
-                            (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPC_r4) && 
-                                (screenControllers[screenNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Refl));
+                        // set placement for all nonPreviewScreens.  (conidtional also reverses UV if necc.)
+                        screenControllers[screenNumber].SetScreenPlacement(posVector, rotVector, scrScalefloat, screenControllers[screenNumber].curvatureDegrees,
+                        (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_6) && 
+                                screenControllers[screenNumber].reverseReflection
+                        || (screenNumber >= (int)ScreenManager.CurrentScreenEnum.Primary_Screen_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.Primary_Screen_6) &&
+                                screenControllers[screenNumber].reverseUV);
                     }
 
 

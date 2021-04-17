@@ -136,7 +136,7 @@ namespace CustomVideoPlayer
             // todo: add conditional ... only change if new ...
             ScreenManager.screenControllers[0].aspectRatioDefault = val;
             ScreenManager.screenControllers[0].ComputeAspectRatioFromDefault();  // init the '.aspectRatio' value that is actually used by SetPlacement()
-            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, CurveValue, false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, CurveValue);
         }
 
 
@@ -203,7 +203,7 @@ namespace CustomVideoPlayer
 
             // Only aspectratio is relavent for preview screen since it will be placed in or near the menu.
             ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
-            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees, false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees);
 
 
             MessageifNotPrimary(pm2);  // update GeneralInfoMessage if currently selected screen is not primary
@@ -217,7 +217,9 @@ namespace CustomVideoPlayer
         };
 
         [UIObject("select-mspreset-list")]
-        private GameObject msplacementlistObj; 
+        private GameObject msplacementlistObj;
+       // private DropDownListSetting msplacementlistObj;
+
 
         [UIValue("multi-screen-modes")]
         private List<object> multiScreenModes = (new object[]
@@ -378,6 +380,53 @@ namespace CustomVideoPlayer
         void ShowSelectedScreenAction(bool val)
         {
             ScreenManager.screenControllers[(int)selectedScreen].enabled = val;
+        }
+
+
+        private static bool ReversePrimaryUVBool = false;
+        [UIValue("reverse-primary-uv-value")]
+        public bool ReversePrimaryUV
+        {
+            get => ReversePrimaryUVBool;
+            set
+            {
+                ReversePrimaryUVBool = (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6) ?  value : false;
+                NotifyPropertyChanged();
+            }
+        }
+
+        [UIAction("reverse-primary-uv-action")]
+        void SetReversePrimaryUV(bool val)
+        {
+            if (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6)
+            {
+                ScreenManager.screenControllers[(int)selectedScreen].reverseUV = val;
+                ScreenManager.screenControllers[0].reverseUV = val;
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees);
+            }
+        }
+
+
+        private static bool ReverseReflectionUVBool = false;
+        [UIValue("reverse-reflect-uv-value")]
+        public bool ReverseReflectionUV
+        {
+            get => ReverseReflectionUVBool;
+            set
+            {
+                ReversePrimaryUVBool = (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6) ? value : false;
+                NotifyPropertyChanged();
+            }
+        }
+
+        [UIAction("reverse-reflect-uv-action")]
+        void SetReverseReflection(bool val)
+        {
+            if (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6)
+            {
+                ScreenManager.screenControllers[(int)selectedScreen].reverseReflection = val;
+                ScreenManager.screenControllers[0].reverseReflection = val;
+            }
         }
 
 
@@ -1129,7 +1178,7 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[0].isCurved = val;
              //   ScreenManager.screenControllers[0].useAutoCurvature = autoCurvatureEnabledBool;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (val ? ScreenManager.screenControllers[0].curvatureDegrees : 0f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (val ? ScreenManager.screenControllers[0].curvatureDegrees : 0f));
             }
         }
 
@@ -1152,7 +1201,7 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[0].useAutoCurvature != val)
             {
                 ScreenManager.screenControllers[0].useAutoCurvature = val;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f));
             }
         }
 
@@ -1431,7 +1480,7 @@ namespace CustomVideoPlayer
                         ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
                 }
 
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f));
             }
         }
 
@@ -1458,7 +1507,7 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenScale = tempSliderValue;
             ScrHeightSliderValue = tempSliderValue;
 
-            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f));
 
             if (devHighPrecisionPlacementUtility) placementSlider4Text.text = "Height = " + tempSliderValue.ToString("F3");
 
@@ -1487,7 +1536,7 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenScale = tempSliderValue;
             ScrHeightSliderValue = tempSliderValue;
 
-            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f));
 
             if (devHighPrecisionPlacementUtility) placementSlider4Text.text = "Height = " + tempSliderValue.ToString("F3");
         }
@@ -1516,7 +1565,7 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[(int)selectedScreen].screenWidth = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenWidth = val;  
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.01f));
             }
         }
 
@@ -1658,7 +1707,7 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[0].curvatureDegrees != val)
             {
                 ScreenManager.screenControllers[0].curvatureDegrees = val;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? val : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? val : 0.01f));
             }
         }
 
@@ -1670,7 +1719,7 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[0].curvatureDegrees != tempCurveValue)
             {
                 ScreenManager.screenControllers[0].curvatureDegrees = tempCurveValue;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? tempCurveValue : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? tempCurveValue : 0.01f));
                 CurveValue = tempCurveValue;
             }
         }
@@ -1683,7 +1732,7 @@ namespace CustomVideoPlayer
             if (ScreenManager.screenControllers[0].curvatureDegrees != tempCurveValue)
             {
                 ScreenManager.screenControllers[0].curvatureDegrees = tempCurveValue;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? tempCurveValue : 0.01f), false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? tempCurveValue : 0.01f));
                 CurveValue = tempCurveValue;
             }
         }
@@ -1701,7 +1750,7 @@ namespace CustomVideoPlayer
             get => addScreenMirror;
             set
             {
-                Plugin.Logger.Debug("Add Mirror Value");
+                // Plugin.Logger.Debug("Add Mirror Value");
                 addScreenMirror = (MirrorButtonState  != MirrorScreenType.Mirror_Off);
                 // UpdateMirrorScreenButtonText();
                 NotifyPropertyChanged();  
@@ -1749,19 +1798,19 @@ namespace CustomVideoPlayer
             switch (MirrorButtonState)
             {
                 case MirrorScreenType.Mirror_Off:
-                    MirrorTypeButtonText.text = "Mirror : Off";
+                    MirrorTypeButtonText.text = "No Mir";
                     break;
                 case MirrorScreenType.Mirror_Refl:
-                    MirrorTypeButtonText.text = "Mirror : T1";
+                    MirrorTypeButtonText.text = "Mirror T1";
                     break;
                 case MirrorScreenType.Mirror_X:
-                    MirrorTypeButtonText.text = "Mirror : X";
+                    MirrorTypeButtonText.text = "Mirror X";
                     break;
                 case MirrorScreenType.Mirror_Y:
-                    MirrorTypeButtonText.text = "Mirror : Y";
+                    MirrorTypeButtonText.text = "Mirror Y";
                     break;
                 case MirrorScreenType.Mirror_Z:
-                    MirrorTypeButtonText.text = "Mirror : Z";
+                    MirrorTypeButtonText.text = "Mirror Z";
                     break;
             }
         }
@@ -2023,7 +2072,7 @@ namespace CustomVideoPlayer
         // this turns on a dev only routine that adds additional info to the placement slider's text and added precision in their step size.
         private bool devHighPrecisionPlacementUtility = false;
 
-        private enum menuEnum { main, extras, attributes, shape, placement };
+        internal enum menuEnum { main, extras, attributes, shape, placement };
 
         public static ScreenManager.CurrentScreenEnum selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
 
@@ -2068,8 +2117,6 @@ namespace CustomVideoPlayer
 
         public void Setup()
         {
-
-
             songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().First();
 
             BSEvents.levelSelected += HandleDidSelectLevel;
@@ -2248,7 +2295,6 @@ namespace CustomVideoPlayer
                 previewButton1.interactable = false;
 
                 currentVideoOffsetText.text = String.Format("{0:0.0}", 0d);
-
             }
             else if (numberOfVideos == 1)
             {
@@ -2272,7 +2318,8 @@ namespace CustomVideoPlayer
 
         public void Activate()
         {
-            isActive = true;  
+            isActive = true;
+            // msplacementlistObj.SetActive(false);
             ChangeView(menuEnum.main);
         }
 
@@ -2732,7 +2779,7 @@ namespace CustomVideoPlayer
             SetPreviewButtonText();
         }
 
-        private void ChangeView(menuEnum gotoMenu)
+        internal void ChangeView(menuEnum gotoMenu)
         {
             StopPreview(false);
 
@@ -2742,25 +2789,26 @@ namespace CustomVideoPlayer
             screenShapeViewRect.gameObject.SetActive(gotoMenu == menuEnum.shape);
             screenPlacementViewRect.gameObject.SetActive(gotoMenu == menuEnum.placement);
 
+            LoadVideoSettings(selectedVideo);
+            InitializeScreenAttribControls();
+            InitializeScreenShapeControls();
+            InitializeScreenPlacementControls();
+
             if (gotoMenu == menuEnum.main)  // Main menu
             {
                 if(isActive)
                 {
                     ScreenManager.screenControllers[0].videoPlacement = VideoPlacement.PreviewScreenInMenu;
-                    ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees, false);
+                    ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, ScreenManager.screenControllers[0].curvatureDegrees);
                     ScreenManager.screenControllers[0].SetScreenColor(Color.black);
                     ScreenManager.Instance.ShowPreviewScreen(true);
                 }
-                LoadVideoSettings(selectedVideo);
+                
             }
             else //  Secondary Menus
             {
-                if (gotoMenu == menuEnum.attributes) InitializeScreenAttribControls();
-                if (gotoMenu == menuEnum.shape) InitializeScreenShapeControls();
-                if (gotoMenu == menuEnum.placement) InitializeScreenPlacementControls();
-
                 ScreenManager.screenControllers[0].videoPlacement = VideoPlacement.PreviewScreenLeft;
-                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, ScreenManager.screenControllers[0].curvatureDegrees, false);
+                ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, ScreenManager.screenControllers[0].curvatureDegrees);
                 ScreenManager.Instance.ShowPreviewScreen(false);
             }
         }
@@ -2768,7 +2816,6 @@ namespace CustomVideoPlayer
         private void InitializeScreenAttribControls()
         {
             currentScreenInAttribMessageText.text = "Current Screen settings for :  " + selectedScreen;
-
 
             ScreenColorUISetting = ScreenManager.screenControllers[0].screenColor = ScreenManager.screenControllers[(int)selectedScreen].screenColor;
             ScrBloom = ScreenManager.screenControllers[0].bloom = ScreenManager.screenControllers[(int)selectedScreen].bloom;
@@ -2784,6 +2831,7 @@ namespace CustomVideoPlayer
             // also initialize preview screen
             ScreenManager.screenControllers[0].colorCorrection = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection;
             ScreenManager.screenControllers[0].isTransparent = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
+            ScreenManager.screenControllers[0].reverseUV = ScreenManager.screenControllers[(int)selectedScreen].reverseUV;
 
 
             // actualize those values for preview screen
@@ -2792,7 +2840,6 @@ namespace CustomVideoPlayer
             ScreenManager.screenControllers[0].SetScreenColor(ScreenColorUtil.ColorFromEnum(ScreenManager.screenControllers[0].screenColor));
 
             // should the preview screen be allowed to be transparent?
-            
             if (ScreenManager.screenControllers[0].isTransparent)
             {   
                 ScreenManager.screenControllers[0].screen.HideBody();
@@ -2925,10 +2972,12 @@ namespace CustomVideoPlayer
             // update speed, offset display
             UpdateVideoSourcePriorityButtonText();
             currentVideoSpeedText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].videoSpeed);
-            RollingVideoQueue = ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue;
+            RollingVideoQueue = ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue;   // fragment from old UI, left in place but invisible for now.
+            ReverseReflectionUV = ScreenManager.screenControllers[(int)selectedScreen].reverseReflection;
+            ReversePrimaryUV = ScreenManager.screenControllers[(int)selectedScreen].reverseUV;
             //        RollingOffset = ScreenManager.screenControllers[(int)selectedScreen].rollingOffsetEnable;  // will return in 2023!
-            // AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl;
-            
+            //        AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl;
+
             SilenceUIAction = true;
             MirrorButtonState = ScreenManager.screenControllers[(int)selectedScreen].MirrorType;  
             AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].MirrorType != MirrorScreenType.Mirror_Off;  
@@ -3257,7 +3306,7 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[0].videoPlacement = VideoPlacement.PreviewScreenLeft;
 
             // resetting placement is the only way to update curvature and aspect ratio
-            ScreenManager.screenControllers[0].SetScreenPlacement(ScreenManager.screenControllers[0].videoPlacement, ScreenManager.screenControllers[0].curvatureDegrees, false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(ScreenManager.screenControllers[0].videoPlacement, ScreenManager.screenControllers[0].curvatureDegrees);
         }
 
         [UIAction("on-next-screen-action-preview-on")]
@@ -3311,7 +3360,7 @@ namespace CustomVideoPlayer
                 ScreenManager.screenControllers[0].videoPlacement = VideoPlacement.PreviewScreenLeft;
 
             // resetting placement is the only way to update curvature and aspect ratio
-            ScreenManager.screenControllers[0].SetScreenPlacement(ScreenManager.screenControllers[0].videoPlacement, ScreenManager.screenControllers[0].curvatureDegrees, false);
+            ScreenManager.screenControllers[0].SetScreenPlacement(ScreenManager.screenControllers[0].videoPlacement, ScreenManager.screenControllers[0].curvatureDegrees);
 
         }
 
@@ -3598,8 +3647,6 @@ namespace CustomVideoPlayer
 
                 // let ScreenManager take over
                 ScreenManager.Instance.PlayVideosInGameScene();
-
-                
             }     
         }
 

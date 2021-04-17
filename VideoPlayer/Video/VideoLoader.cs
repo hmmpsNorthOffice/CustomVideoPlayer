@@ -26,29 +26,37 @@ namespace CustomVideoPlayer.Util
         internal static bool RetrieveAllVideoDataInitCall = true;
         internal static bool RetrieveLocalVideoDataCalled = false;
 
+        // local videos (new)
+        internal const string OST_DIRECTORY_NAME = "CinemaOSTVideos";
+        private const string WIP_DIRECTORY_NAME = "CustomWIPLevels";
+        private const string CONFIG_FILENAME = "cinema-video.json";
+        private const string CONFIG_FILENAME_MVP = "video.json";
+        private const string MOD_ID_MVP = "Music Video Player";
+
+        private static readonly ConcurrentDictionary<string, VideoConfig> CachedConfigs = new ConcurrentDictionary<string, VideoConfig>();
+        private static readonly ConcurrentDictionary<string, VideoConfig> BundledConfigs = new ConcurrentDictionary<string, VideoConfig>();
+
+        // local videos (old)
         internal static ConcurrentDictionary<string, CustomPreviewBeatmapLevel> mapLevels;
-
-
 
         //public static Dictionary<IPreviewBeatmapLevel, VideoData> videos { get; private set; }
         public static ConcurrentDictionary<IPreviewBeatmapLevel, VideoDatas> levelsVideos { get; private set; }
 
+        // custom videos
         public static List<CustomVideoData> customVideos { get; private set; }
         public static List<CustomVideoData> custom360Videos { get; private set; }
 
-        public static int numberOfCustomVideos = 0;    // xxx why am I not using ().Count ???
+        public static int numberOfCustomVideos = 0;
         public static int numberOf360Videos = 0;
 
         //  all to be deprecated:
         public static bool loadLocalVideosFirst = true;        // sets priority of local videos vs custom
-        public static bool rollingVideoQueueEnable = false;    // should video queue increment each play?
-        public static bool rollingOffsetEnable = false;  // should video offset advance each play?
+        public static bool rollingVideoQueueEnable = false;    
+        public static bool rollingOffsetEnable = false;    // deprecated
  //       public static int globalRollingOffset = 0;       // This is the value that replaces VideoData.offset when rolling offset is enabled
         public static int rollingOffsetAmount = 180000;  // This is the amount the offset advances (* videospeed), until I can figure out how to get song.length 
         public static int nextVideoNumber = 0;          // position in video queue, saved and recalled from cvp.ini
         public static int threeSixtyVideoIndex = -1;
-
-
 
         private HMTask _loadingTask;
         private bool _loadingCancelled;

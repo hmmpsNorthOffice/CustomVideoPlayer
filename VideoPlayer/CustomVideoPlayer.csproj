@@ -157,7 +157,8 @@
     <Compile Include="Screen\CustomBloomPrePass.cs" />
     <Compile Include="Util\ScreenColorUtil.cs" />
     <Compile Include="Video\VideoConfig.cs" />
-    <Compile Include="Video\VideoConfigBackCompat.cs" />
+    <Compile Include="Video\VideoConfigCinemaCompat.cs" />
+    <Compile Include="Video\VideoConfigMVPCompat.cs" />
     <Compile Include="Video\VideoData.cs" />
     <Compile Include="Video\VideoLoader.cs" />
     <EmbeddedResource Include="manifest.json" />
@@ -193,6 +194,10 @@
     <EmbeddedResource Include="Resources\video_sequence_white.png" />
     <EmbeddedResource Include="Resources\video_sequence_white-B.png" />
     <EmbeddedResource Include="Resources\Reflect 360.png" />
+    <EmbeddedResource Include="Resources\repeat-128.png" />
+    <EmbeddedResource Include="Resources\repeat-256.png" />
+    <EmbeddedResource Include="Resources\repeat-32.png" />
+    <EmbeddedResource Include="Resources\copy-pic-128.png" />
     <Content Include="UI\Check.png" />
     <Content Include="UI\VideoMenu\Check.png" />
   </ItemGroup>
