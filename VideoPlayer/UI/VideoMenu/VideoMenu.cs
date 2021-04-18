@@ -414,7 +414,7 @@ namespace CustomVideoPlayer
             get => ReverseReflectionUVBool;
             set
             {
-                ReversePrimaryUVBool = (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6) ? value : false;
+                ReverseReflectionUVBool = (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6) ? value : false;
                 NotifyPropertyChanged();
             }
         }
@@ -425,7 +425,6 @@ namespace CustomVideoPlayer
             if (selectedScreen >= ScreenManager.CurrentScreenEnum.Primary_Screen_1 && selectedScreen <= ScreenManager.CurrentScreenEnum.Primary_Screen_6)
             {
                 ScreenManager.screenControllers[(int)selectedScreen].reverseReflection = val;
-                ScreenManager.screenControllers[0].reverseReflection = val;
             }
         }
 
