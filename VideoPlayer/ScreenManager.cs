@@ -137,7 +137,7 @@ namespace CustomVideoPlayer
             public bool reverseUV = false;
             public bool rollingOffsetEnable = false;
             
-            internal VideoMenu.MSPreset msPreset = VideoMenu.MSPreset.Preset_Off;   // only utilized for mspControllerScreens
+            internal VideoMenu.MSPreset msPreset = VideoMenu.MSPreset.MSP_Off;   // only utilized for mspControllerScreens
             public float videoSpeed = 1.0f;
             public VideoMenu.MirrorScreenType MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
             public bool isTransparent = false;
@@ -909,11 +909,11 @@ namespace CustomVideoPlayer
                 // if ContrB was enabled and set to 8k, copy its contents to ContrA and disable ContrB.
                 // this has the unhappy side effect of overriding contrA's settings and should be mentioned in the docs. 
 
-                // After introducing a third MSP Controller, I chose to just disregard it if it was set to P4_4x4 ... this is not eloquent, but this preset 
-                // is only experimental.
+                // After introducing a third MSP Controller, I chose to just disregard it if it was set to P4_4x4 ... 
+
                 if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset == VideoMenu.MSPreset.P4_4x4)
                 {
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.Preset_Off;
+                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.MSP_Off;
                     screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled = false;
                 }
 
@@ -929,7 +929,15 @@ namespace CustomVideoPlayer
                         screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoURL = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoURL;
                         screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].colorCorrection = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].colorCorrection;
                         screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].vignette = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].vignette;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].aspectRatio = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].aspectRatio;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].aspectRatioDefault = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].aspectRatioDefault;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].curvatureDegrees = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].curvatureDegrees;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].useAutoCurvature = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].useAutoCurvature;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isCurved = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].isCurved;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].bloom = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].bloom;
+                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isTransparent = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].isTransparent;
                         screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
+
                     }
 
                     screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled = true;
@@ -948,7 +956,7 @@ namespace CustomVideoPlayer
 
                 switch (screenControllers[mspControllerNumber].msPreset)
                 {
-                    case VideoMenu.MSPreset.Preset_Off:
+                    case VideoMenu.MSPreset.MSP_Off:
                         break;
 
                     case VideoMenu.MSPreset.P1_4Screens:
@@ -1178,7 +1186,14 @@ namespace CustomVideoPlayer
                                 // Since P4_4x4 uses both msp_A and msp_B, these must be added
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].colorCorrection = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].colorCorrection;
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].vignette = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].vignette;
-
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].aspectRatio = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].aspectRatio;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].curvatureDegrees = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].curvatureDegrees;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].useAutoCurvature = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].useAutoCurvature;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isCurved = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isCurved;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].screenColor = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].screenColor;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].bloom = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].bloom;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isTransparent = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isTransparent;
+                                if (screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isTransparent) screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].screen.HideBody();
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
                             }
                             else screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].enabled = false;
