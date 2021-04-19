@@ -12,7 +12,7 @@
 
 * Does not import map's local video.  This feature was removed to make it less dependent on other mods and more future proof.
 * The timing offset setting for the MSP presets is based on the timing offset of the video currently selected by the MSP controller screen.  This is by design to reduce the number of coroutines and improve synchronization when the MSP is used to 'uncrop' a higher definition image.
-* The preset called P4_4x4 which is used to recreate an 8k image (or just show 16 videos) uses more screens than the MSP controller has access to.  Special rules apply if it is selected.  It can only be used by MSP_A.  If used it will disable MSP_B.
+* The preset called P4_4x4 which is used to recreate an 8k image (or just show 16 videos) uses more screens than the MSP controller has access to.  Special rules apply if it is selected.  It can only be used by MSP_A.  If used, it will disable MSP_B.
 * The introduction of the bloom effect will cause issues for screens with large surface areas.  
 * The screen color can be set to mimic either the cube(saber) or environment light colors.  This feature only works when the player overrides the default environment colors or when the colors are provided by the level map.  The functionality does not yet support the default environment colors, maps that envoke boost color events, or maps that use chroma.
 * Placement editing for MSP screens is not possible.
