@@ -211,7 +211,7 @@ namespace CustomVideoPlayer
 
 
 
-        public enum MSPreset { Preset_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
+        public enum MSPreset { MSP_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
             P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Ceiling_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360,
             P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
         };
@@ -224,7 +224,7 @@ namespace CustomVideoPlayer
         [UIValue("multi-screen-modes")]
         private List<object> multiScreenModes = (new object[]
         {
-            MSPreset.Preset_Off,
+            MSPreset.MSP_Off,
             MSPreset.P1_4Screens,
             MSPreset.P2_1x3,
             MSPreset.P3_2x2_Medium,
@@ -3138,7 +3138,7 @@ namespace CustomVideoPlayer
 
                 ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex;
             
-                ShowSelectedScreen = msPresetSetting != MSPreset.Preset_Off;  // if the UI list setting is not 'Preset Off', enable controller
+                ShowSelectedScreen = msPresetSetting != MSPreset.MSP_Off;  // if the UI list setting is not 'Preset Off', enable controller
             }
 
             ScreenManager.screenControllers[(int) selectedScreen].msPreset = msPresetSetting;
@@ -3146,7 +3146,7 @@ namespace CustomVideoPlayer
 
             switch (msPresetSetting)
             {
-                case MSPreset.Preset_Off:      
+                case MSPreset.MSP_Off:      
                     multiScreenInfo = "Multi-Screen Placement is disabled";
                     break;
 
@@ -3175,7 +3175,7 @@ namespace CustomVideoPlayer
                     break;
 
                 case MSPreset.P4_4x4:
-                    multiScreenInfo = "4x4 panel (8k) [MSP B disabled, no refl scr]";
+                    multiScreenInfo = "4x4 panel (8k) [Must use MSP A and will disable MSP_B]";
                     break;
 
                 case MSPreset.P6_2x2_Floor_M:

@@ -626,9 +626,6 @@ namespace CustomVideoPlayer
 
         private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransition)
         {
-            //    VideoMenu.selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1; // xxx apr14 trying to init preview screen
-            //    VideoMenu.instance.ChangeView(VideoMenu.menuEnum.main);
-
             if (currentVideo != null) PreparePreviewScreen(currentVideo);  
             HideScreens(false);  
             PauseVideo();
@@ -875,7 +872,34 @@ namespace CustomVideoPlayer
             // It may be refactored in the future to use a few helper methods which receive the parameters that make each msp unique.
 
             ScreenColorUtil.GetMainColorScheme();
+
+
             //  MSP (MultiScreenPlacement) logic
+            // -----------------------------------------------------------------------------------------------------
+
+            // since 8k uses screens allocated to both mspController A & B, Only allow MSP_A to use preset P4_4x4 and
+            //  use the GeneralInfoMessage to alert the user when the preset is selected.
+            if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled)
+            {
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset = VideoMenu.MSPreset.MSP_Off;
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled = false;
+                //   screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.MSP_Off;
+                //   screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled = false;
+            }
+
+            if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled)
+            {
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset = VideoMenu.MSPreset.MSP_Off;
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled = false;
+            }
+
+            if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled)
+            {
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.MSP_Off;
+                screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled = false;
+            }
+
+
             for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             {
                 int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
@@ -905,49 +929,12 @@ namespace CustomVideoPlayer
                 // IndexMult is used decide if MSP will play one video several times or an sequence. (ordered by filename) It is set by three bool UIs in 'Extras'
                 int IndexMult = (enableSequence && !screenControllers[mspControllerNumber].videoIsLocal) ? 1 : 0;  // if video is local, cancel sequential videos
 
-                // since 8k uses screens allocated to both mspController A & B, only one can be active.
-                // if ContrB was enabled and set to 8k, copy its contents to ContrA and disable ContrB.
-                // this has the unhappy side effect of overriding contrA's settings and should be mentioned in the docs. 
-
-                // After introducing a third MSP Controller, I chose to just disregard it if it was set to P4_4x4 ... 
-
-                if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset == VideoMenu.MSPreset.P4_4x4)
-                {
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].msPreset = VideoMenu.MSPreset.MSP_Off;
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_C].enabled = false;
-                }
-
-                if ((screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled)
-                         || (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset == VideoMenu.MSPreset.P4_4x4 && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled))
-                {
-                    if (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset == VideoMenu.MSPreset.P4_4x4)
-                    {
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIndex = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoIndex;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoSpeed = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoSpeed;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].rollingVideoQueue;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoIsLocal;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoURL = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].videoURL;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].colorCorrection = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].colorCorrection;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].vignette = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].vignette;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].aspectRatio = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].aspectRatio;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].aspectRatioDefault = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].aspectRatioDefault;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].curvatureDegrees = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].curvatureDegrees;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].useAutoCurvature = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].useAutoCurvature;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isCurved = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].isCurved;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].bloom = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].bloom;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isTransparent = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].isTransparent;
-                        screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-
-                    }
-
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled = true;
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].enabled = false;
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset = VideoMenu.MSPreset.P4_4x4;
-                    screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_B].msPreset = VideoMenu.MSPreset.P4_4x4;
-                }
-                // turn off unused screens if their mspController is disabled
-                else if (!screenControllers[mspControllerNumber].enabled)
-                {
+                // turn off unused screens if their mspController is disabled -> but make an exception for msp_b if msp_a is enabled and P4_4x4:
+                if (!screenControllers[mspControllerNumber].enabled
+                    && !(firstMSPScreen == (int)CurrentScreenEnum.ScreenMSPB_1
+                        && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4
+                        && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].enabled))
+                { 
                     for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
                     {
                         screenControllers[firstMSPScreen + screenNumber].enabled = false;
@@ -1152,6 +1139,7 @@ namespace CustomVideoPlayer
                     case VideoMenu.MSPreset.P4_4x4:
 
                         if (mspControllerNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_B) break;
+                        if (mspControllerNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_C) break;
 
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1].InitPlacementFromEnum(VideoPlacement.Back_8k_1a);
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPA_2].InitPlacementFromEnum(VideoPlacement.Back_8k_1b);
