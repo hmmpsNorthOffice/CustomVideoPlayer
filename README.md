@@ -143,7 +143,7 @@ UI elements in the Screen Attributes Menu menu:
 
 
 **Screen Shapes Menu:**
- ![](VideoPlayer/Resources/menu233dc.jpg)
+ ![](VideoPlayer/Resources/menu234shape.jpg)
 
 UI elements in the Screen Shapes menu:
 
@@ -155,7 +155,7 @@ UI elements in the Screen Shapes menu:
 
 - Screen Vignette controls - Enables/disables vignetting.  The shape can be toggled between elliptical and rectangular.  The radius and softness can be adjusted.  Softness of zero removes vignetting completely while a larger number has significant effect.  
 
-- Screen Curvature controls - Enables/disables screen curvature.  The 'Auto-Adjustment' bool calculates the degree of curvature from the distance from the origin of the scene.  The manual adjustment slider will be applied if 'auto' is disabled.
+- Screen Curvature - The slider controls the extent of screen curvature for both primary and msp screens.  The shape can be concave (positive value) or convex (negative value).  A setting of zero will result in a flat surface.
 
 
 **Screen Placement Menu:**
@@ -348,52 +348,55 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 ** Version History **
 
+**Added to Version 2.33**  May 11th, 2021
 
-**Added to Version 2.33**
+* Changed curvature slider values to allow convex shape, the range can now be set from -180 to 180 degrees.  Removed 'Curvature Enabled' and 'Auto Curvature' bools.
+
+**Added to Version 2.33**  April 17th, 2021
 
 * Added 'Reverse Image' capability for both Primary Screens and their reflection (if enabled).  The property is not transitive ... if you reverse both, the reflection will not be the original image, both will be the reversed.  Removed 'Rolling Video Queue' functionality by removing UI button.  Removed local video access by removing 'Source Priority' button.
 
-**Added to Version 2.32**
+**Added to Version 2.32**  April 2nd, 2021
 
 * Fixed min/max values for rotational sliders in placement menu.  Added extra 'hoverhint' messages for 'Primary Placement' and 'Aspect Ratio' dropdown lists to warn that they will reset any changes made in the placement menu.  This is by design since these UI controls are essentially setting the default placement of the screen.
 
-**Added to Version 2.31**
+**Added to Version 2.31**  March 31st, 2021
 
 * Removed screen reflection and added mirroring across x, y, and z axes. Made the feature 'Primary screens only'. Multiple UI cosmetic changes.  Fixed all MSP (Multiple Screen Placement) screen positions.
 
-**Added to Version 2.30**
+**Added to Version 2.30**  March 26, 2021
 
 * Added Screen Placement editor menu.  Changed CVP enable/disable button to a modifier for better menu uniformity and visibility.
 
-**Added to Version 2.29**
+**Added to Version 2.29** March 14th, 2021
 
 * Added bloom global enable bool in 'Extras' menu.  Added Cinema screen location to placement list.  Fixed screen color routine to allow for maps with only left or right color initialization.
 
-**Added to Version 2.28**
+**Added to Version 2.28** March 13th, 2021
 
 * Added screen bloom control to screen attributes menu.
 
-**Added to Version 2.27**
+**Added to Version 2.27** March 11th, 2021
 
 * Updates for game version 1.13.4.  Added Environment and Cube(Saber) colors to screen dropdown list.
 
-**Added to Version 2.26**
+**Added to Version 2.26** March 7th, 2021
 
 * Added screen curvature and screen color.  Game environment captures screen reflection properly.  Updated this readme file with new images.
 
-**Added to Version 2.25**
+**Added to Version 2.25** February 19th, 2021
 
 * Added two submenus that process screen properties made accessible by the new Cinema shader.
 
-**Added to Version 2.24**
+**Added to Version 2.24**  February 1st, 2021
 
 * Changing from MVP shader to BeatSaberCinema shader.
 
-**Added to Version 2.23**
+**Added to Version 2.23**  February 1st, 2021
 
 * Changed menu screen position to work with Beat Saber v1.13.2.  Added a slider control in 'Extras' to set video screen brightness.
 
-**Added to Version 2.22**
+**Added to Version 2.22**  November 18th, 2020
 
 * Fixed a bug where the preview screen would appear in the main scene.  There is still a minor glitch where the preview is screen is sometimes invisible in the settings menu.  The screen will appear when the user interacts with the UI.
 
@@ -401,14 +404,14 @@ Alternatively, they can be put in their own folder by creating the subfolder “
 
 * Tweaked a couple reflection placement settings.
 
-**Added to Version 2.2**
+**Added to Version 2.2**  November 13th, 2020
 
 * Added a checkbox in 'Extras' menu that changes the way reflection screens work.  Type 1 reflections (bool unchecked) adds a screen to create either a mirror effect (vertical-horizontal) or between left-right, top-bottom.
   Type 2 reflections (bool checked) mirrors the screen behind the player (inverts x and z coordinates).
 * Added another MSP (Multi-screen placement) preset for 6 screens in a hexagon shape.  This behaves similarly to the existing 8 screen octagon configuration.
 * Removed reflection ability from Cardinal/Ordinal MSP presets.  These used to create a huge floor/ceiling.  Now that there are three MSP controller screens, creating a floor or ceiling can be done by just using another MSP.
 
-**Added to Version 2.1**
+**Added to Version 2.1** November 8th, 2020
 
 * Ability to layer two 360 videos (Added second 360 video screen).
 * Added additional MSP Controller screen for a total of three.
@@ -416,6 +419,7 @@ Alternatively, they can be put in their own folder by creating the subfolder “
   - The old Floor_H, Ceiling_H placement were unique because they put the video at floor level, which suited the 90/360 environments well.  The player was placed however in the center of the screen which was not ideal for 90 maps.
     I renamed the placements to Floor_H360, and Ceiling_H360 and added two complimentary configurations (H90) where the screen is in front of the player.
 
+** Github release 2.0 ** November 3rd, 2020
 
 Here is the batch file I used to crop 3k, 4k, 6k, and 8k videos into separate 1080 parts.
 

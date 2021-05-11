@@ -38,10 +38,10 @@
           <button id='speed-reset-button' hover-hint='Resets speed to one' text='R' on-click='on-speed-reset-action' pad='1' font-size='3' />
         </horizontal>
         <horizontal align='left' pad-right='5' pad-left='15'>
-          <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement - This will reset any adjustments made in the placement menu."></dropdown-list-setting>
+          <dropdown-list-setting id='select-placement-list' on-change="setPlacementUIAction" bind-value='true' apply-on-change='true' font-size='3' options="place-positions" value="placement-list-value" pref-width='15' text='' hover-hint="Primary Screen Placement - This will reset any adjustments made in the placement menu."></dropdown-list-setting>
         </horizontal>
         <horizontal align='left' pad-right='5' pad-left='15'>
-          <dropdown-list-setting id='select-mspreset-list' on-change="setMSPlacementUIAction" bind-value='true' apply-on-change='true' font-size="3" options="multi-screen-modes" value="msplacement-list-value" pref-width='15' text='' hover-hint="Multi-Screen Placement (MSP)"></dropdown-list-setting>
+          <dropdown-list-setting id='select-mspreset-list' on-change="setMSPlacementUIAction" bind-value='true' apply-on-change='true' font-size='3' options="multi-screen-modes" value="msplacement-list-value" pref-width='15' text='' hover-hint="Multi-Screen Placement (MSP)"></dropdown-list-setting>
         </horizontal>
         <horizontal spacing='1' pad-top='2'>
           
@@ -70,12 +70,12 @@
        </vertical>
     </horizontal>  
      
-     <horizontal pad-top='50' font-size='2'>
-      <button id='preview-button1' text='Preview' font-size="3" on-click='on-preview-action'/>
-      <button text='Extras' font-size="3" on-click='on-extras-action'/>
-      <button text='Attributes' font-size="3" on-click='on-screen-attrib-action'/>
-      <button text='Shape' font-size="3" on-click='on-screen-shape-action'/>
-      <button id='placement-button1' text='Placement' font-size="3" on-click='on-screen-placement-action'/>
+     <horizontal pad-top='50' font-size='3'>
+      <button id='preview-button1' text='Preview' font-size='3' on-click='on-preview-action'/>
+      <button text='Extras' font-size='3' on-click='on-extras-action'/>
+      <button text='Attributes' font-size='3' on-click='on-screen-attrib-action'/>
+      <button text='Shape' font-size='3' on-click='on-screen-shape-action'/>
+      <button id='placement-button1' text='Placement' font-size='3' on-click='on-screen-placement-action'/>
       <modifier id='enableCVPModifier' text="CVP is On" value="enableCVPValue" on-change="on-enable-cvp-action"  bind-value='true' hover-hint="Enable/Disable CVP" align='Right' source="CustomVideoPlayer.Resources.power button white.png" pref-width='18' preferred-height='3' />
      </horizontal>
   </bg>
@@ -101,11 +101,11 @@
     </vertical>
 
     <horizontal pad-top='52'>
-      <button id='preview-button2' text='Preview' font-size="3" on-click='on-preview-action'/>
-      <button text='Attributes' font-size="3" on-click='on-screen-attrib-action'/>
-      <button text='Shape' font-size="3" on-click='on-screen-shape-action'/>
-      <button id='placement-button2' text='Placement' font-size="3" on-click='on-screen-placement-action'/>
-      <button text='Back' font-size="3" on-click='on-back-action'/>
+      <button id='preview-button2' text='Preview' font-size='3' on-click='on-preview-action'/>
+      <button text='Attributes' font-size='3' on-click='on-screen-attrib-action'/>
+      <button text='Shape' font-size='3' on-click='on-screen-shape-action'/>
+      <button id='placement-button2' text='Placement' font-size='3' on-click='on-screen-placement-action'/>
+      <button text='Back' font-size='3' on-click='on-back-action'/>
     </horizontal>
   </bg>
 
@@ -120,11 +120,11 @@
       </horizontal>
 
       <horizontal>
-        <!--    <modifier id='screen-body-bool' value="setTransparency" on-change="use-transparency"  bind-value='true' apply-on-change='true' text="Screen is transparent" hover-hint="Creates transparency by hiding screen body" source="CustomVideoPlayer.Resources.clone-white-128.png" all-uppercase='false' font-size="3" pref-width='30'/>
-        <modifier id='use-msp-sequence' value="useMSPSequence" on-change="set-mspSequence"  bind-value='true' apply-on-change='true'  text="MSPreset uses a sequence" hover-hint="Determines if MSPreset uses the same video or several"  all-uppercase='false' font-size="3" pref-width='30' source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
+        <!--    <modifier id='screen-body-bool' value="setTransparency" on-change="use-transparency"  bind-value='true' apply-on-change='true' text="Screen is transparent" hover-hint="Creates transparency by hiding screen body" source="CustomVideoPlayer.Resources.clone-white-128.png" all-uppercase='false' font-size='3' pref-width='30'/>
+        <modifier id='use-msp-sequence' value="useMSPSequence" on-change="set-mspSequence"  bind-value='true' apply-on-change='true'  text="MSPreset uses a sequence" hover-hint="Determines if MSPreset uses the same video or several"  all-uppercase='false' font-size='3' pref-width='30' source="CustomVideoPlayer.Resources.video_sequence_white.png"/>
 -->
         <bool-setting apply-on-change="true" bind-value='true' text='Transparent Screen' value='setTransparency' on-change="use-transparency" all-uppercase='false' font-size='3' pref-width='25' hover-hint='Creates transparency by hiding screen body.'></bool-setting>
-            <dropdown-list-setting id='select-screen-color-dropdownlist' text=' ' on-change="screenColor-list-Action" bind-value='true' apply-on-change='true' all-uppercase='false' font-size="3" options="screen-color-list" value="screencolor-list-value" pref-width='15' hover-hint="Select screen color"></dropdown-list-setting>
+            <dropdown-list-setting id='select-screen-color-dropdownlist' text=' ' on-change="screenColor-list-Action" bind-value='true' apply-on-change='true' all-uppercase='false' font-size='3' options="screen-color-list" value="screencolor-list-value" pref-width='15' hover-hint="Select screen color"></dropdown-list-setting>
       <!--  <dropdown-list-setting id='select-aspect-ratio-dropdownlist' text='Screen Aspect Ratio' on-change="aspectRatio-list-Action" bind-value='true' apply-on-change='true' font-size='3' options="aspect-ratio-list" value="aspectRatio-list-value" pref-width='15' hover-hint="Select screen aspect ratio"></dropdown-list-setting> 
         <dropdown-list-setting id='select-screen-color-dropdownlist' text='Screen Color' on-change="screenColor-list-Action" bind-value='true' apply-on-change='true' font-size='3' options="screen-color-list" value="screencolor-list-value" pref-width='15' hover-hint="Select screen color"></dropdown-list-setting>
         
@@ -170,12 +170,12 @@
 
     </vertical>
 
-    <horizontal pad-top='50' font-size='2'>
-      <button id='preview-button3' text='Preview' font-size="3" on-click='on-preview-action'/>
-      <button text='Extras' font-size="3" on-click='on-extras-action'/>
-      <button text='Shape' font-size="3" on-click='on-screen-shape-action'/>
-      <button id='placement-button3' text='Placement' font-size="3" on-click='on-screen-placement-action'/>
-      <button text='Back' font-size="3" on-click='on-back-action'/>
+    <horizontal pad-top='50' font-size='3'>
+      <button id='preview-button3' text='Preview' font-size='3' on-click='on-preview-action'/>
+      <button text='Extras' font-size='3' on-click='on-extras-action'/>
+      <button text='Shape' font-size='3' on-click='on-screen-shape-action'/>
+      <button id='placement-button3' text='Placement' font-size='3' on-click='on-screen-placement-action'/>
+      <button text='Back' font-size='3' on-click='on-back-action'/>
     </horizontal>
   </bg>
 
@@ -207,12 +207,12 @@
         <button id='vigSoftness-decrement-button' font-size='3' text='-' pad='1' on-click='on-vigSoftness-decrement-action'/>
         <button id='vigSoftness-increment-button' font-size='3' text='+' pad='1' on-click='on-vigSoftness-increment-action'/>
       </horizontal>
-      <horizontal pad-top='2'>
+   <!--    <horizontal pad-top='2'>
         <bool-setting apply-on-change="true" bind-value='true' text='Curvature Enabled' value='CurvatureEnabled' on-change='on-curvature-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Enables curved screen shape.'></bool-setting>
         <bool-setting apply-on-change="true" bind-value='true' text='Auto Adjustment' align='Right' value='UseAutoCurvature' on-change='on-auto-curvature-enabled-action' all-uppercase='false' font-size='3' pref-width='40' hover-hint='Amount of curvature set by distance from screen. (Disables manual curvature setting)'></bool-setting>
-      </horizontal>
-      <horizontal pad-bottom='5'>
-        <slider-setting text='Extent of Curvature' value='CurvatureValue' on-change="change-curve-value" bind-value='true' apply-on-change='true' integer-only='false' min='0' max='180' increment='5' all-uppercase='false' font-size='3' hover-hint='Sets the extent of curvature in degrees' />
+      </horizontal> -->
+      <horizontal pad-bottom='14' pad-top='3'>
+        <slider-setting text='Screen Curvature' value='CurvatureValue' on-change="change-curve-value" bind-value='true' apply-on-change='true' integer-only='false' min='-180' max='180' increment='5' all-uppercase='false' font-size='3' hover-hint='Sets the extent of curvature in degrees, set to zero to disable' />
         <button id='curvature-decrement-button' font-size='3' text='-' pad='1' on-click='on-curvature-decrement-action'/>
         <button id='curvature-increment-button' font-size='3' text='+' pad='1' on-click='on-curvature-increment-action'/>
       </horizontal>
@@ -221,11 +221,11 @@
     </vertical>
 
     <horizontal pad-top='50'>
-      <button id='preview-button4' text='Preview' font-size="3" on-click='on-preview-action'/>
-      <button text='Extras' font-size="3" on-click='on-extras-action'/>
-      <button text='Attributes' font-size="3" on-click='on-screen-attrib-action'/>
-      <button id='placement-button4' text='Placement' font-size="3" on-click='on-screen-placement-action'/>
-      <button text='Back' font-size="3" on-click='on-back-action'/>
+      <button id='preview-button4' text='Preview' font-size='3' on-click='on-preview-action'/>
+      <button text='Extras' font-size='3' on-click='on-extras-action'/>
+      <button text='Attributes' font-size='3' on-click='on-screen-attrib-action'/>
+      <button id='placement-button4' text='Placement' font-size='3' on-click='on-screen-placement-action'/>
+      <button text='Back' font-size='3' on-click='on-back-action'/>
     </horizontal>
   </bg>
 
@@ -240,27 +240,27 @@
       </horizontal>
 
       <horizontal pad-top='3'>
-        <slider-setting id='placement-slider1' text='Pos.X' value='PlacementSlider1Value' on-change="placement-slider-one-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size="3" hover-hint='Manipulates currently selected screen placement parameter' />
+        <slider-setting id='placement-slider1' text='Pos.X' value='PlacementSlider1Value' on-change="placement-slider-one-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size='3' hover-hint='Manipulates currently selected screen placement parameter' />
         <button id='slider1-decrement-button' font-size='3' text='-' pad='1' on-click='on-slider1-decrement-action'/>
         <button id='slider1-increment-button' font-size='3' text='+' pad='1' on-click='on-slider1-increment-action'/>
       </horizontal>      
       <horizontal>
-        <slider-setting id='placement-slider2' text='Pos.Y' value='PlacementSlider2Value' on-change="placement-slider-two-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size="3" hover-hint='Manipulates currently selected screen placement parameter' />
+        <slider-setting id='placement-slider2' text='Pos.Y' value='PlacementSlider2Value' on-change="placement-slider-two-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size='3' hover-hint='Manipulates currently selected screen placement parameter' />
         <button id='slider2-decrement-button' font-size='3' text='-' pad='1' on-click='on-slider2-decrement-action'/>
         <button id='slider2-increment-button' font-size='3' text='+' pad='1' on-click='on-slider2-increment-action'/>
       </horizontal>
       <horizontal>
-        <slider-setting id='placement-slider3' text='Pos.Z' value='PlacementSlider3Value' on-change="placement-slider-three-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size="3" hover-hint='Manipulates currently selected screen placement parameter' />
+        <slider-setting id='placement-slider3' text='Pos.Z' value='PlacementSlider3Value' on-change="placement-slider-three-action" bind-value='true' apply-on-change='true' integer-only='false' min='-1000' max='1000' increment='0.01' all-uppercase='false' font-size='3' hover-hint='Manipulates currently selected screen placement parameter' />
         <button id='slider3-decrement-button' font-size='3' text='-' pad='1' on-click='on-slider3-decrement-action'/>
         <button id='slider3-increment-button' font-size='3' text='+' pad='1' on-click='on-slider3-increment-action'/>
       </horizontal>
       <horizontal>
-        <slider-setting id='placement-slider4' text='Height' value='ScreenHeightSliderValue' on-change="placement-slider-four-action" bind-value='true' apply-on-change='true' integer-only='false' min='0.01' max='1000' increment='0.01' all-uppercase='false' font-size="3" hover-hint='Adjusts height of currently selected screen' />
+        <slider-setting id='placement-slider4' text='Height' value='ScreenHeightSliderValue' on-change="placement-slider-four-action" bind-value='true' apply-on-change='true' integer-only='false' min='0.01' max='1000' increment='0.01' all-uppercase='false' font-size='3' hover-hint='Adjusts height of currently selected screen' />
         <button id='slider4-decrement-button' font-size='3' text='-' pad='1' on-click='on-slider4-decrement-action'/>
         <button id='slider4-increment-button' font-size='3' text='+' pad='1' on-click='on-slider4-increment-action'/>
       </horizontal>
       <horizontal pad-bottom='4'>
-        <slider-setting id='placement-slider5' text='Width' value='ScreenWidthSliderValue' on-change="placement-slider-five-action" bind-value='true' apply-on-change='true' integer-only='false' min='0.01' max='1000' increment='0.01' all-uppercase='false' font-size="3" hover-hint='Adjusts width of currently selected screen' />
+        <slider-setting id='placement-slider5' text='Width' value='ScreenWidthSliderValue' on-change="placement-slider-five-action" bind-value='true' apply-on-change='true' integer-only='false' min='0.01' max='1000' increment='0.01' all-uppercase='false' font-size='3' hover-hint='Adjusts width of currently selected screen' />
         <button id='slider5-decrement-button' font-size='3' text='-' pad='1' on-click='on-slider5-decrement-action'/>
         <button id='slider5-increment-button' font-size='3' text='+' pad='1' on-click='on-slider5-increment-action'/>
       </horizontal>
@@ -275,11 +275,11 @@
     </vertical>
 
     <horizontal pad-top='50'>
-      <button id='preview-button5' text='Preview' font-size="3" on-click='on-preview-action'/>
-      <button text='Extras' font-size="3" on-click='on-extras-action'/>
-      <button text='Attributes' font-size="3" on-click='on-screen-attrib-action'/>
-      <button text='Shape' font-size="3" on-click='on-screen-shape-action'/>
-      <button text='Back' font-size="3" on-click='on-back-action'/>
+      <button id='preview-button5' text='Preview' font-size='3' on-click='on-preview-action'/>
+      <button text='Extras' font-size='3' on-click='on-extras-action'/>
+      <button text='Attributes' font-size='3' on-click='on-screen-attrib-action'/>
+      <button text='Shape' font-size='3' on-click='on-screen-shape-action'/>
+      <button text='Back' font-size='3' on-click='on-back-action'/>
     </horizontal>
   </bg>
 </bg>

@@ -17,7 +17,7 @@ namespace CustomVideoPlayer
 		}
 
 		public Mesh screenSurface;
-		private const float MIN_CURVATURE = 0.0001f;
+		private const float MIN_CURVATURE = -180.0f; // 0.0001f;
 
 		private float _radius;
 		private float _distance;
@@ -69,10 +69,11 @@ namespace CustomVideoPlayer
 
 		private void UpdateRadius()
 		{
-			_curvatureDegreesAutomatic = MIN_CURVATURE;
+			_curvatureDegreesAutomatic = 0.001f; // MIN_CURVATURE;
 			if (_curvatureDegreesFixed != null) // || !VideoMenu.instance.CurvEnabled)  // old cinema code !SettingsStore.Instance.CurvedScreen)
 			{
-				_radius = (float) (GetCircleFraction() / (2 * Math.PI)) * Width;
+			// orig  	_radius = (float) (GetCircleFraction() / (2 * Math.PI)) * Width;
+				_radius = (float)((360f / ((CurvatureDegrees == 0f) ? 0.001f : CurvatureDegrees)) / (2 * Math.PI)) * Width;   // allowing negative radius and disallowing / 0.
 			}
 			else
 			{

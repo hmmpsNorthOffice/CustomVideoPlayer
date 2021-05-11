@@ -104,9 +104,9 @@ namespace CustomVideoPlayer
             public float bloom;
             public ScreenColorUtil.ScreenColorEnum screenColor = ScreenColorUtil.ScreenColorEnum.White;
 
-            public bool isCurved = false;           
+            public bool isCurved = true;           
             public bool useAutoCurvature = false;
-            public float curvatureDegrees = 0.01f;
+            public float curvatureDegrees = 0.0001f;
 
             public bool enabled = false;
 
@@ -312,12 +312,6 @@ namespace CustomVideoPlayer
                 float width = VideoPlacementSetting.Scale(placement) * this.aspectRatio; 
                 float height = VideoPlacementSetting.Scale(placement);
 
-                // Setting curvature to zero disables it, providing a null value (not including parameter) selects autoCurvature.
-                if (!this.isCurved) curvature = 0f;
-
-                // there is a bug here ... but it is only affecting 'preview' screen (which uses this 'SetPlacement' overloaded method ...
-                // ... toggling 'Curve Enabled' off while 'Auto Curve' is enabled 
-
                 if (this.useAutoCurvature && this.isCurved)
                     this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height, VideoMenu.BloomOn);
                 else
@@ -341,7 +335,7 @@ namespace CustomVideoPlayer
                 float height = scale;
 
                 // Setting curvature to zero disables it, providing a null value (not including parameter) selects autoCurvature.
-                if (!this.isCurved) curvature = 0f;
+             ///   if (!this.isCurved) curvature = 0f;
 
                 if (this.useAutoCurvature && this.isCurved)
                     this.screen.SetPlacement(position, rotation, width, height, VideoMenu.BloomOn);
@@ -465,10 +459,10 @@ namespace CustomVideoPlayer
             scrControl.colorCorrection = new VideoConfig.ColorCorrection();
             scrControl.vignette = new VideoConfig.Vignette();
             scrControl.isTransparent = false;
-            scrControl.curvatureDegrees = 0.01f;
+            scrControl.curvatureDegrees = 0.0001f;
             scrControl.bloom = 1.0f;
             scrControl.useAutoCurvature = false;
-            scrControl.isCurved = false;
+            scrControl.isCurved = true;
             scrControl.mspSequence = false;
             scrControl.MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
 

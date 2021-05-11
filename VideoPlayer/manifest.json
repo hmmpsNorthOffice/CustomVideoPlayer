@@ -2,10 +2,10 @@
     "$schema": "https://github.com/nike4613/BSIPA-MetadataFileSchema/master/Schema.json",
     "author": "hmmps",
     "description": "Custom Video Player is a mod that plays videos in BeatSaber from a CustomVideos directory",
-    "gameVersion": "1.14.0",
+    "gameVersion": "1.15.0",
     "id": "Custom Video Player",
     "name": "Custom Video Player",
-    "version": "2.30.0",
+    "version": "2.34.0",
     "features": [
 
     ],
