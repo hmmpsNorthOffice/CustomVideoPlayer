@@ -75,8 +75,6 @@ UI elements in the Extras menu:
 
 - Play Audio In Preview - User can choose to play or mute audio during video preview.
 
-- Enable Screen Bloom - Globally Enable/Disable screen bloom.
-
 **Screen Attributes Menu:**
  ![](ReadmeFiles/Menu240Attr.jpg)
 
