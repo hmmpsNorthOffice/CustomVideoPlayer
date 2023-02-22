@@ -20,6 +20,8 @@ namespace CustomVideoPlayer
     [Plugin(RuntimeOptions.SingleStartInit)]
     public sealed class Plugin
     {
+        // Last debug id string used : db037
+
         public static IPA.Logging.Logger Logger;
         private const string HARMONY_ID = "com.github.hmmpsNorthOffice.CustomVideoPlayer";
         internal const string CAPABILITY = "CVP";
@@ -81,7 +83,7 @@ namespace CustomVideoPlayer
         {
             try
             {
-                Plugin.Logger.Debug("Applying Harmony patches");
+                Plugin.Logger.Debug("db006 Applying Harmony patches");
                 _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
             }
             catch (Exception ex)
@@ -95,8 +97,9 @@ namespace CustomVideoPlayer
         {
             try
             {
-                Plugin.Logger.Debug("Removing Harmony patches");
-                _harmonyInstance.UnpatchAll(HARMONY_ID);
+                Plugin.Logger.Debug("db007 Removing Harmony patches");
+                /// dec22xxx  _harmonyInstance.UnpatchAll(HARMONY_ID);
+                _harmonyInstance.UnpatchSelf();
             }
             catch (Exception ex)
             {

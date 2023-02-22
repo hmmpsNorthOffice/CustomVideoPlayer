@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace CustomVideoPlayer
 {
-	internal class CustomBloomPrePass : MonoBehaviour, CameraRenderCallbacksManager.ICameraRenderCallbacks
+	internal class CustomBloomPrePass : MonoBehaviour
 	{
 		//Most cameras have their own BloomPrePass, so save one for each camera and use that when rendering the bloom for the camera
-		private readonly Dictionary<Camera, BloomPrePass?> _bloomPrePassDict = new Dictionary<Camera, BloomPrePass?>();
+		private readonly Dictionary<Camera, BloomPrePass> _bloomPrePassDict = new Dictionary<Camera, BloomPrePass>();
 		private readonly Dictionary<Camera, BloomPrePassRendererSO> _bloomPrePassRendererDict = new Dictionary<Camera, BloomPrePassRendererSO>();
 		private readonly Dictionary<Camera, BloomPrePassRenderDataSO.Data> _bloomPrePassRenderDataDict = new Dictionary<Camera, BloomPrePassRenderDataSO.Data>();
 		private readonly Dictionary<Camera, IBloomPrePassParams> _bloomPrePassParamsDict = new Dictionary<Camera, IBloomPrePassParams>();
@@ -86,47 +86,6 @@ namespace CustomVideoPlayer
 			return boost;
 		}
 		
-		/*
-		private float GetBloomBoost(Camera camera)
-		{
-			var fov = camera.fieldOfView;
-
-			//Base calculation scales down with screen width and up with distance
-			var boost = (BLOOM_BOOST_FACTOR / (float)Math.Sqrt(_screnDimensions.x / GetCameraDistance(camera)));
-			// what if we tried it based on the inverse of the ((Screen Area)^2)?  ... 
-			//var boost = (BLOOM_BOOST_FACTOR / (float)(_screnDimensions.x * _screnDimensions.y * _screnDimensions.x * _screnDimensions.y));
-			// var boost = (BLOOM_BOOST_FACTOR / (float)Math.Sqrt((_screnDimensions.x*_screnDimensions.y) / GetCameraDistance(camera)));
-
-			//Apply map/user setting on top
-
-			if (_bloomIntensityConfigSetting == null)  // (vz changed != to ==)
-			{
-				_bloomIntensityConfigSetting = Math.Min(2f, Math.Max(0f, _bloomIntensityConfigSetting.Value));  // limits range of json input from 0 to 2
-				boost *= (float)Math.Sqrt(_bloomIntensityConfigSetting.Value);
-				//Plugin.Logger.Debug("value init from json");  //  this gets fired if conditional left as is ...
-			}
-			else
-			{
-				boost *= (float)Math.Sqrt(_bloomIntensityConfigSetting.Value / 100f);  // slider values currently set 0-200
-				//Plugin.Logger.Debug("value init from slider");
-			}
-
-			//Mitigate extreme amounts of bloom at the edges of the camera frustum when not looking directly at the screen
-			var targetDirection = gameObject.transform.position - camera.transform.position;
-			var angle = Vector3.Angle(targetDirection, camera.transform.forward);
-			angle /= (fov / 2);
-			const float threshold = 0.3f;
-			//Prevent brightness from fluctuating when looking close to the center
-			angle = Math.Max(threshold, angle);
-			boost /= ((angle + (1 - threshold)) * (fov / 100f));
-
-			//Adjust for FoV
-			boost *= fov / 100f;
-
-		//	Plugin.Logger.Debug("logging boost factor = " + boost.ToString());
-			return boost;
-		}
-*/
 		private float GetCameraDistance(Camera camera)
 		{
 			return (gameObject.transform.position - camera.transform.position).magnitude;
@@ -192,7 +151,7 @@ namespace CustomVideoPlayer
 			//Mirror cam has no BloomPrePass
 			if (camera.name == "SmoothCamera" || camera.name.StartsWith("MirrorCam"))
 			{
-				Plugin.Logger.Debug("camera name == smooth || Mirror");
+				Plugin.Logger.Debug("db011 camera name == smooth || Mirror");
 				return;
 			}
 			
@@ -217,7 +176,7 @@ namespace CustomVideoPlayer
 			_bloomPrePassDict.TryGetValue(camera, out var bloomPrePass);
 			if (bloomPrePass == null)
 			{
-				Plugin.Logger.Debug("bloomPrePass == null");
+				Plugin.Logger.Debug("db012 bloomPrePass == null");
 				return;
 			}
 
@@ -280,19 +239,26 @@ namespace CustomVideoPlayer
 			UpdateMesh();
 		}
 
-		private void OnWillRenderObject()
+
+		public void OnEnable()
 		{
-			CameraRenderCallbacksManager.RegisterForCameraCallbacks(Camera.current, this);
+			Camera.onPreRender = (Camera.CameraCallback)Delegate.Combine(Camera.onPreRender, new Camera.CameraCallback(OnCameraPreRender));
 		}
+
+		///private void OnWillRenderObject()
+		///{
+			///CameraRenderCallbacksManager.RegisterForCameraCallbacks(Camera.current, this);
+		///}
 
 		public void OnDisable()
 		{
-			CameraRenderCallbacksManager.UnregisterFromCameraCallbacks(this);
+			Camera.onPreRender = (Camera.CameraCallback)Delegate.Remove(Camera.onPreRender, new Camera.CameraCallback(OnCameraPreRender))!;
+			/// CameraRenderCallbacksManager.UnregisterFromCameraCallbacks(this);
 		}
 
 		private void OnDestroy()
 		{
-			CameraRenderCallbacksManager.UnregisterFromCameraCallbacks(this);
+			///CameraRenderCallbacksManager.UnregisterFromCameraCallbacks(this);
 			BSEvents.menuSceneLoaded -= UpdateMesh;
 			BSEvents.gameSceneLoaded -= UpdateMesh;
 			BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoaded;
@@ -300,6 +266,11 @@ namespace CustomVideoPlayer
 
 		private void DoubleBlur(RenderTexture src, RenderTexture dest, KawaseBlurRendererSO.KernelSize kernelSize0, float boost0, KawaseBlurRendererSO.KernelSize kernelSize1, float boost1, float secondBlurAlpha, int downsample)
 		{
+			if (_kawaseBlurRenderer == null)
+			{
+				return;
+			}
+
 			int[] blurKernel = _kawaseBlurRenderer.GetBlurKernel(kernelSize0);
 			int[] blurKernel2 = _kawaseBlurRenderer.GetBlurKernel(kernelSize1);
 			var num = 0;
@@ -314,9 +285,9 @@ namespace CustomVideoPlayer
 			descriptor.width = width;
 			descriptor.height = height;
 			RenderTexture temporary = RenderTexture.GetTemporary(descriptor);
-			_kawaseBlurRenderer.Blur(src, temporary, blurKernel, 0f, downsample, 0, num, 0f, 1f, false, true, KawaseBlurRendererSO.WeightsType.None);
-			_kawaseBlurRenderer.Blur(temporary, dest, blurKernel, boost0, 0, num, blurKernel.Length - num, 0f, 1f, false, true, KawaseBlurRendererSO.WeightsType.None);
-			_kawaseBlurRenderer.Blur(temporary, dest, blurKernel2, boost1, 0, num, blurKernel2.Length - num, 0f, secondBlurAlpha, true, true, KawaseBlurRendererSO.WeightsType.None);
+		//	_kawaseBlurRenderer.Blur(src, temporary, blurKernel, 0f, downsample, 0, num, 0f, 1f, false, true, KawaseBlurRendererSO.WeightsType.None);
+		//	_kawaseBlurRenderer.Blur(temporary, dest, blurKernel, boost0, 0, num, blurKernel.Length - num, 0f, 1f, false, true, KawaseBlurRendererSO.WeightsType.None);
+		// xxx	_kawaseBlurRenderer.Blur(temporary, dest, blurKernel2, boost1, 0, num, blurKernel2.Length - num, 0f, secondBlurAlpha, true, true, KawaseBlurRendererSO.WeightsType.None);
 			RenderTexture.ReleaseTemporary(temporary);
 		}
 	}

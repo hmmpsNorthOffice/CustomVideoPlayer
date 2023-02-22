@@ -6,14 +6,6 @@ namespace CustomVideoPlayer
 {
 	public class Screen: MonoBehaviour
 	{
-	/* orig
-	 * private readonly GameObject _screenGameObject;
-		private readonly GameObject _screenBodyGameObject;
-		private readonly CurvedSurface _screenSurface;
-		private readonly Renderer _screenRenderer;
-		private CurvedSurface _screenBodySurface = null!;
-		///	private readonly CustomBloomPrePass _screenBloomPrePass;
-		// */	
 
 		internal GameObject _screenGameObject;
 		internal GameObject _screenBodyGameObject;
@@ -60,13 +52,13 @@ namespace CustomVideoPlayer
 
 		public void ShowBody()
 		{
-		//	Plugin.Logger.Debug("Showing body");
+		//	Plugin.Logger.Debug("db013 Showing body");
 			_screenBodyGameObject.SetActive(true);
 		}
 
 		public void HideBody()
 		{
-		//	Plugin.Logger.Debug("Hiding body");
+		//	Plugin.Logger.Debug("db014 Hiding body");
 			_screenBodyGameObject.SetActive(false);
 		}
 

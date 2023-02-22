@@ -25,49 +25,18 @@ namespace CustomVideoPlayer
 
         private VideoData currentVideo;
 
-        
-        // default preview screen position placement
-        // old, mvp 1.0 usage ... static readonly Vector3 defaultPreviewScale = new Vector3(0.8f, 0.8f, 1f);   // (0.55f, 0.55f, 1f);
-
-        /* moved to VideoPlacementSetting
-        static readonly Vector3 _defaultPreviewPosition = new Vector3(-3.7f, 1.30f, 1.2f);  //(v1.12.2 -2.46f, 1.40f, 0.83f); 
-        static readonly Vector3 _defaultPreviewRotation = new Vector3(0f, 286f, 0f);  // (0f, 291f, 0f);
-        static readonly float _defaultPreviewScale = 0.8f;       // Scale will likely change to Height to math Cinema mod 
-
-        // Cinema position numbers
-         
-        internal static readonly Vector3 _defaultGameplayPosition = new Vector3(0, 12.4f, 67.8f);
-        internal static readonly Vector3 _defaultGameplayRotation = new Vector3(-8, 0, 0);
-        internal static readonly float _defaultGameplayHeight = 25;
-
-        internal static readonly Vector3 _defaultCoverPosition = new Vector3(0, 5.9f, 75f);
-        internal static readonly Vector3 _defaultCoverRotation = new Vector3(-8, 0, 0);
-        internal static readonly float _defaultCoverHeight = 12;
-
-        
-        internal static readonly Vector3 _menuPosition = new Vector3(0, 4f, 16);
-        internal static readonly Vector3 _menuRotation = new Vector3(0, 0, 0);
-        internal static readonly float _menuHeight = 8;
-        */
-
-
         public enum CurrentScreenEnum
         {
             Preview, Primary_Screen_1, Primary_Screen_2, Primary_Screen_3, Primary_Screen_4, Primary_Screen_5, Primary_Screen_6, ScreenMSPA_1, ScreenMSPA_2, ScreenMSPA_3, ScreenMSPA_4,
-            ScreenMSPA_5, ScreenMSPA_6, ScreenMSPA_7, ScreenMSPA_8, ScreenMSPA_9, ScreenMSPB_1, ScreenMSPB_2, ScreenMSPB_3, ScreenMSPB_4,
-            ScreenMSPB_5, ScreenMSPB_6, ScreenMSPB_7, ScreenMSPB_8, ScreenMSPB_9, ScreenMSPC_1, ScreenMSPC_2, ScreenMSPC_3, ScreenMSPC_4,
-            ScreenMSPC_5, ScreenMSPC_6, ScreenMSPC_7, ScreenMSPC_8, ScreenMSPC_9,
-            ScreenRef_1, ScreenRef_2, ScreenRef_3, ScreenRef_4, ScreenRef_5, ScreenRef_6,
-            ScreenRef_MSPA_r1, ScreenRef_MSPA_r2, ScreenRef_MSPA_r3, ScreenRef_MSPA_r4, 
-            ScreenRef_MSPB_r1, ScreenRef_MSPB_r2, ScreenRef_MSPB_r3, ScreenRef_MSPB_r4,
-            ScreenRef_MSPC_r1, ScreenRef_MSPC_r2, ScreenRef_MSPC_r3, ScreenRef_MSPC_r4,
+            ScreenMSPA_5, ScreenMSPA_6, ScreenMSPA_7, ScreenMSPA_8, ScreenMSPA_9, ScreenMSPB_1, ScreenMSPB_2, ScreenMSPB_3, ScreenMSPB_4, ScreenMSPB_5, ScreenMSPB_6, ScreenMSPB_7, 
+            ScreenMSPB_8, ScreenMSPB_9, ScreenMSPC_1, ScreenMSPC_2, ScreenMSPC_3, ScreenMSPC_4, ScreenMSPC_5, ScreenMSPC_6, ScreenMSPC_7, ScreenMSPC_8, ScreenMSPC_9,
+            ScreenMirror_1, ScreenMirror_2, ScreenMirror_3, ScreenMirror_4, ScreenMirror_5, ScreenMirror_6,
             Multi_Screen_Pr_A, Multi_Screen_Pr_B, Multi_Screen_Pr_C, Screen_360_A, Screen_360_B
         };
 
         public static readonly int totalNumberOfPrimaryScreens = 6;
         public static readonly int totalNumberOfMSPControllers = 3;
-        public static readonly int totalNumberOfMSPReflectionScreensPerContr = 4;
-        public static readonly int totalNumberOfScreens = 57;
+        public static readonly int totalNumberOfScreens = 45;
         public static readonly int totalNumberOfMSPScreensPerController = 9;
 
         private double offsetSec = 0d;
@@ -75,7 +44,7 @@ namespace CustomVideoPlayer
         private EnvironmentSpawnRotation _envSpawnRot;
         public AudioTimeSyncController syncController;
 
-        public enum ScreenType { primary, mspController, reflection, threesixty };
+        public enum ScreenType { primary, mspController, mirror, threesixty };
 
         public enum ScreenAspectRatio { _54x9, _21x9, _2x1, _16x9, _16x10, _3x2, _5x4,  _1x1 };
 
@@ -85,7 +54,7 @@ namespace CustomVideoPlayer
         // a 'helper method' in VideoMenu does this job
         public enum ScreenAttribute {brightness_attrib, contrast_attrib, saturation_attrib, hue_attrib, gamma_attrib, exposure_attib, 
             vignette_radius_attrib, vignette_softness_attrib, use_vignette_attrib, use_opalVignette_attrib, transparent_attrib, use_curvature_attrib,
-            use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib, screen_bloom_attrib
+            use_auto_curvature_attrib, curvature_amount_attrib, aspect_ratio_attrib, screen_color_attrib, screen_bloom_attrib, looping_attrib
         };
         internal static List<ScreenController> screenControllers { get; set; }
 
@@ -112,11 +81,7 @@ namespace CustomVideoPlayer
 
             // screen attributes from Cinema Shader
             private const string MAIN_TEXTURE_NAME = "_MainTex";
-            internal const float DEFAULT_SPHERE_SIZE = 1200.0f;
-
-            //    private const float GLOBAL_SCREEN_BRIGHTNESS = 1.0f; // 0.92f                         // these moved to parent class
-            //    private readonly Color _screenColorOn = Color.white.ColorWithAlpha(0f) * GLOBAL_SCREEN_BRIGHTNESS;
-            //    private readonly Color _screenColorOff = Color.clear;
+            internal const float DEFAULT_SPHERE_SIZE = 2200.0f;
 
             internal static readonly int MainTex = Shader.PropertyToID(MAIN_TEXTURE_NAME);
             internal static readonly int Brightness = Shader.PropertyToID("_Brightness");
@@ -131,11 +96,9 @@ namespace CustomVideoPlayer
 
             // values associated 1:1 to screens
             public ScreenType screenType = ScreenType.primary;
-            public bool localVideosFirst = false;
-            public bool rollingVideoQueue = false;
             public bool reverseReflection = false;
             public bool reverseUV = false;
-            public bool rollingOffsetEnable = false;
+            public bool isLooping = true;
             
             internal VideoMenu.MSPreset msPreset = VideoMenu.MSPreset.MSP_Off;   // only utilized for mspControllerScreens
             public float videoSpeed = 1.0f;
@@ -160,9 +123,7 @@ namespace CustomVideoPlayer
             public IPreviewBeatmapLevel localLevel;
             public string title;
             public string videoURL;
-            public int fixedOffset = 0;
-            public int rollingOffset = 0;
-            public bool videoIsLocal = false;
+            public int timingOffset = 0;
             
 
             public object instance { get; internal set; }
@@ -209,7 +170,7 @@ namespace CustomVideoPlayer
                 }
             }
      
-            private void SetTexture(Texture? texture)
+            private void SetTexture(Texture texture)
             {
                 this.screen.GetRenderer().material.SetTexture(MainTex, texture);
             }
@@ -244,7 +205,7 @@ namespace CustomVideoPlayer
                 {
                     // this.aspectRatio = CVPSettings.customPlacementWidth / CVPSettings.customPlacementScale;
                     this.aspectRatio = CVPSettings.CustomWidthInConfig / CVPSettings.CustomHeightInConfig;
-                    Plugin.Logger.Debug("Custom aspect ratio = " + this.aspectRatio.ToString("F3"));
+                    Plugin.Logger.Debug("db015 Custom aspect ratio = " + this.aspectRatio.ToString("F3"));
                 }
                 else
                 { 
@@ -304,8 +265,6 @@ namespace CustomVideoPlayer
             internal void SetScreenPlacement(VideoPlacement placement, float curvature)
             {
 
-                Plugin.Logger.Debug("preview screen placed");
-
                 if(this.aspectRatio > 3f) placement = VideoPlacement.PreviewScreenLeft;  // so wide curved screens don't give us trouble 
                                                                                           // the above patch must be removed if placing other than PreviewMenu
 
@@ -317,7 +276,7 @@ namespace CustomVideoPlayer
                 else
                     this.screen.SetPlacement(VideoPlacementSetting.Position(placement), VideoPlacementSetting.Rotation(placement), width, height, VideoMenu.BloomOn, curvature);
                
-                // for reflection screens. This must be done each time since _curvedSurface mesh is regenerated each time radius,z changes
+                // for mirror screens, this must be done each time since _curvedSurface mesh is regenerated each time radius,z changes
                 // Note: This should be moved into public method in 'screen' class.
                 if (this.reverseUV)
                 {
@@ -409,52 +368,17 @@ namespace CustomVideoPlayer
             screenControllers.Add(InitController360(scrControl360b, 2));
             screenControllers[(int)CurrentScreenEnum.Screen_360_B].screen.Hide();
 
-            //  screenControllers[0].videoPlacement = VideoMenu.instance.PlacementUISetting;
-
-            /// APRIL14 XXX screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenInMenu, 0f);
-
-            // SetScale(defaultPreviewScreenScale);          // older placement method
-            // SetPosition(defaultPreviewScreenPosition);
-            // SetRotation(defaultPreviewScreenRotation);
-
         }
 
         private ScreenController InitController(ScreenController scrControl, int screenNumber)
         {
             var screenName = "Screen" + screenNumber;
 
-        //    _screen = gameObject.AddComponent<Screen>();
-        //    _screen.SetTransform(transform);
-
-            // old   scrControl.screen = new GameObject(screenName);
             scrControl.screen = gameObject.AddComponent<Screen>();
             scrControl.screen.SetTransform(transform);
 
-            // ??    scrControl.screen.AddComponent<BoxCollider>().size = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
-            //     scrControl.screen.transform.parent = transform;
-
-            /* all moved to screen class
-            scrControl.body = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            if (scrControl.body.GetComponent<Collider>() != null) Destroy(scrControl.body.GetComponent<Collider>());
-            scrControl.body.transform.parent = scrControl.screen.transform;
-            scrControl.body.transform.localPosition = new Vector3(0, 0, 0.1f); // (1, 1, 1.1f);
-            scrControl.body.transform.localScale = new Vector3(16f / 9f + 0.1f, 1.1f, 0.1f);
-            Renderer bodyRenderer = scrControl.body.GetComponent<Renderer>();
-            bodyRenderer.material = new Material(Resources.FindObjectsOfTypeAll<Material>()
-               .First(x => x.name == "DarkEnvironmentSimple")); // finding objects is wonky because platforms hides them 
-            */
-
-            ///    scrControl.videoScreen = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            ///    if (scrControl.videoScreen.GetComponent<Collider>() != null) Destroy(scrControl.videoScreen.GetComponent<Collider>());
-            ///    scrControl.videoScreen.transform.parent = scrControl.screen.transform;
-            ///    scrControl.videoScreen.transform.localPosition = Vector3.zero;
-            ///    scrControl.videoScreen.transform.localScale = new Vector3(16f / 9f, 1, 1);
-
-            ///scrControl.vsRenderer = scrControl.videoScreen.GetComponent<Renderer>();
-            ///
             scrControl.vsRenderer = scrControl.screen.GetRenderer();
             scrControl.vsRenderer.material = new Material(this.GetShader()) { color = ScreenColorUtil._SCREENOFF }; 
-       ///     scrControl.vsRenderer.material = new Material(this.GetShader());
 
             scrControl.colorCorrection = new VideoConfig.ColorCorrection();
             scrControl.vignette = new VideoConfig.Vignette();
@@ -466,19 +390,15 @@ namespace CustomVideoPlayer
             scrControl.mspSequence = false;
             scrControl.MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
 
-            // inverts uv values so screen can look like a proper reflection
-            if (screenNumber >= (int)CurrentScreenEnum.ScreenRef_1 && screenNumber <= ((int)CurrentScreenEnum.ScreenRef_MSPA_r1 + (totalNumberOfMSPReflectionScreensPerContr * totalNumberOfMSPControllers)) - 1)
+            // inverts uv values of mirror screens
+            if (screenNumber >= (int)CurrentScreenEnum.ScreenMirror_1 && screenNumber <= ((int)CurrentScreenEnum.ScreenMirror_6))
             {
-                scrControl.screenType = ScreenType.reflection;
-                scrControl.videoPlacement = VideoPlacement.Center_r;
-                scrControl.screenPosition = VideoPlacementSetting.Position(VideoPlacement.Center_r);
-                scrControl.screenRotation = VideoPlacementSetting.Rotation(VideoPlacement.Center_r);
-                scrControl.screenScale = VideoPlacementSetting.Scale(VideoPlacement.Center_r);
+                scrControl.screenType = ScreenType.mirror;
+                scrControl.videoPlacement = VideoPlacement.Center;
+                scrControl.screenPosition = VideoPlacementSetting.Position(VideoPlacement.Center);
+                scrControl.screenRotation = VideoPlacementSetting.Rotation(VideoPlacement.Center);
+                scrControl.screenScale = VideoPlacementSetting.Scale(VideoPlacement.Center);
 
-                // does not work ... the mesh is regenerated everytime the radius or distance is changed ...
-                /*    Mesh mesh = scrControl.screen._screenSurface.GetComponent<MeshFilter>().mesh;
-                    mesh.uv = mesh.uv.Select(o => new Vector2(1 - o.x, o.y)).ToArray();
-                    mesh.normals = mesh.normals.Select(o => -o).ToArray();    */
             }
             else if (screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_A || screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_B || screenNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_C)
             {
@@ -502,17 +422,13 @@ namespace CustomVideoPlayer
             scrControl.aspectRatioDefault = ScreenAspectRatio._16x9;
             scrControl.ComputeAspectRatioFromDefault();
             scrControl.screenWidth = scrControl.screenScale * scrControl.aspectRatio;
-            scrControl.SetScreenPlacement(scrControl.videoPlacement, 0f);
-            
-            ///scrControl.screen.transform.position = VideoPlacementSetting.Position(scrControl.videoPlacement);
-            ///scrControl.screen.transform.eulerAngles = VideoPlacementSetting.Rotation(scrControl.videoPlacement);
-            ///scrControl.screen.transform.localScale = VideoPlacementSetting.Scale(scrControl.videoPlacement) * Vector3.one;
+            scrControl.SetScreenPlacement(scrControl.videoPlacement, 0f);           
 
             scrControl.videoPlayer = gameObject.AddComponent<VideoPlayer>();
 
             scrControl.videoPlayer.isLooping = true;
             scrControl.videoSpeed = 1f;
-            scrControl.videoPlayer.renderMode = VideoRenderMode.MaterialOverride; // VideoRenderMode.RenderTexture; 
+            scrControl.videoPlayer.renderMode = VideoRenderMode.MaterialOverride;
             scrControl.videoPlayer.targetMaterialProperty = "_MainTex";
             scrControl.videoPlayer.playOnAwake = false;
             scrControl.videoPlayer.targetMaterialRenderer = scrControl.vsRenderer;
@@ -542,20 +458,26 @@ namespace CustomVideoPlayer
 
             scrControl.videoScreen = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             scrControl.videoScreen.transform.parent = transform;
-            scrControl.videoScreen.transform.localPosition = new Vector3(0, 0, 0f);
-            scrControl.videoScreen.transform.localScale = new Vector3(1000f, 1000f, 1000f);  
-            scrControl.videoScreen.transform.eulerAngles = new Vector3(0f, -90f, 0f);
-            scrControl.aspectRatioDefault = ScreenAspectRatio._16x9;                              // values have no meaning, but the 360 screen values do init normal screen menu items ...            
+            scrControl.videoScreen.transform.localPosition = new Vector3(0, 0, 0);  
+            scrControl.videoScreen.transform.localScale = new Vector3(2200f, 2200f, 2200f);  
+            scrControl.videoScreen.transform.eulerAngles = new Vector3(0f, -90f, 0f); 
+            
+            // all of the following property values have no meaning, but the 360 screen values do init normal screen menu items ...            
+            scrControl.aspectRatioDefault = ScreenAspectRatio._16x9;                              
             scrControl.videoPlacement = VideoPlacement.Center;
             scrControl.ComputeAspectRatioFromDefault();
             scrControl.screenWidth = scrControl.screenScale * scrControl.aspectRatio;
-            scrControl.screenPosition = VideoPlacementSetting.Position(VideoPlacement.Center);
+            scrControl.screenPosition = new Vector3(0, 0, 0);
             scrControl.screenRotation = VideoPlacementSetting.Rotation(VideoPlacement.Center);
             scrControl.screenScale = VideoPlacementSetting.Scale(VideoPlacement.Center);
 
             gameObject.AddComponent<MeshFilter>();
             scrControl.vsRenderer = scrControl.videoScreen.GetComponent<MeshRenderer>();
-            scrControl.vsRenderer.material = new Material(this.GetShader());
+
+            // Unless a special shader is used to properly render equirectangular videos onto a sphere, 
+            // there will be visual deformations in the top and bottom.  These are out of view of the player when
+            // looking forward but should be addressed in the future.
+            scrControl.vsRenderer.material = new Material(this.GetShader());   
 
             Mesh mesh = scrControl.videoScreen.GetComponent<MeshFilter>().mesh;
             mesh.uv = mesh.uv.Select(o => new Vector2(1 - o.x, o.y)).ToArray();
@@ -579,7 +501,7 @@ namespace CustomVideoPlayer
 
             scrControl.vsRenderer.material.SetTexture("_MainTex", scrControl.videoPlayer.texture);
 
-            scrControl.videoPlayer.playOnAwake = true;
+            scrControl.videoPlayer.playOnAwake = false;
             scrControl.videoPlayer.targetMaterialRenderer = scrControl.vsRenderer;
 
             scrControl.videoPlayer.playbackSpeed = 1f;
@@ -604,13 +526,8 @@ namespace CustomVideoPlayer
                 screenControllers[screenNumber].enabled = false;
                 screenControllers[screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
                 screenControllers[screenNumber].videoSpeed = 1f;
-                screenControllers[screenNumber].videoIsLocal = false;
                 screenControllers[screenNumber].videoIndex = 0;
-                screenControllers[screenNumber].rollingOffset = 0;
-                screenControllers[screenNumber].fixedOffset = 0;
-                screenControllers[screenNumber].rollingOffsetEnable = false;
-                screenControllers[screenNumber].rollingVideoQueue = false;
-                screenControllers[screenNumber].localVideosFirst = false;
+                screenControllers[screenNumber].timingOffset = 0;
                 screenControllers[screenNumber].title = "not set";
                 screenControllers[screenNumber].videoURL = "not set";
             }
@@ -658,11 +575,11 @@ namespace CustomVideoPlayer
 
             screenControllers[0].videoPlayer.isLooping = true;
 
-            string videoPath = VideoLoader.GetVideoPath(video, screenControllers[(int)VideoMenu.selectedScreen].localVideosFirst, false);
+            string videoPath = VideoLoader.GetCustomVideoPath();
 
             screenControllers[0].videoPlayer.url = videoPath;
 
-            int offsetmSec = screenControllers[(int)VideoMenu.selectedScreen].fixedOffset; // video.offset;
+            int offsetmSec = screenControllers[(int)VideoMenu.selectedScreen].timingOffset; // video.offset;
             offsetSec = (double)(offsetmSec / 1000d);
 
             if (!screenControllers[0].videoPlayer.isPrepared) screenControllers[0].videoPlayer.Prepare();
@@ -720,115 +637,83 @@ namespace CustomVideoPlayer
             ShowPreviewScreen(false); 
 
             if (!screenControllers[screenNumber].enabled)
-            {    
+            {
+                Plugin.Logger.Debug("db035 ... disabled screen started");
                 screenControllers[screenNumber].screen.Hide();  
                 yield break;
             }
 
             // if our offset is negative, wait for songTime to elapse.
 
-            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[screenNumber].fixedOffset / 1000.0f));
+            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[screenNumber].timingOffset / 1000.0f));
 
             // if our offset is positive, set videoPlayer.time as such.
-            screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].videoPlayer.time = 
-                screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[screenNumber].fixedOffset / 1000.0d) : 0d;
+            screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].videoPlayer.time = 
+                screenControllers[screenNumber].timingOffset >= 0 ? ((double)screenControllers[screenNumber].timingOffset / 1000.0d) : 0d;
 
-            screenControllers[screenNumber].videoPlayer.audioOutputMode = screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
+            screenControllers[screenNumber].videoPlayer.audioOutputMode = screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 
             if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
-            if (!screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].videoPlayer.isPrepared) screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].videoPlayer.Prepare();
+            if (!screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].videoPlayer.isPrepared) screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].videoPlayer.Prepare();
 
-            // RVQ (Rolling Video Queue) simply advances the index so the player will have a new video if the next time they hit play
-            if (screenControllers[screenNumber].rollingVideoQueue)
+            screenControllers[screenNumber].screen.Show(); // 2023
+            screenControllers[screenNumber].videoPlayer.Play();
+
+            if(screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].enabled)
             {
-                if (screenControllers[screenNumber].videoIsLocal)
-                {
-                    VideoDatas vids;
-                    // for local videos, need to advance localVideoIndex and seed VideoURL as well.  (Note: videoplayer.URL is unchanged) 
-                    if (VideoLoader.levelsVideos.TryGetValue(screenControllers[screenNumber].localLevel, out vids))
-                    {
-                        vids.activeVideo = screenControllers[screenNumber].localVideoIndex = (1 + screenControllers[screenNumber].localVideoIndex) % vids.Count;
-
-                        VideoData vid = vids?.ActiveVideo;
-
-                        ScreenManager.screenControllers[screenNumber].title = vid.title;
-                        ScreenManager.screenControllers[screenNumber].videoURL = VideoLoader.GetVideoPath(vid, true, true);
-                    }
-                }
-                else
-                {
-                    screenControllers[screenNumber].videoIndex = (1 + screenControllers[screenNumber].videoIndex) % VideoLoader.numberOfCustomVideos;
-                }
+                screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].screen.Show();
+                screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenMirror_1 - 1)].videoPlayer.Play();
             }
 
-            screenControllers[screenNumber].videoPlayer.Play();
-            if(screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].enabled)
-               screenControllers[screenNumber + ((int)CurrentScreenEnum.ScreenRef_1 - 1)].videoPlayer.Play();   
         }
 
         private IEnumerator PlayMSPScreensWithOffset(int mSPNumber)
         {
             if (!screenControllers[mSPNumber].enabled)
             {
+                Plugin.Logger.Debug("db036 ... disabled screen started");
                 HideScreens(false);
                 yield break;
             }
 
-            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[mSPNumber].fixedOffset / 1000.0f));
+            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[mSPNumber].timingOffset / 1000.0f));
 
             int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-            int firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
 
             switch ((CurrentScreenEnum)mSPNumber)
             {
                 case CurrentScreenEnum.Multi_Screen_Pr_A:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                    firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                     break;
                 case CurrentScreenEnum.Multi_Screen_Pr_B:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
-                    firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPB_r1;
                     break;
                 case CurrentScreenEnum.Multi_Screen_Pr_C:
                     firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
-                    firstMSPReflScreen = (int)CurrentScreenEnum.ScreenRef_MSPC_r1;
                     break;
             }
-
-            // RVQ for MSPs would only work if it rolled distinguished sets of panels (like 2x2 ... _4k1,4k2,4k3,4k4) as one entity, and took into account the configuration
-            // that the current preset expects.  Maybe revisit in the future ...
-        //    if (screenControllers[mSPNumber].rollingVideoQueue && !screenControllers[mSPNumber].videoIsLocal)
-        //        screenControllers[mSPNumber].videoIndex = (1 + screenControllers[mSPNumber].videoIndex) % VideoLoader.numberOfCustomVideos;
 
             // play MSPScreens 
             for (int screenNumber = firstMSPScreen; screenNumber < firstMSPScreen + totalNumberOfMSPScreensPerController; screenNumber++)
             {
 
-                screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[mSPNumber].fixedOffset / 1000.0d) : 0d;
+                screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].timingOffset >= 0 ? ((double)screenControllers[mSPNumber].timingOffset / 1000.0d) : 0d;
 
                 screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
                 if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
+                screenControllers[screenNumber].screen.Show(); 
                 screenControllers[screenNumber].videoPlayer.Play();
                 
                 // MSPreset 4x4 is a special case where MSPController A initializes both A and B screens (16 screens)
                 if(mSPNumber == (int)CurrentScreenEnum.Multi_Screen_Pr_A && screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].msPreset == VideoMenu.MSPreset.P4_4x4)
                 { 
-                    screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.time = screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[mSPNumber].fixedOffset / 1000.0d) : 0d;
+                    screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.time = screenControllers[screenNumber].timingOffset >= 0 ? ((double)screenControllers[mSPNumber].timingOffset / 1000.0d) : 0d;
 
                     screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
                     if (!screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
+                    screenControllers[screenNumber + totalNumberOfMSPScreensPerController].screen.Show();
                     screenControllers[screenNumber + totalNumberOfMSPScreensPerController].videoPlayer.Play();
                 }
-        }
-
-            // play MSPReflection Screens
-            for (int screenNumber = firstMSPReflScreen; screenNumber < firstMSPReflScreen + totalNumberOfMSPReflectionScreensPerContr; screenNumber++)
-            {
-                screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[mSPNumber].fixedOffset / 1000.0d) : 0d;
-
-                screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
-                if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
-                screenControllers[screenNumber].videoPlayer.Play();
             }
         }
 
@@ -836,25 +721,24 @@ namespace CustomVideoPlayer
         {
             if (!screenControllers[screenNumber].enabled)
             {
+                Plugin.Logger.Debug("db037 ... disabled screen started");
                 HideScreens(false);
                 yield break;
             }
 
             // if our offset is negative, wait for songTime to elapse.
-            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[screenNumber].fixedOffset / 1000.0f));
+            yield return new WaitUntil(() => syncController.songTime >= -((float)screenControllers[screenNumber].timingOffset / 1000.0f));
 
             // if our offset is positive, set videoPlayer.time as such.
-            screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].fixedOffset >= 0 ? ((double)screenControllers[screenNumber].fixedOffset / 1000.0d) : 0d;
-
-            // Roll RVQ
-            if (screenControllers[screenNumber].rollingVideoQueue && !screenControllers[screenNumber].videoIsLocal)
-                screenControllers[screenNumber].videoIndex = (1 + screenControllers[screenNumber].videoIndex) % VideoLoader.numberOf360Videos;
+            screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].timingOffset >= 0 ? ((double)screenControllers[screenNumber].timingOffset / 1000.0d) : 0d;
 
             screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
             screenControllers[screenNumber].vsRenderer.material.color = ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor);
             screenControllers[screenNumber].screen.SetBloomIntensity(screenControllers[screenNumber].bloom);
 
             if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
+
+            screenControllers[screenNumber].screen.Show();
             screenControllers[screenNumber].videoPlayer.Play();
         }
 
@@ -897,31 +781,27 @@ namespace CustomVideoPlayer
             for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
             {
                 int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                int firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                 bool enableSequence = false;
 
                 switch ((CurrentScreenEnum)mspControllerNumber)
                 {
                     case CurrentScreenEnum.Multi_Screen_Pr_A:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
                         enableSequence = VideoMenu.MVSequenceA;
                         break;
                     case CurrentScreenEnum.Multi_Screen_Pr_B:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPB_r1;
                         enableSequence = VideoMenu.MVSequenceB;
                         break;
                     case CurrentScreenEnum.Multi_Screen_Pr_C:
                         firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPC_r1;
                         enableSequence = VideoMenu.MVSequenceC;
                         break;
                 }
 
 
                 // IndexMult is used decide if MSP will play one video several times or an sequence. (ordered by filename) It is set by three bool UIs in 'Extras'
-                int IndexMult = (enableSequence && !screenControllers[mspControllerNumber].videoIsLocal) ? 1 : 0;  // if video is local, cancel sequential videos
+                int IndexMult = (enableSequence) ? 1 : 0;
 
                 // turn off unused screens if their mspController is disabled -> but make an exception for msp_b if msp_a is enabled and P4_4x4:
                 if (!screenControllers[mspControllerNumber].enabled
@@ -935,73 +815,57 @@ namespace CustomVideoPlayer
                     }
                 }
 
+                int numPresetScreens = 0;
+
                 switch (screenControllers[mspControllerNumber].msPreset)
                 {
                     case VideoMenu.MSPreset.MSP_Off:
                         break;
 
-                    case VideoMenu.MSPreset.P1_4Screens:
+                    case VideoMenu.MSPreset.P1_FOB:
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Cinema);
+                        screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Left_Small);
+                        screenControllers[firstMSPScreen + 1].aspectRatioDefault = ScreenAspectRatio._1x1;
+                        screenControllers[firstMSPScreen + 1].aspectRatio = 1f;
+                        screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Right_Small);
+                        screenControllers[firstMSPScreen + 2].aspectRatioDefault = ScreenAspectRatio._1x1;
+                        screenControllers[firstMSPScreen + 2].aspectRatio = 1f;
+                        numPresetScreens = 3;
+                        break;
 
+                    case VideoMenu.MSPreset.P1_FOBH:
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Cinema);
+                        screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Left_Small);
+                        screenControllers[firstMSPScreen + 1].aspectRatioDefault = ScreenAspectRatio._1x1;
+                        screenControllers[firstMSPScreen + 1].aspectRatio = 1f;
+                        screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Right_Small);
+                        screenControllers[firstMSPScreen + 2].aspectRatioDefault = ScreenAspectRatio._1x1;
+                        screenControllers[firstMSPScreen + 2].aspectRatio = 1f;
+                        screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_Huge);
+                        numPresetScreens = 4;
+                        break;
+
+                    case VideoMenu.MSPreset.P1_4ScreensA:
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Center);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Slant_Small);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Northwest);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Northeast);
+                        numPresetScreens = 4;
+                        break;
 
-                        // ** read note above (note: this msp placement did not need to be resorted)
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Center);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Slant_Small);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Northwest);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Northeast);
-                        }
-
-
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                    case VideoMenu.MSPreset.P1_4ScreensB:
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Center);
+                        screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Left_Medium);
+                        screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Right_Medium);
+                        screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_Medium);
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P2_1x3:
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Center_Left);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Center);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Center_Right);
-
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Center_Right);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Center);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Center_Left);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 2 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;  // could easily find next set of (1x3) during queue increment
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;  // will need added logic but easy to impliment
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 3;
                         break;
 
                     case VideoMenu.MSPreset.P3_2x2_Medium:
@@ -1010,99 +874,27 @@ namespace CustomVideoPlayer
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_M_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_M_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_M_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Back_4k_M_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_M_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_M_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_M_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P3_2x2_Large:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Back_4k_L_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_L_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_L_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_L_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Back_4k_L_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_L_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_L_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_L_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = false;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P3_2x2_Huge:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Back_4k_H_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_H_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_H_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_H_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {                            
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Back_4k_H_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Back_4k_H_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Back_4k_H_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Back_4k_H_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = false;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
 
                     case VideoMenu.MSPreset.P4_3x3:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Center_TopL);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Center_Top);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Center_TopR);
@@ -1112,22 +904,7 @@ namespace CustomVideoPlayer
                         screenControllers[firstMSPScreen + 6].InitPlacementFromEnum(VideoPlacement.Center_BottomL);
                         screenControllers[firstMSPScreen + 7].InitPlacementFromEnum(VideoPlacement.Center_Bottom);
                         screenControllers[firstMSPScreen + 8].InitPlacementFromEnum(VideoPlacement.Center_BottomR);
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = false;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 9;
                         break;
 
                     case VideoMenu.MSPreset.P4_4x4:
@@ -1152,6 +929,7 @@ namespace CustomVideoPlayer
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPB_5].InitPlacementFromEnum(VideoPlacement.Back_8k_4b);
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPB_6].InitPlacementFromEnum(VideoPlacement.Back_8k_4c);
                         screenControllers[(int)CurrentScreenEnum.ScreenMSPB_7].InitPlacementFromEnum(VideoPlacement.Back_8k_4d);
+                        numPresetScreens = 16;
 
                         for (int screenNumber = 0; screenNumber <= (totalNumberOfMSPScreensPerController * 2) - 1; screenNumber++)
                         {
@@ -1159,10 +937,9 @@ namespace CustomVideoPlayer
                             {
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].enabled = true;
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIndex = (screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoSpeed;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].rollingVideoQueue;
-                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoIsLocal;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoSpeed; 
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].videoURL;
+                                screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isLooping = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isLooping;
 
                                 // special case: replication of the vignette and colorCorrection members is normally done using a helper method in VideoMenu.
                                 // Since P4_4x4 uses both msp_A and msp_B, these must be added
@@ -1177,137 +954,42 @@ namespace CustomVideoPlayer
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isTransparent = screenControllers[(int)CurrentScreenEnum.Multi_Screen_Pr_A].isTransparent;
                                 if (screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].isTransparent) screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].screen.HideBody();
                                 screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
+
                             }
                             else screenControllers[(int)CurrentScreenEnum.ScreenMSPA_1 + screenNumber].enabled = false;
                         }
                         break;
 
                     case VideoMenu.MSPreset.P5_2x2_Slant:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Slant_4k_L_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Floor_M:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_M_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Ceiling_M:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_M_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Floor_H90:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_H90_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Floor_H360:
@@ -1316,98 +998,26 @@ namespace CustomVideoPlayer
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Floor_4k_H360_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Ceiling_H90:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H90_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P6_2x2_Ceiling_H360:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_1);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_2);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_3);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_4);
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
-                        {
-                            screenControllers[firstMSPReflectionScreen].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_2);
-                            screenControllers[firstMSPReflectionScreen + 1].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_1);
-                            screenControllers[firstMSPReflectionScreen + 2].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_4);
-                            screenControllers[firstMSPReflectionScreen + 3].InitPlacementFromEnum(VideoPlacement.Ceiling_4k_H360_3);
-                        }
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off; // screenControllers[mspControllerNumber].MirrorType;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P7_Octagon:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.North);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Northeast);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.East);
@@ -1416,219 +1026,97 @@ namespace CustomVideoPlayer
                         screenControllers[firstMSPScreen + 5].InitPlacementFromEnum(VideoPlacement.Southwest);
                         screenControllers[firstMSPScreen + 6].InitPlacementFromEnum(VideoPlacement.West);
                         screenControllers[firstMSPScreen + 7].InitPlacementFromEnum(VideoPlacement.Northwest);
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 7 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 8;
                         break;
 
                     case VideoMenu.MSPreset.P8_360_Cardinal_H:
-
-                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.North_H);
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Back_Medium); // xxx2023 was North_H
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.East_H);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.South_H);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.West_H);
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P8_360_Ordinal_H:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.NorthEast_H);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.SouthEast_H);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.SouthWest_H);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.NorthWest_H);
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 3 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 4;
                         break;
 
                     case VideoMenu.MSPreset.P7_Hexagon:
-
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.HexNorth);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.HexNE);
                         screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.HexSE);
                         screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.HexSouth);
                         screenControllers[firstMSPScreen + 4].InitPlacementFromEnum(VideoPlacement.HexSW);
                         screenControllers[firstMSPScreen + 5].InitPlacementFromEnum(VideoPlacement.HexNW);
-
-                        for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
-                        {
-                            if (screenNumber <= 5 && screenControllers[mspControllerNumber].enabled)
-                            {
-                                screenControllers[firstMSPScreen + screenNumber].enabled = true;
-                                screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
-                                screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
-                                screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue = screenControllers[mspControllerNumber].rollingVideoQueue;
-                                screenControllers[firstMSPScreen + screenNumber].videoIsLocal = screenControllers[mspControllerNumber].videoIsLocal;
-                                screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
-                                screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
-                            }
-                            else screenControllers[firstMSPScreen + screenNumber].enabled = false;
-                        }
+                        numPresetScreens = 6;
                         break;
 
                 }
+
+                if((numPresetScreens > 0) && (numPresetScreens < 10)) 
+                { 
+                    for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
+                    {
+                        if (screenNumber < numPresetScreens && screenControllers[mspControllerNumber].enabled)
+                        {
+                            screenControllers[firstMSPScreen + screenNumber].enabled = true;
+                            screenControllers[firstMSPScreen + screenNumber].videoIndex = (screenControllers[mspControllerNumber].videoIndex + (screenNumber * IndexMult)) % VideoLoader.numberOfCustomVideos;
+                            screenControllers[firstMSPScreen + screenNumber].videoSpeed = screenControllers[mspControllerNumber].videoSpeed;
+                            screenControllers[firstMSPScreen + screenNumber].videoURL = screenControllers[mspControllerNumber].videoURL;
+                            screenControllers[firstMSPScreen + screenNumber].isLooping = screenControllers[mspControllerNumber].isLooping;
+                            screenControllers[firstMSPScreen + screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
+                            // Special case for "Fall Out Boy Stage (Pyre)"
+                            if ((screenControllers[mspControllerNumber].msPreset != VideoMenu.MSPreset.P1_FOB) && (screenControllers[mspControllerNumber].msPreset != VideoMenu.MSPreset.P1_FOBH))
+                            {
+                                screenControllers[firstMSPScreen + screenNumber].aspectRatioDefault = screenControllers[mspControllerNumber].aspectRatioDefault;
+                                screenControllers[firstMSPScreen + screenNumber].aspectRatio = screenControllers[mspControllerNumber].aspectRatio;
+                            }
+                        }
+                        else screenControllers[firstMSPScreen + screenNumber].enabled = false;
+                    }
+                }
             }
-
-            // ScreenReflection logic
-
-            // NOTE: After March2021, type1 (pond mirror) reflections have been removed.  Code implementation still exixts but their access is unavailable in the UI.
-            // The reflection ability will also be limited to primary screens only with MirrorTypes that clone screens across the x/y/z axis.
+           
+            // The Mirror ability is limited to primary screens that clone screens across the x/y/z axis.
 
             for (int screenNumber = 0; screenNumber <= totalNumberOfPrimaryScreens - 1; screenNumber++)
             {
-                // Each primary screen can be reflected if desired.  
+                // Each primary screen can be mirrored if desired.  
                 if (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].enabled && (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType != VideoMenu.MirrorScreenType.Mirror_Off)) 
                 {
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = true;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].reverseReflection = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].reverseReflection;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].enabled = true;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].reverseReflection = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].reverseReflection;
 
                     // short explanation of class placement value members:
                     //  videoPlacement is the old enum value that is used by the PlacementMenu to reset values to original setting
                     //  screenPosition/Rotation/Scale are members that allow editing on a per screen instance
-
-                        if (screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Refl)
-                    {
-                        // this is the older version (pond reflection) which relied on fixed values set in VideoPlacementSettings.cs
-                        screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].InitPlacementFromEnum((VideoPlacement)(screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoPlacement + 1));
-                    }
-                    else
-                    {
-                        screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoPlacement = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoPlacement;
-                        screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].screenPosition = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenPosition;
-                        screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].screenRotation = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenRotation;
-                        screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].screenScale = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenScale;
-                    }
-
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIndex = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoIndex;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoIsLocal = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoIsLocal;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoSpeed;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoURL;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].fixedOffset = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].fixedOffset;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffset = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingOffset;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingOffsetEnable = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingOffsetEnable;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].rollingVideoQueue = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].rollingVideoQueue;
-                    screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].MirrorType = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType;
+                  
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].videoPlacement = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoPlacement;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].screenPosition = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenPosition;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].screenRotation = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenRotation;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].screenScale = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].screenScale;
+                    
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].videoIndex = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoIndex;  
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].videoSpeed = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoSpeed;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].videoURL = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].videoURL;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].isLooping = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].isLooping;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].timingOffset = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].timingOffset;                   
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].MirrorType = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].MirrorType;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].aspectRatioDefault = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].aspectRatioDefault;
+                    screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].aspectRatio = screenControllers[(int)CurrentScreenEnum.Primary_Screen_1 + screenNumber].aspectRatio;
                 }
-                else screenControllers[(int)CurrentScreenEnum.ScreenRef_1 + screenNumber].enabled = false;
-            }
-
-
-            // Only the first 4 MSP screens are currently reflected. <--- No longer applies.  The implementation code is left here but reflection of MSP's is not used anymore.
-            // It is disabled by setting MirrorType to 'Mirror_Off' for the MSP's.
-            for (int mspControllerNumber = (int)CurrentScreenEnum.Multi_Screen_Pr_A; mspControllerNumber <= (int)CurrentScreenEnum.Multi_Screen_Pr_C; mspControllerNumber++)
-            { 
-                int firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
-                int firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-
-                switch ((CurrentScreenEnum)mspControllerNumber) 
-                {
-                    case CurrentScreenEnum.Multi_Screen_Pr_A:
-                        firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPA_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPA_r1;
-                        break;
-                    case CurrentScreenEnum.Multi_Screen_Pr_B:
-                        firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPB_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPB_r1;
-                        break;
-                    case CurrentScreenEnum.Multi_Screen_Pr_C:
-                        firstMSPScreen = (int)CurrentScreenEnum.ScreenMSPC_1;
-                        firstMSPReflectionScreen = (int)CurrentScreenEnum.ScreenRef_MSPC_r1;
-                        break;
-                }
-
-                for (int screenNumber = 0; screenNumber <= totalNumberOfMSPReflectionScreensPerContr - 1; screenNumber++)
-                {
-
-                    if (screenControllers[firstMSPScreen + screenNumber].enabled && (screenControllers[firstMSPScreen + screenNumber].MirrorType != VideoMenu.MirrorScreenType.Mirror_Off)) 
-                    {
-                        screenControllers[firstMSPReflectionScreen + screenNumber].enabled = true;
-
-                        if (screenControllers[mspControllerNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Refl)  // 360 reflection type values were handled during each msp config (above)
-                        {
-                            screenControllers[firstMSPReflectionScreen + screenNumber].InitPlacementFromEnum((VideoPlacement)(screenControllers[firstMSPScreen + screenNumber].videoPlacement + 1));
-                        }
-
-                        screenControllers[firstMSPReflectionScreen + screenNumber].videoIndex = screenControllers[firstMSPScreen + screenNumber].videoIndex;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].videoIsLocal = screenControllers[firstMSPScreen + screenNumber].videoIsLocal;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].videoSpeed = screenControllers[firstMSPScreen + screenNumber].videoSpeed;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].videoURL = screenControllers[firstMSPScreen + screenNumber].videoURL;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].fixedOffset = screenControllers[firstMSPScreen + screenNumber].fixedOffset;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].rollingOffset = screenControllers[firstMSPScreen + screenNumber].rollingOffset;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].rollingOffsetEnable = screenControllers[firstMSPScreen + screenNumber].rollingOffsetEnable;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].rollingVideoQueue = screenControllers[firstMSPScreen + screenNumber].rollingVideoQueue;
-                        screenControllers[firstMSPReflectionScreen + screenNumber].MirrorType = screenControllers[firstMSPScreen + screenNumber].MirrorType;
-                    }
-                    else screenControllers[firstMSPReflectionScreen + screenNumber].enabled = false;
-                }
+                else screenControllers[(int)CurrentScreenEnum.ScreenMirror_1 + screenNumber].enabled = false;
             }
       
             // VideoPlayer and Screen Initialization
             for (int screenNumber = 1; screenNumber < totalNumberOfScreens; screenNumber++)
             {
-                // roll MSPController if RVQ is enabled for them.
                 if (screenControllers[screenNumber].screenType == ScreenType.mspController)
                 {
-                    if (screenControllers[screenNumber].enabled && screenControllers[screenNumber].rollingVideoQueue)
-                    {
-                        if (screenControllers[screenNumber].videoIsLocal)
-                        {
-                            VideoDatas vids;
-                            // for local videos, need to advance localVideoIndex and seed VideoURL as well.  (Note: videoplayer.URL is unchanged) 
-                            if (VideoLoader.levelsVideos.TryGetValue(screenControllers[screenNumber].localLevel, out vids))
-                            {
-                                vids.activeVideo = screenControllers[screenNumber].localVideoIndex = (1 + screenControllers[screenNumber].localVideoIndex) % vids.Count;
-
-                                VideoData vid = vids?.ActiveVideo;
-
-                                ScreenManager.screenControllers[screenNumber].title = vid.title;
-                                ScreenManager.screenControllers[screenNumber].videoURL = VideoLoader.GetVideoPath(vid, true, true);
-                            }
-                        }
-                        else
-                        {
-                            screenControllers[screenNumber].videoIndex = (1 + screenControllers[screenNumber].videoIndex) % VideoLoader.numberOfCustomVideos;
-                        }
-                    }
                     continue;  // nothing else to do for MSPController screens
                 }
 
@@ -1637,7 +1125,7 @@ namespace CustomVideoPlayer
                 {
 
                     if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
-                    else screenControllers[screenNumber].screen.Show();
+                    else screenControllers[screenNumber].screen.Hide(); //2023
 
                     if (screenControllers[screenNumber].screenType != ScreenType.threesixty)      // Set Placement
                     {
@@ -1646,7 +1134,7 @@ namespace CustomVideoPlayer
                         float scrScalefloat = 1.0f;
                      
                         // process primary screen mirroring placement based on 'mirrorType'
-                        if (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPC_r4)
+                        if (screenNumber >= (int)CurrentScreenEnum.ScreenMirror_1 && screenNumber <= (int)CurrentScreenEnum.ScreenMirror_6)
                         {
                             // for Mirror_Z (360). z axis and change rotation
                             if (screenControllers[screenNumber].MirrorType == VideoMenu.MirrorScreenType.Mirror_Z)
@@ -1686,37 +1174,17 @@ namespace CustomVideoPlayer
 
                         // set placement for all nonPreviewScreens.  (conidtional also reverses UV if necc.)
                         screenControllers[screenNumber].SetScreenPlacement(posVector, rotVector, scrScalefloat, screenControllers[screenNumber].curvatureDegrees,
-                        (screenNumber >= (int)ScreenManager.CurrentScreenEnum.ScreenRef_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.ScreenRef_6) && 
+                        (screenNumber >= (int)CurrentScreenEnum.ScreenMirror_1 && screenNumber <= (int)CurrentScreenEnum.ScreenMirror_6) && 
                                 screenControllers[screenNumber].reverseReflection
-                        || (screenNumber >= (int)ScreenManager.CurrentScreenEnum.Primary_Screen_1 && screenNumber <= (int)ScreenManager.CurrentScreenEnum.Primary_Screen_6) &&
+                        || (screenNumber >= (int)CurrentScreenEnum.Primary_Screen_1 && screenNumber <= (int)CurrentScreenEnum.Primary_Screen_6) &&
                                 screenControllers[screenNumber].reverseUV);
                     }
 
 
                     if (screenNumber < (int)CurrentScreenEnum.Multi_Screen_Pr_A)      // all the enums for Primary screens are < Multi_Screen_Pr_A
                     {
-                        // two distinct cases ... if video is local, the url resides in videoURL, if custom, the videoIndex is used to access approp list.
-                        // ... this may be changed to rely solely on videoURL.
-
-                        if (screenControllers[screenNumber].videoIsLocal)
-                        {
-                            // this is where we uould update the offset 
-                            screenControllers[screenNumber].videoPlayer.url = screenControllers[screenNumber].videoURL;   // locals use the actual videoPath while customs are using index
-                                                                                                                       
-                            Plugin.Logger.Debug("... preparenonPrimary ... [].videoIsLocal true");
-                        }
-                //        else if (VideoLoader.numberOfCustomVideos == 0)  // this validity check was already done in UpdateVideoTitle();  ... remove?
-                //        {
-                //            screenControllers[screenNumber].enabled = false;
-                //        }
-                        else
-                        {
-                            screenControllers[screenNumber].videoPlayer.url = VideoLoader.customVideos[screenControllers[screenNumber].videoIndex].videoPath;
-                            Plugin.Logger.Debug("... preparenonPrimary ... [].videoIsLocal false");
-                        }
-
-                        Plugin.Logger.Debug("... and the filepath is ...");
-                        Plugin.Logger.Debug("... and the filepath is ... " + screenControllers[screenNumber].videoURL);
+                        screenControllers[screenNumber].videoPlayer.url = VideoLoader.customVideos[screenControllers[screenNumber].videoIndex].videoPath;
+                        // Plugin.Logger.Debug("db018 ... and the filepath is ... " + screenControllers[screenNumber].videoURL);
                     }
                     else if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B)
                     {
@@ -1725,26 +1193,22 @@ namespace CustomVideoPlayer
 
                     //   screenControllers[screenNumber].videoPlayer.url = screenControllers[screenNumber].videoURL;      // this would work if we initialized values properly, 
                     // but the videoIndex will always be valid.
-                    screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].fixedOffset;
+                    screenControllers[screenNumber].videoPlayer.time = screenControllers[screenNumber].timingOffset;
 
                     screenControllers[screenNumber].videoPlayer.playbackSpeed = screenControllers[screenNumber].videoSpeed;
-                    screenControllers[screenNumber].videoPlayer.isLooping = true;
+                    screenControllers[screenNumber].videoPlayer.isLooping = screenControllers[screenNumber].isLooping; 
                     screenControllers[screenNumber].videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 
-                    //... New! Feb13 2021 ... changing video attributes using Cinema Shader ...
                     screenControllers[screenNumber].SetShaderParameters();
 
                     
-                    screenControllers[screenNumber].SetScreenColor(ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor));    // ScreenColorEnum.screenColorOn)); // screenControllers[screenNumber].screenColor); // _screenColorOn);   // was _onColor  ...this actually works!  kinda redundant to 'hue' setting but creates drastic effect
+                    screenControllers[screenNumber].SetScreenColor(ScreenColorUtil.ColorFromEnum(screenControllers[screenNumber].screenColor));  
                     screenControllers[screenNumber].screen.SetBloomIntensity(screenControllers[screenNumber].bloom);
-                    // screenControllers[screenNumber].vsRenderer.material.color = _screenColorOn;
-
 
                     if (!screenControllers[screenNumber].videoPlayer.isPrepared) screenControllers[screenNumber].videoPlayer.Prepare();
                 }
                 else
                 {
-                    //screenControllers[screenNumber].vsRenderer.material.color = _screenColorOff;
                     screenControllers[screenNumber].SetScreenColor(ScreenColorUtil._SCREENOFF);
 
                     if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(false);   //  videoScreen != screen issue on 360
@@ -1850,14 +1314,12 @@ namespace CustomVideoPlayer
         internal bool IsVideoPlayable()
         {
 
-            return true; //  (temporarily until I can exempt cv's) ... will fix this when implementing Cinema local video json compatibility
-
-            if (currentVideo == null || currentVideo.downloadState != DownloadState.Downloaded)
+            if (currentVideo == null)
                 return false;
 
             return true;
         }
-
+/*
         public Shader GetShader()
         {
             var myLoadedAssetBundle = AssetBundle.LoadFromMemory(
@@ -1869,6 +1331,38 @@ namespace CustomVideoPlayer
             // cinema shader
             UIUtilities.GetResource(Assembly.GetExecutingAssembly(), "CustomVideoPlayer.Resources.bscinema.bundle"));    
             Shader shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenShader");
+            myLoadedAssetBundle.Unload(false);
+
+            return shader;
+        }
+*/
+
+      //  private static Shader GetShader(string? path = null)
+            public Shader GetShader(string path = null)
+        {
+            AssetBundle myLoadedAssetBundle;
+            if (path == null)
+            {
+                var bundle = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "CustomVideoPlayer.Resources.bscinema.bundle");
+                if (bundle == null || bundle.Length == 0)
+                {
+                  //  Log.Error("GetResource failed");
+                    return Shader.Find("Hidden/BlitAdd");
+                }
+
+                myLoadedAssetBundle = AssetBundle.LoadFromMemory(bundle);
+                if (myLoadedAssetBundle == null)
+                {
+                  //  Log.Error("LoadFromMemory failed");
+                    return Shader.Find("Hidden/BlitAdd");
+                }
+            }
+            else
+            {
+                myLoadedAssetBundle = AssetBundle.LoadFromFile(path);
+            }
+
+            var shader = myLoadedAssetBundle.LoadAsset<Shader>("ScreenShader");
             myLoadedAssetBundle.Unload(false);
 
             return shader;

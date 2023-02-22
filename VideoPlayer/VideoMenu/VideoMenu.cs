@@ -66,9 +66,6 @@ namespace CustomVideoPlayer
             ScreenColorUtil.ScreenColorEnum.Navy
         }).ToList();
 
-        [UIObject("select-screen-color-dropdownlist")]    
-        private GameObject screenColorDropdownList;
-
         private ScreenColorUtil.ScreenColorEnum screenColorListSetting = ScreenColorUtil.ScreenColorEnum.White;
         [UIValue("screencolor-list-value")]
         public ScreenColorUtil.ScreenColorEnum ScreenColorUISetting
@@ -105,8 +102,8 @@ namespace CustomVideoPlayer
             ScreenManager.ScreenAspectRatio._1x1    // 1.0
         }).ToList();
 
-        [UIObject("select-aspect-ratio-dropdownlist")]    // can we use this to change properties of dropdownlist?
-        private GameObject screenAspectRatioDropdownList;
+    //    [UIObject("select-aspect-ratio-dropdownlist")]    // can we use this to change properties of dropdownlist?
+    //    private GameObject screenAspectRatioDropdownList;
 
         private ScreenManager.ScreenAspectRatio aspectRatioListSetting = ScreenManager.ScreenAspectRatio._16x9;
         [UIValue("aspectRatio-list-value")]
@@ -163,9 +160,6 @@ namespace CustomVideoPlayer
             VideoPlacement.Pedestal
         }).ToList();
 
-        [UIObject("select-placement-list")]    // can we use this to change properties of dropdownlist?
-        private GameObject placementlistObj;
-
         private VideoPlacement placementSetting;
         [UIValue("placement-list-value")]
         public VideoPlacement PlacementUISetting
@@ -211,21 +205,20 @@ namespace CustomVideoPlayer
 
 
 
-        public enum MSPreset { MSP_Off, P1_4Screens, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
+        public enum MSPreset { MSP_Off, P1_FOB, P1_FOBH, P1_4ScreensA, P1_4ScreensB, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
             P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Ceiling_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360,
             P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
         };
-
-        [UIObject("select-mspreset-list")]
-        private GameObject msplacementlistObj;
-       // private DropDownListSetting msplacementlistObj;
 
 
         [UIValue("multi-screen-modes")]
         private List<object> multiScreenModes = (new object[]
         {
             MSPreset.MSP_Off,
-            MSPreset.P1_4Screens,
+            MSPreset.P1_FOB,
+            MSPreset.P1_FOBH,
+            MSPreset.P1_4ScreensA,
+            MSPreset.P1_4ScreensB,
             MSPreset.P2_1x3,
             MSPreset.P3_2x2_Medium,
             MSPreset.P3_2x2_Large,
@@ -428,48 +421,8 @@ namespace CustomVideoPlayer
             }
         }
 
-
-        private static bool RollingVideoQueueEnableBool = false;
-        [UIValue("rollingVideoQueueEnableUI")]
-        public bool RollingVideoQueue
-        {
-            get => RollingVideoQueueEnableBool;
-            set
-            {
-                RollingVideoQueueEnableBool = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        [UIAction("set-rolling-video-queue")]
-        void SetRollingVideoQueue(bool val)
-        {
-            RollingVideoQueue = val;
-            ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue = val;
-            UpdateGeneralInfoMessageText();
-        }
-
-        /*
-                public static bool useSequenceInMSPreset = false;           // <- This worked fine in 'Attributes' menu but ran out of space ...
-                [UIValue("useMSPSequence")]                                 //   so I returned it to 'Extras' menu with '3 button' arrangement.
-                public bool MSPSequence
-                {
-                    get => useSequenceInMSPreset;
-                    set
-                    {
-                        ScreenManager.screenControllers[(int)selectedScreen].mspSequence = value;
-                        useSequenceInMSPreset = value;
-                        NotifyPropertyChanged();       // Add this to update UI element if we need to change bool value in code.
-                    }
-                }
-
-                [UIAction("set-mspSequence")]
-                void SetMSPSequence(bool val)
-                {
-                   // MSPSequenceA = val;
-                } */
-
-
+        internal static bool BloomOn = false;
+/*
         private static bool globalEnableBloomBool = false;
         [UIValue("SetBloomOn")]
         internal static bool BloomOn
@@ -488,7 +441,7 @@ namespace CustomVideoPlayer
         {
             // no action needed
         }
-
+*/
 
         private bool screenTransparencyBool = false;
         [UIValue("setTransparency")]
@@ -515,6 +468,30 @@ namespace CustomVideoPlayer
             }
         }
 
+        // 2023 loop ui addition
+        private bool screenLoopingBool = true;
+        [UIValue("setLooping")]
+        public bool SetLooping
+        {
+            get => screenLoopingBool;
+            set
+            {
+                SetScreenAttributeProperties(ScreenManager.ScreenAttribute.looping_attrib, 1.0f, value);
+                screenLoopingBool = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+
+        [UIAction("use-looping")]
+        void SetLoopingAction(bool val)
+        {
+            // do we really need the preview screen to mirror this attribute?
+            // if so ... logic still needs to be added.
+            ScreenManager.screenControllers[0].isLooping = val;
+        }
+
+        //
         private float threeSixtySphereSize = ScreenManager.ScreenController.DEFAULT_SPHERE_SIZE;
         [UIValue("ThreeSixtySphereSize")]
         public float SphereSize
@@ -666,7 +643,7 @@ namespace CustomVideoPlayer
         [UIAction("on-brightness-decrement-action")]
         private void OnBrightnessDecrementAction()
         {
-            // Plugin.Logger.Debug("... OnBrightnessDecrementAction()");
+            // Plugin.Logger.Debug("db020 ... OnBrightnessDecrementAction()");
             // It is important that we do not set ScrBrightness until after the conditional ... 
 
             float tempScrBrightness = ((ScrBrightness - 0.1f) < VideoConfig.ColorCorrection.MIN_BRIGHTNESS) ? VideoConfig.ColorCorrection.MIN_BRIGHTNESS : ScrBrightness - 0.1f;
@@ -683,7 +660,7 @@ namespace CustomVideoPlayer
         [UIAction("on-brightness-increment-action")]
         private void OnbrightnessIncrementAction()
         {
-            // Plugin.Logger.Debug("... OnBrightnessIncrementAction()");
+            // Plugin.Logger.Debug("db021 ... OnBrightnessIncrementAction()");
 
             float tempScrBrightness = ((ScrBrightness + 0.1f) > VideoConfig.ColorCorrection.MAX_BRIGHTNESS) ? VideoConfig.ColorCorrection.MAX_BRIGHTNESS : ScrBrightness + 0.1f;
             if (ScreenManager.screenControllers[0].colorCorrection.brightness != tempScrBrightness)
@@ -697,7 +674,7 @@ namespace CustomVideoPlayer
         [UIAction("on-saturation-decrement-action")]
         private void OnSaturationDecrementAction()
         {
-            // Plugin.Logger.Debug("... ScrSaturation decrem action");
+            // Plugin.Logger.Debug("db022 ... ScrSaturation decrem action");
             float tempScrSaturation = ((ScrSaturation - 0.1f) < VideoConfig.ColorCorrection.MIN_SATURATION) ? VideoConfig.ColorCorrection.MIN_SATURATION : ScrSaturation - 0.1f;
 
             if (ScreenManager.screenControllers[0].colorCorrection.saturation != tempScrSaturation)
@@ -711,7 +688,7 @@ namespace CustomVideoPlayer
         [UIAction("on-saturation-increment-action")]
         private void OnSaturationIncrementAction()
         {
-            // Plugin.Logger.Debug("... ScrSaturation increm action");
+            // Plugin.Logger.Debug("db023 ... ScrSaturation increm action");
             float tempScrSaturation = ((ScrSaturation + 0.1f) > VideoConfig.ColorCorrection.MAX_SATURATION) ? VideoConfig.ColorCorrection.MAX_SATURATION : ScrSaturation + 0.1f;
             if (ScreenManager.screenControllers[0].colorCorrection.saturation != tempScrSaturation)
             {
@@ -814,7 +791,7 @@ namespace CustomVideoPlayer
             {
                 SetScreenAttributeProperties(ScreenManager.ScreenAttribute.saturation_attrib, value, false);
                 screenSaturation = value;
-            //    Plugin.Logger.Debug("... ScrSaturation Set UIValue");
+            //    Plugin.Logger.Debug("db024 ... ScrSaturation Set UIValue");
                 NotifyPropertyChanged();      
             }
         }
@@ -825,7 +802,7 @@ namespace CustomVideoPlayer
             // movement of the slider control fires the UIValue/UIAction methods multiple times
             // ... added the conditional below to reduce unneccessary shader calls.
 
-            // Plugin.Logger.Debug("... ScrSaturation UIAction");  
+            // Plugin.Logger.Debug("db025 ... ScrSaturation UIAction");  
 
             // Only update the shader (of the preview screen) if its value changed.
             if (ScreenManager.screenControllers[0].colorCorrection.saturation != val)
@@ -911,10 +888,10 @@ namespace CustomVideoPlayer
             get => screenBloom;
             set
             {
-                //   Plugin.Logger.Debug("... [UIValue(ScreenBloom)]");
+                //   Plugin.Logger.Debug("db026 ... [UIValue(ScreenBloom)]");
                 SetScreenAttributeProperties(ScreenManager.ScreenAttribute.screen_bloom_attrib, value, false);
                 screenBloom = value;
-                NotifyPropertyChanged();
+              //  NotifyPropertyChanged();
             }
         }
 
@@ -926,14 +903,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[0].bloom = val;
                 ScreenManager.screenControllers[0].screen.SetBloomIntensity(val);
-             //   Plugin.Logger.Debug("... [UIAction(change-screen-bloom)]");
+             //   Plugin.Logger.Debug("db027 ... [UIAction(change-screen-bloom)]");
             }
         }
 
         [UIAction("on-bloom-decrement-action")]
         private void OnBloomDecrementAction()
         {
-            // Plugin.Logger.Debug("... OnBloomDecrementAction()");
+            // Plugin.Logger.Debug("db028 ... OnBloomDecrementAction()");
             // It is important that we do not set ScrBloom until after the conditional ... 
 
             float tempScrBloom = ((ScrBloom - 5f) < VideoConfig.MIN_BLOOM) ? VideoConfig.MIN_BLOOM : ScrBloom - 5.0f;
@@ -949,7 +926,7 @@ namespace CustomVideoPlayer
         [UIAction("on-bloom-increment-action")]
         private void OnBloomIncrementAction()
         {
-            // Plugin.Logger.Debug("... OnBloomIncrementAction()");
+            // Plugin.Logger.Debug("db029 ... OnBloomIncrementAction()");
 
             float tempScrBloom = ((ScrBloom + 5f) > VideoConfig.MAX_BLOOM) ? VideoConfig.MAX_BLOOM : ScrBloom + 5.0f;
             if (ScreenManager.screenControllers[0].bloom != tempScrBloom)
@@ -968,7 +945,7 @@ namespace CustomVideoPlayer
             get => screenBrightness;
             set
             {
-             //   Plugin.Logger.Debug("... [UIValue(ScreenBrightness)]");
+             //   Plugin.Logger.Debug("db030 ... [UIValue(ScreenBrightness)]");
                 SetScreenAttributeProperties(ScreenManager.ScreenAttribute.brightness_attrib, value, false);
                 screenBrightness = value;
                 NotifyPropertyChanged();    
@@ -978,7 +955,7 @@ namespace CustomVideoPlayer
         [UIAction("change-screen-brightness")]
         void ChangeScreenBrightness(float val)
         {
-            Plugin.Logger.Debug("... [UIAction(change-screen-brightness)]");
+            Plugin.Logger.Debug("db031 ... [UIAction(change-screen-brightness)]");
             if (ScreenManager.screenControllers[0].colorCorrection.brightness != val)
             {
                 ScreenManager.screenControllers[0].colorCorrection.brightness = val;
@@ -1233,13 +1210,13 @@ namespace CustomVideoPlayer
                ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x = val;
                // will disable placement menu button for other types of screens, but just in case ...
                if(ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)  
-                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.x = val;
+                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.x = val;
             }
             else
             { 
                ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x = val;
                if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.x = val;
+                 ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.x = val;
             }
         }
 
@@ -1252,7 +1229,7 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.x = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
             }
             else
@@ -1260,7 +1237,7 @@ namespace CustomVideoPlayer
 
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.x = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
             }
 
@@ -1279,14 +1256,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.x = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.x = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.x = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.x = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.x = tempSliderValue;
                 PSlider1Value = tempSliderValue;
             }
 
@@ -1317,13 +1294,13 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.y = val;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.y = val;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.y = val;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.y = val;
             }
         }
 
@@ -1336,14 +1313,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.y = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.y = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
 
@@ -1360,14 +1337,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.y = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.y = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.y = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.y = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.y = tempSliderValue;
                 PSlider2Value = tempSliderValue;
             }
 
@@ -1394,13 +1371,13 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.z = val;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.z = val;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.z = val;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.z = val;
             }
         }
 
@@ -1413,14 +1390,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.z = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.z = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
 
@@ -1437,14 +1414,14 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenPosition.z = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenPosition.z = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenPosition.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
             else
             {
                 ScreenManager.screenControllers[(int)selectedScreen].screenRotation.z = tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenRotation.z = tempSliderValue;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenRotation.z = tempSliderValue;
                 PSlider3Value = tempSliderValue;
             }
 
@@ -1477,13 +1454,13 @@ namespace CustomVideoPlayer
                     // the following sets Width slider control, previewScreen Width, and selectedScreenWidth
                     ScrWidthSliderValue = ScreenManager.screenControllers[0].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth = val * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
                     if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                        ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
+                        ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
                 }
                 else
                 {
                     ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].screenWidth / val;
                     if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                        ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+                        ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
                 }
 
                 ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.0001f));
@@ -1499,18 +1476,18 @@ namespace CustomVideoPlayer
             {
                 ScrWidthSliderValue = ScreenManager.screenControllers[0].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth = tempSliderValue * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
             }
             else
             {
                 ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].screenWidth / tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             }
 
             ScreenManager.screenControllers[(int)selectedScreen].screenScale = tempSliderValue;
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenScale = tempSliderValue;
+                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenScale = tempSliderValue;
             ScrHeightSliderValue = tempSliderValue;
 
             ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.0001f));
@@ -1528,18 +1505,18 @@ namespace CustomVideoPlayer
             {
                 ScrWidthSliderValue = ScreenManager.screenControllers[0].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth = tempSliderValue * ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenWidth = ScreenManager.screenControllers[(int)selectedScreen].screenWidth;
             }
             else
             {
                 ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].screenWidth / tempSliderValue;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+                    ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             }
 
             ScreenManager.screenControllers[(int)selectedScreen].screenScale = tempSliderValue;
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenScale = tempSliderValue;
+                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenScale = tempSliderValue;
             ScrHeightSliderValue = tempSliderValue;
 
             ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.0001f));
@@ -1570,7 +1547,7 @@ namespace CustomVideoPlayer
                 // Width is used in recomputing aspectRatio.
                 ScreenManager.screenControllers[(int)selectedScreen].screenWidth = val;
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                   ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenWidth = val;  
+                   ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenWidth = val;  
                 ScreenManager.screenControllers[0].SetScreenPlacement(VideoPlacement.PreviewScreenLeft, (ScreenManager.screenControllers[0].isCurved ? ScreenManager.screenControllers[0].curvatureDegrees : 0.0001f));
             }
         }
@@ -1582,7 +1559,7 @@ namespace CustomVideoPlayer
 
             ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio = tempSliderValue / ScreenManager.screenControllers[(int)selectedScreen].screenScale;
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             ScrWidthSliderValue = tempSliderValue;
 
             if (devHighPrecisionPlacementUtility) placementSlider5Text.text = "Width = " + tempSliderValue.ToString("F3");
@@ -1595,7 +1572,7 @@ namespace CustomVideoPlayer
 
             ScreenManager.screenControllers[0].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio = tempSliderValue / ScreenManager.screenControllers[(int)selectedScreen].screenScale;
             if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.primary)
-                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
+                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatio = ScreenManager.screenControllers[(int)selectedScreen].aspectRatio;
             ScrWidthSliderValue = tempSliderValue;
 
             if (devHighPrecisionPlacementUtility) placementSlider5Text.text = "Width = " + tempSliderValue.ToString("F3");
@@ -1756,7 +1733,7 @@ namespace CustomVideoPlayer
             get => addScreenMirror;
             set
             {
-                // Plugin.Logger.Debug("Add Mirror Value");
+                // Plugin.Logger.Debug("db032 Add Mirror Value");
                 addScreenMirror = (MirrorButtonState  != MirrorScreenType.Mirror_Off);
                 // UpdateMirrorScreenButtonText();
                 NotifyPropertyChanged();  
@@ -1770,15 +1747,12 @@ namespace CustomVideoPlayer
         [UIAction("mirror-screen-button-action")]
         void SetAddScreenMirror(bool val)
         {
-            Plugin.Logger.Debug("Add Mirror Action");
+            Plugin.Logger.Debug("db033 Add Mirror Action");
             if(!SilenceUIAction)
             { 
                 switch (MirrorButtonState)
                 {
                     case MirrorScreenType.Mirror_Off:
-                        MirrorButtonState = MirrorScreenType.Mirror_X;
-                        break;
-                    case MirrorScreenType.Mirror_Refl:                      // to be deprecated
                         MirrorButtonState = MirrorScreenType.Mirror_X;
                         break;
                     case MirrorScreenType.Mirror_X:
@@ -1806,9 +1780,6 @@ namespace CustomVideoPlayer
                 case MirrorScreenType.Mirror_Off:
                     MirrorTypeButtonText.text = "No Mir";
                     break;
-                case MirrorScreenType.Mirror_Refl:
-                    MirrorTypeButtonText.text = "Mirror T1";
-                    break;
                 case MirrorScreenType.Mirror_X:
                     MirrorTypeButtonText.text = "Mirror X";
                     break;
@@ -1831,9 +1802,6 @@ namespace CustomVideoPlayer
         #region Rect Transform
         [UIComponent("video-details")]
         private RectTransform videoDetailsViewRect;
-
-  //      [UIComponent("video-search-results")]
-  //      private RectTransform videoSearchResultsViewRect;
 
         [UIComponent("extras-menu")]
         private RectTransform videoExtrasViewRect;
@@ -1889,14 +1857,9 @@ namespace CustomVideoPlayer
         [UIComponent("placement-slider3")]      
         private SliderSetting placementSlider3;
 
-        [UIComponent("placement-slider4")]
-        private SliderSetting placementSlider4;
-
         [UIComponent("placement-slider5")]
         private SliderSetting placementSlider5;    // correct, but allows access to interactability not min/max
 
-        [UIComponent("no-video-message")]
-        private TextMeshProUGUI noVideoMessageText;
 
         [UIComponent("current-video-offset")]
         private TextMeshProUGUI currentVideoOffsetText;
@@ -1919,24 +1882,6 @@ namespace CustomVideoPlayer
         [UIComponent("preview-button5")]
         private TextMeshProUGUI previewButtonText5;
 
-        //       [UIComponent("delete-button")]                  // disable until I re-enable search
-        //       private TextMeshProUGUI deleteButtonText;
-
-        [UIComponent("rolling-video-queue-button")]
-        private TextMeshProUGUI rollingVideoQueueEnableButtonText;
-
-//        [UIComponent("search-button")]
-//        private TextMeshProUGUI searchButtonText;
-
-        [UIComponent("enable-cvp-button")]
-        private TextMeshProUGUI enableCVPButtonText;
-
-        //      [UIComponent("search-results-loading")]
-        //      private TextMeshProUGUI searchResultsLoadingText;
-
-        [UIComponent("video-source-priority-button")]
-        private TextMeshProUGUI vidSourceButtonText;
-
         [UIComponent("placement-pos-or-rot-button")]
         private TextMeshProUGUI placementPosRotButtonText;
 
@@ -1948,24 +1893,6 @@ namespace CustomVideoPlayer
 
         [UIComponent("placement-step-granularity-button")]
         private TextMeshProUGUI placementStepGranularityButtonText;
-
-        [UIComponent("multi-screen-button")]
-        private TextMeshProUGUI multiScreenButtonText;
-
-        [UIComponent("select-video-button")]
-        private TextMeshProUGUI selectVideoButtonText;
-
-        [UIComponent("show-Selected-Video-Button")]
-        private TextMeshProUGUI showSelectedScreenButtonText;
-
-        [UIComponent("360-select-button")]
-        private TextMeshProUGUI threeSixtySelectButtonText;
-
-        [UIComponent("rolling-offset-button")]
-        private TextMeshProUGUI rollingOffsetEnableButtonText;
-
-    //    [UIComponent("download-state-text")]                         // merged with delete button
-    //    private TextMeshProUGUI downloadStateText;
 
         [UIComponent("offset-magnitude-button")]
         private TextMeshProUGUI offsetMagnitudeButtonText;
@@ -1980,56 +1907,14 @@ namespace CustomVideoPlayer
         [UIComponent("selectMirrorButton")]
         private TextMeshProUGUI MirrorTypeButtonText;
 
-        [UIComponent("offset-decrease-button")]
-        private Button offsetDecreaseButton;
-
-        [UIComponent("offset-increase-button")]
-        private Button offsetIncreaseButton;
-
         [UIComponent("next-video-button")]
         private Button nextVideoButton;
 
         [UIComponent("previous-video-button")]
         private Button previousVideoButton;
 
-        [UIComponent("video-source-priority-button")]
-        private Button videoSourcePriorityButton;
-
-        [UIComponent("placement-pos-or-rot-button")]
-        private Button placementPosRotButton;
-
-        [UIComponent("aspect-ratio-lock-toggle-button")]
-        private Button aspectRatioLockButton;
-
-        [UIComponent("save-placement-button")]
-        private Button savePlacementButton;
-
-        [UIComponent("placement-step-granularity-button")]
-        private Button placementStepGranularityButton;
-
-        [UIComponent("load-local-videos-button")]
-        private Button loadLocalVideosButton;
-
-        [UIComponent("download-button")]
-        private Button downloadButton;
-
-        [UIComponent("refine-button")]
-        private Button refineButton;
-
         [UIComponent("preview-button1")]
         private Button previewButton1;
-
-        [UIComponent("preview-button2")]
-        private Button previewButton2;
-
-        [UIComponent("preview-button3")]
-        private Button previewButton3;
-
-        [UIComponent("preview-button4")]
-        private Button previewButton4;
-
-        [UIComponent("preview-button5")]
-        private Button previewButton5;
 
         [UIComponent("placement-button1")]
         private Button placementButton1;
@@ -2049,17 +1934,6 @@ namespace CustomVideoPlayer
         [UIComponent("slider5-increment-button")]
         private Button widthIncButton;
 
-        [UIComponent("enable-cvp-button")]
-        private Button enableCVPButton;
-        
-
-        ///   [UIComponent("use-msp-sequence")] 
-        ///  private Button useMSPSequenceButton;
-
-
-        ///   [UIComponent("screen-body-bool")]
-        ///   private modifier screenBodyUIElement;
-
         #endregion
 
         #region misc VideoMenu members 
@@ -2072,7 +1946,7 @@ namespace CustomVideoPlayer
 
         public static bool isPreviewing = false;
 
-        private enum manualOffsetDeltaEnum { tenth, one, ten, onehundred };
+        private enum manualOffsetDeltaEnum { hundredth, tenth, one, ten, onehundred };
         private enum placementStepDeltaEnum { thousandth, hundredth, tenth, one, ten, onehundred };
 
         // this turns on a dev only routine that adds additional info to the placement slider's text and added precision in their step size.
@@ -2128,8 +2002,8 @@ namespace CustomVideoPlayer
             BSEvents.levelSelected += HandleDidSelectLevel;
             BSEvents.gameSceneLoaded += GameSceneLoaded;
 
-         //   if (songPreviewPlayer == null) GoGetSongPreviewPlayer();
-         //   GoGetSongPreviewPlayer();
+            if (songPreviewPlayer == null) GoGetSongPreviewPlayer();
+            GoGetSongPreviewPlayer();
 
             videoDetailsViewRect.gameObject.SetActive(true);
             videoExtrasViewRect.gameObject.SetActive(false);
@@ -2145,10 +2019,10 @@ namespace CustomVideoPlayer
 
         }
 
-       /* public IEnumerator GoGetSongPreviewPlayer()
+       public IEnumerator GoGetSongPreviewPlayer()
         {
             yield return new WaitUntil(() => songPreviewPlayer ?? (songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().First()));
-        } */
+        } 
         #endregion
 
         #region Public Methods
@@ -2185,7 +2059,6 @@ namespace CustomVideoPlayer
 
             UpdateEnableCVPButton();
             UpdateGeneralInfoMessageText();
-            UpdateVideoSourcePriorityButtonText();
 
             // if the selected level is of type 360, disable 'Screen Shape' menu.
           // nope ... makes ui look uneven ...
@@ -2203,14 +2076,10 @@ namespace CustomVideoPlayer
         public VideoData UpdateVideoTitle()
         {
             string customVideoTitle = "No Local or CustomVideos Found";    
-            string localVideoTitle = "No Local or CustomVideos Found";
 
             int numberOfVideos = 0;
-            bool localVideoExists = false;
-            bool customVideoExists = false;
 
             VideoData vid;
-            VideoDatas vids;
 
             if(selectedLevel == null) // redundant if called from LoadVideoSettings ...
             {
@@ -2220,79 +2089,42 @@ namespace CustomVideoPlayer
                 currentVideoTitleText.text = "No Map Level Selected";
                 return null;
             }
+            
+            vid = new VideoData(selectedLevel);
 
-            if (VideoLoader.levelsVideos.TryGetValue(selectedLevel, out vids) && ScreenManager.screenControllers[(int) selectedScreen].localVideosFirst) // (reimpliment with UpdateDownloadState ... && vid.downloadState == DownloadState.Downloaded)
+            switch (ScreenManager.screenControllers[(int)selectedScreen].screenType)
             {
-                // if this screen has been previously initialized for this level, retrieve that index as the local activeVideo.
-                if (ScreenManager.screenControllers[(int)selectedScreen].localLevel == selectedLevel && ScreenManager.screenControllers[(int)selectedScreen].localVideoIndex < vids.Count)
-                    vids.activeVideo = ScreenManager.screenControllers[(int)selectedScreen].localVideoIndex;
+                case ScreenManager.ScreenType.primary:
+                case ScreenManager.ScreenType.mspController:
 
-                vid = vids?.ActiveVideo;
+                    numberOfVideos = VideoLoader.numberOfCustomVideos;
+                    if(numberOfVideos == 0) customVideoTitle = "No videos found in CustomVideos directory";
 
-                numberOfVideos = vids.Count;
-                localVideoExists = true;
+                    else 
+                    {
 
-                localVideoTitle = (vids.activeVideo + 1) + " of " + numberOfVideos + "  " + vid.title;
+                        if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex >= VideoLoader.numberOfCustomVideos) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex = 0;
+                        customVideoTitle = ((ScreenManager.screenControllers[(int)selectedScreen].videoIndex + 1) + " of " + VideoLoader.customVideos.Count + "  "
+                                + VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].filename);                            
+                    }
+                    break;
+                case ScreenManager.ScreenType.threesixty:
 
-                ScreenManager.screenControllers[(int)selectedScreen].title = vid.title;
-                ScreenManager.screenControllers[(int)selectedScreen].localLevel = selectedLevel;
-                ScreenManager.screenControllers[(int)selectedScreen].videoURL = VideoLoader.GetVideoPath(vid, true, true); // @"C:\temp\testme.mp4";
+                    numberOfVideos = VideoLoader.numberOf360Videos;
+                    if (numberOfVideos == 0) customVideoTitle = "No videos found in CustomVideos\\360 directory";
+
+                    else
+                    {
+
+                        if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex >= VideoLoader.numberOf360Videos) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = last360VideoIndex = 0;                  
+                        customVideoTitle = ((ScreenManager.screenControllers[(int)selectedScreen].videoIndex + 1) + " of " + VideoLoader.custom360Videos.Count + "  "
+                            + VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].filename);                            
+                    }
+                    break;
             }
-            else
-            {
-                vid = new VideoData(selectedLevel);
+            
 
-                switch (ScreenManager.screenControllers[(int)selectedScreen].screenType)
-                {
-                    case ScreenManager.ScreenType.primary:
-                    case ScreenManager.ScreenType.mspController:
-
-                        numberOfVideos = VideoLoader.numberOfCustomVideos;
-                        if(numberOfVideos == 0) customVideoTitle = "No videos found in CustomVideo directory";
-
-                        else 
-                        {
-                            customVideoExists = true;
-
-                            if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex >= VideoLoader.numberOfCustomVideos) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex = 0;
-                            customVideoTitle = ((ScreenManager.screenControllers[(int)selectedScreen].videoIndex + 1) + " of " + VideoLoader.customVideos.Count + "  "
-                                    + VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].filename);
-
-                            // set screens offset to videos offset
-                            ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset;
-                        }
-                        break;
-                    case ScreenManager.ScreenType.threesixty:
-
-                        numberOfVideos = VideoLoader.numberOf360Videos;
-                        if (numberOfVideos == 0) customVideoTitle = "No videos found in CustomVideo\\360 directory";
-
-                        else
-                        {
-                            customVideoExists = true;
-
-                            if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex >= VideoLoader.numberOf360Videos) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = last360VideoIndex = 0;                  
-                            customVideoTitle = ((ScreenManager.screenControllers[(int)selectedScreen].videoIndex + 1) + " of " + VideoLoader.custom360Videos.Count + "  "
-                                + VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].filename);
-
-                            // set screens offset to videos offset
-                            ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset;
-                        }
-                        break;
-                }
-            }
-            if ((localVideoExists && ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst) || !customVideoExists)
-            {
-                currentVideoTitleText.text = TruncateAtWord(localVideoTitle, 40);
-                ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal = true;
-
-                ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = vid.offset;
-            }
-            else
-            {
-                currentVideoTitleText.text = TruncateAtWord(customVideoTitle, 40);
-                ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal = false;
-            }
+            currentVideoTitleText.text = TruncateAtWord(customVideoTitle, 40);
 
             if(numberOfVideos == 0)
             {
@@ -2300,7 +2132,7 @@ namespace CustomVideoPlayer
                 previousVideoButton.gameObject.SetActive(false);
                 previewButton1.interactable = false;
 
-                currentVideoOffsetText.text = String.Format("{0:0.0}", 0d);
+                currentVideoOffsetText.text = String.Format("{0:0.00}", 0d);
             }
             else if (numberOfVideos == 1)
             {
@@ -2352,7 +2184,7 @@ namespace CustomVideoPlayer
         private void SetScreenAttributeProperties(ScreenManager.ScreenAttribute attrib, float value1, bool value2, ScreenManager.ScreenAspectRatio aspRatio = ScreenManager.ScreenAspectRatio._16x9, ScreenColorUtil.ScreenColorEnum scrColor = ScreenColorUtil.ScreenColorEnum.White)
         {
 
-          //  Plugin.Logger.Debug("... SetScreenAttributeProperties()");
+          //  Plugin.Logger.Debug("db034 ... SetScreenAttributeProperties()");
             switch (ScreenManager.screenControllers[(int)selectedScreen].screenType)
             {
                 case ScreenManager.ScreenType.primary:
@@ -2360,83 +2192,87 @@ namespace CustomVideoPlayer
                     {
                         case ScreenManager.ScreenAttribute.brightness_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.brightness = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.brightness = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.brightness = value1;
                             break;
                         case ScreenManager.ScreenAttribute.contrast_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.contrast = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.contrast = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.contrast = value1;
                             break;
                         case ScreenManager.ScreenAttribute.exposure_attib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.exposure = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.exposure = value1;
                             break;
                         case ScreenManager.ScreenAttribute.gamma_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.gamma = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.gamma = value1;
                             break;
                         case ScreenManager.ScreenAttribute.hue_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.hue = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.hue = value1;
                             break;
                         case ScreenManager.ScreenAttribute.saturation_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].colorCorrection.saturation = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].colorCorrection.saturation = value1;
                             break;
                         case ScreenManager.ScreenAttribute.transparent_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].isTransparent = value2;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].isTransparent = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].isTransparent = value2;
                             if (value2)
                             {
                                 ScreenManager.screenControllers[(int)selectedScreen].screen.HideBody();
-                                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screen.HideBody();
+                                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screen.HideBody();
                             }
                             else 
                             {
                                 ScreenManager.screenControllers[(int)selectedScreen].screen.ShowBody();
-                                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screen.ShowBody();
+                                ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screen.ShowBody();
                             }
                             break;
                         case ScreenManager.ScreenAttribute.vignette_radius_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.radius = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.radius = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].vignette.radius = value1;
                             break;
                         case ScreenManager.ScreenAttribute.vignette_softness_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.softness = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.softness = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].vignette.softness = value1;
                             break;
                         case ScreenManager.ScreenAttribute.use_vignette_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.vignetteEnabled = value2;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.vignetteEnabled = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].vignette.vignetteEnabled = value2;
                             break;
                         case ScreenManager.ScreenAttribute.use_opalVignette_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.type = value2 ? "elliptical" : "rectangular";
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].vignette.type = value2 ? "elliptical" : "rectangular";
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].vignette.type = value2 ? "elliptical" : "rectangular";
                             break;
                         case ScreenManager.ScreenAttribute.use_curvature_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].isCurved = value2;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].isCurved = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].isCurved = value2;
                             break;
                         case ScreenManager.ScreenAttribute.use_auto_curvature_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].useAutoCurvature = value2;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].useAutoCurvature = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].useAutoCurvature = value2;
                             break;
                         case ScreenManager.ScreenAttribute.curvature_amount_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].curvatureDegrees = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].curvatureDegrees = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].curvatureDegrees = value1;
                             break;
                         case ScreenManager.ScreenAttribute.aspect_ratio_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].aspectRatioDefault = aspRatio;
                             ScreenManager.screenControllers[(int)selectedScreen].ComputeAspectRatioFromDefault();
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].aspectRatioDefault = aspRatio;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].ComputeAspectRatioFromDefault();
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].aspectRatioDefault = aspRatio;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].ComputeAspectRatioFromDefault();
                             break;
                         case ScreenManager.ScreenAttribute.screen_color_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].screenColor = scrColor;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].screenColor = scrColor;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].screenColor = scrColor;
                             break;
                         case ScreenManager.ScreenAttribute.screen_bloom_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].bloom = value1;
-                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenRef_1 - 1)].bloom = value1;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].bloom = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.looping_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].isLooping = value2;
+                            ScreenManager.screenControllers[(int)selectedScreen + ((int)ScreenManager.CurrentScreenEnum.ScreenMirror_1 - 1)].isLooping = value2;
                             break;
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch default option reached");
@@ -2447,9 +2283,6 @@ namespace CustomVideoPlayer
 
                     int firstMSPScreen = ((Math.Abs((int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A - (int)selectedScreen)) *
                         ScreenManager.totalNumberOfMSPScreensPerController) + (int)ScreenManager.CurrentScreenEnum.ScreenMSPA_1;
-
-                    int firstMSPReflScreen = ((Math.Abs((int)ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A - (int)selectedScreen)) *
-                        ScreenManager.totalNumberOfMSPReflectionScreensPerContr) + (int)ScreenManager.CurrentScreenEnum.ScreenRef_MSPA_r1;
 
                     switch (attrib)
                     {
@@ -2464,12 +2297,6 @@ namespace CustomVideoPlayer
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.brightness = value1;
                             }
-
-                            // msp 'reflection' screens
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.brightness = value1;
-                            }
                             break;
 
                         case ScreenManager.ScreenAttribute.contrast_attrib:
@@ -2478,60 +2305,40 @@ namespace CustomVideoPlayer
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.contrast = value1;
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.contrast = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.exposure_attib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.exposure = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.exposure = value1;
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.exposure = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.gamma_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.gamma = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.gamma = value1;
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.gamma = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.hue_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.hue = value1;
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.hue = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.saturation_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].colorCorrection.saturation = value1;
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].colorCorrection.saturation = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.transparent_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].isTransparent = value2;
                             if (value2) ScreenManager.screenControllers[(int)selectedScreen].screen.HideBody(); else ScreenManager.screenControllers[(int)selectedScreen].screen.ShowBody();
@@ -2541,90 +2348,64 @@ namespace CustomVideoPlayer
                                 ScreenManager.screenControllers[screenNumber].isTransparent = value2;
                                 if (value2) ScreenManager.screenControllers[screenNumber].screen.HideBody(); else ScreenManager.screenControllers[screenNumber].screen.ShowBody();
                             }
-
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].isTransparent = value2;
-                                if (value2) ScreenManager.screenControllers[screenNumber].screen.HideBody(); else ScreenManager.screenControllers[screenNumber].screen.ShowBody();
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.vignette_radius_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.radius = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].vignette.radius = value1;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].vignette.radius = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.vignette_softness_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.softness = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].vignette.softness = value1;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].vignette.softness = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.use_vignette_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.vignetteEnabled = value2;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].vignette.vignetteEnabled = value2;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].vignette.vignetteEnabled = value2;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.use_opalVignette_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].vignette.type = value2 ? "elliptical" : "rectangular";
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].vignette.type = value2 ? "elliptical" : "rectangular";
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].vignette.type = value2 ? "elliptical" : "rectangular";
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.use_curvature_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].isCurved = value2;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].isCurved = value2;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].isCurved = value2;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.use_auto_curvature_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].useAutoCurvature = value2;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].useAutoCurvature = value2;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].useAutoCurvature = value2;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.curvature_amount_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].curvatureDegrees = value1;
                             for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
                                 ScreenManager.screenControllers[screenNumber].curvatureDegrees = value1;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].curvatureDegrees = value1;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.aspect_ratio_attrib:
 
                             // either add parameter to helper function, or do the work in UIAction.
@@ -2635,12 +2416,8 @@ namespace CustomVideoPlayer
                                 ScreenManager.screenControllers[screenNumber].aspectRatioDefault = aspRatio;
                                 ScreenManager.screenControllers[screenNumber].ComputeAspectRatioFromDefault();
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].aspectRatioDefault = aspRatio;
-                                ScreenManager.screenControllers[screenNumber].ComputeAspectRatioFromDefault();
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.screen_color_attrib:
 
                             // either add parameter to helper function, or do the work in UIAction.
@@ -2649,11 +2426,8 @@ namespace CustomVideoPlayer
                             {
                                 ScreenManager.screenControllers[screenNumber].screenColor = scrColor;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
-                            {
-                                ScreenManager.screenControllers[screenNumber].screenColor = scrColor;
-                            }
                             break;
+
                         case ScreenManager.ScreenAttribute.screen_bloom_attrib:
 
                             // either add parameter to helper function, or do the work in UIAction.
@@ -2662,11 +2436,18 @@ namespace CustomVideoPlayer
                             {
                                 ScreenManager.screenControllers[screenNumber].bloom = value1;
                             }
-                            for (int screenNumber = firstMSPReflScreen; screenNumber <= ScreenManager.totalNumberOfMSPReflectionScreensPerContr - 1 + firstMSPReflScreen; screenNumber++)
+                            break;
+
+                        case ScreenManager.ScreenAttribute.looping_attrib:
+
+                            // either add parameter to helper function, or do the work in UIAction.
+                            ScreenManager.screenControllers[(int)selectedScreen].isLooping = value2;
+                            for (int screenNumber = firstMSPScreen; screenNumber <= ScreenManager.totalNumberOfMSPScreensPerController - 1 + firstMSPScreen; screenNumber++)
                             {
-                                ScreenManager.screenControllers[screenNumber].bloom = value1;
+                                ScreenManager.screenControllers[screenNumber].isLooping = value2;
                             }
                             break;
+
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch default option reached");
                             break;
@@ -2713,6 +2494,9 @@ namespace CustomVideoPlayer
                             break;
                         case ScreenManager.ScreenAttribute.screen_bloom_attrib:
                             ScreenManager.screenControllers[(int)selectedScreen].bloom = value1;
+                            break;
+                        case ScreenManager.ScreenAttribute.looping_attrib:
+                            ScreenManager.screenControllers[(int)selectedScreen].isLooping = value2;
                             break;
                         default:
                             Plugin.Logger.Error("SetScreenAttributeProperties() ScreenAttribute Switch 360 video default option reached");
@@ -2833,16 +2617,20 @@ namespace CustomVideoPlayer
             ScrHue = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.hue;
             ScrSaturation = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection.saturation;
             SetTransparency = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
+            SetLooping = ScreenManager.screenControllers[(int)selectedScreen].isLooping;
 
             // also initialize preview screen
             ScreenManager.screenControllers[0].colorCorrection = ScreenManager.screenControllers[(int)selectedScreen].colorCorrection;
             ScreenManager.screenControllers[0].isTransparent = ScreenManager.screenControllers[(int)selectedScreen].isTransparent;
+            ScreenManager.screenControllers[0].isLooping = ScreenManager.screenControllers[(int)selectedScreen].isLooping;
             ScreenManager.screenControllers[0].reverseUV = ScreenManager.screenControllers[(int)selectedScreen].reverseUV;
 
 
             // actualize those values for preview screen
             ScreenManager.screenControllers[0].SetShaderParameters();
-            ScreenManager.screenControllers[0].screen.SetBloomIntensity(ScreenManager.screenControllers[0].bloom);
+            // 2023 edit    ScreenManager.screenControllers[0].screen.SetBloomIntensity(ScreenManager.screenControllers[0].bloom);
+            //  bloom is no longer ui controlled
+            ScreenManager.screenControllers[0].screen.SetBloomIntensity(VideoConfig.DEFAULT_BLOOM);
             ScreenManager.screenControllers[0].SetScreenColor(ScreenColorUtil.ColorFromEnum(ScreenManager.screenControllers[0].screenColor));
 
             // should the preview screen be allowed to be transparent?
@@ -2935,11 +2723,6 @@ namespace CustomVideoPlayer
             InitPlacementSliderControls(false);
         }
 
-        private void UpdateVideoSourcePriorityButtonText()
-        {
-            vidSourceButtonText.text = ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst ? "Local" : "Custom";
-        }
-
         private void UpdateSelectedVideoParameters()
         {
             ShowSelectedScreen = ScreenManager.screenControllers[(int)selectedScreen].enabled;      // update screen enabled button value
@@ -2976,13 +2759,10 @@ namespace CustomVideoPlayer
             selectedVideo = UpdateVideoTitle();
 
             // update speed, offset display
-            UpdateVideoSourcePriorityButtonText();
-            currentVideoSpeedText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].videoSpeed);
-            RollingVideoQueue = ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue;   // fragment from old UI, left in place but invisible for now.
+
+            currentVideoSpeedText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].videoSpeed);           
             ReverseReflectionUV = ScreenManager.screenControllers[(int)selectedScreen].reverseReflection;
             ReversePrimaryUV = ScreenManager.screenControllers[(int)selectedScreen].reverseUV;
-            //        RollingOffset = ScreenManager.screenControllers[(int)selectedScreen].rollingOffsetEnable;  // will return in 2023!
-            //        AddScreenMirBool = ScreenManager.screenControllers[(int)selectedScreen].AddScreenRefl;
 
             SilenceUIAction = true;
             MirrorButtonState = ScreenManager.screenControllers[(int)selectedScreen].MirrorType;  
@@ -3009,6 +2789,9 @@ namespace CustomVideoPlayer
             {
                 switch (manualOffsetDelta)
                 {
+                    case manualOffsetDeltaEnum.hundredth:
+                        magnitude = 10;
+                        break;
                     case manualOffsetDeltaEnum.tenth:
                         magnitude = 100;
                         break;
@@ -3026,33 +2809,10 @@ namespace CustomVideoPlayer
 
             magnitude = isDecreasing ? magnitude * -1 : magnitude;
 
-            // find offset from video
+            ScreenManager.screenControllers[(int)selectedScreen].timingOffset += magnitude;
+            if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].timingOffset = 0;
 
-            if(ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal)
-            {
-                selectedVideo.offset += magnitude;  // bad assumption ... selectedVideo could be null.
-                ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = selectedVideo.offset;  // bad assumption ... selectedVideo could be null.
-                if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = selectedVideo.offset = 0;
-                currentVideoOffsetText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].fixedOffset / 1000f);
-
-                Save();    // save to video.json, probably ... fix!
-
-            }
-            else if(ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
-            {
-                VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset += magnitude;
-                ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset;
-                if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.customVideos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset = 0;
-                currentVideoOffsetText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].fixedOffset / 1000f);
-            }
-            else
-            {
-                VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset += magnitude;
-                ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset;
-                if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].fixedOffset = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].customVidOffset = 0;
-                currentVideoOffsetText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].fixedOffset / 1000f);
-            }
-
+            currentVideoOffsetText.text = String.Format("{0:0.00}", ScreenManager.screenControllers[(int)selectedScreen].timingOffset / 1000f);            
             UpdateGeneralInfoMessageText();  
         }
 
@@ -3095,11 +2855,6 @@ namespace CustomVideoPlayer
         private void UpdateGeneralInfoMessageText()
         {
             string multiScreenInfo = " ";
-
-            if (ScreenManager.screenControllers[(int)selectedScreen].rollingVideoQueue) // && selectedVideo.title == "CustomVideo Video")
-            {
-                multiScreenInfo = "Video queue advances each play";
-            }
 
             generalInfoMessageText.text = multiScreenInfo;
         }
@@ -3157,8 +2912,20 @@ namespace CustomVideoPlayer
                     multiScreenInfo = "Multi-Screen Placement is disabled";
                     break;
 
-                case MSPreset.P1_4Screens:
+                case MSPreset.P1_FOB:
+                    multiScreenInfo = "Video shown on Cinema, Left_Small, Right_Small";
+                    break;
+
+                case MSPreset.P1_FOBH:
+                    multiScreenInfo = "Video shown on Cinema, Left/Right_Small, Back_Huge";
+                    break;
+
+                case MSPreset.P1_4ScreensA:
                     multiScreenInfo = "Video shown on Center, Left, Right, Slant_S";
+                    break;
+
+                case MSPreset.P1_4ScreensB:
+                    multiScreenInfo = "Video shown on Center, Med_Left/Right, Back_Medium";
                     break;
 
                 case MSPreset.P2_1x3:
@@ -3233,32 +3000,6 @@ namespace CustomVideoPlayer
 
         #region Actions
 
-        [UIAction("on-video-source-priority-action")]
-        private void OnVideoSourcePriorityAction()
-        {
-            // loading local videos takes too long to properly update menu ... alert user to hit SourcePriorityButton again.
-            if (!VideoLoader.RetrieveLocalVideoDataCalled)
-            {
-                VideoLoader.Instance.RetrieveLocalVideoDataLater();
-                generalInfoMessageText.text = "Local Video Info loaded, press source priority again";
-            }
-            else
-            {
-                ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst = !ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst;
-                UpdateVideoSourcePriorityButtonText();
-                generalInfoMessageText.text = " ";
-                LoadVideoSettings(null);
-            }   
-        }
-
-        [UIAction("on-load-local-videos-action")]
-        private void OnLoadLocalVideosAction()
-        {
-            VideoLoader.Instance.RetrieveLocalVideoDataLater();
-
-            LoadVideoSettings(null); 
-        }
-
         [UIAction("on-previous-screen-action-preview-on")]
         private void OnPreviousScreenActionPreviewOn()
         {
@@ -3288,7 +3029,7 @@ namespace CustomVideoPlayer
             if(selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
-            if (!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal && !ScreenManager.screenControllers[(int)selectedScreen].enabled)
+            if (!ScreenManager.screenControllers[(int)selectedScreen].enabled)
             {
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
                     ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex;
@@ -3344,7 +3085,7 @@ namespace CustomVideoPlayer
                 selectedScreen = primaryScreensOnly ? ScreenManager.CurrentScreenEnum.Primary_Screen_1 : ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
-            if (!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal && !ScreenManager.screenControllers[(int)selectedScreen].enabled)
+            if (!ScreenManager.screenControllers[(int)selectedScreen].enabled)
             {
                 if (ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
                      ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex;
@@ -3375,19 +3116,23 @@ namespace CustomVideoPlayer
         {
             switch(manualOffsetDelta) 
             {                           
-                case manualOffsetDeltaEnum.tenth:
+                case manualOffsetDeltaEnum.ten:
                     manualOffsetDelta = manualOffsetDeltaEnum.one;
                     offsetMagnitudeButtonText.text = " 1 ";
                     break;
-                case manualOffsetDeltaEnum.one:
+                case manualOffsetDeltaEnum.onehundred:
                     manualOffsetDelta = manualOffsetDeltaEnum.ten;
                     offsetMagnitudeButtonText.text = " 10";
                     break;
-                case manualOffsetDeltaEnum.ten:
+                case manualOffsetDeltaEnum.hundredth:
                     manualOffsetDelta = manualOffsetDeltaEnum.onehundred;
                     offsetMagnitudeButtonText.text = "100";
                     break;
-                case manualOffsetDeltaEnum.onehundred:
+                case manualOffsetDeltaEnum.tenth:
+                    manualOffsetDelta = manualOffsetDeltaEnum.hundredth;
+                    offsetMagnitudeButtonText.text = "0.01";
+                    break;
+                case manualOffsetDeltaEnum.one:
                     manualOffsetDelta = manualOffsetDeltaEnum.tenth;
                     offsetMagnitudeButtonText.text = "0.1";
                     break;
@@ -3456,49 +3201,29 @@ namespace CustomVideoPlayer
 
             // local algorithm:
 
-            VideoDatas vids;
+            // VideoDatas vids;
+             
 
-            if (VideoLoader.levelsVideos.TryGetValue(selectedLevel, out vids) && ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst)
+            ScreenManager.screenControllers[(int)selectedScreen].videoIndex++;
+
+            // does not account for lists with 0 members ... should make a call to UpdateVideoTitle and let it do the heavy lifting ...
+
+            if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.threesixty)
             {
-                if (vids.activeVideo >= vids.Count - 1)
-                {
-                    vids.activeVideo = 0;
-                }
-                else
-                {
-                    ++vids.activeVideo;
-                }
-
-                
-                ScreenManager.screenControllers[(int)selectedScreen].localVideoIndex = vids.activeVideo;
-                ScreenManager.screenControllers[(int)selectedScreen].localLevel = selectedLevel;
-
-                Save();
+                if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex > VideoLoader.numberOf360Videos - 1) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = last360VideoIndex = 0;
+                ScreenManager.screenControllers[(int)selectedScreen].videoURL = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].videoPath;
             }
             else
-            { 
-
-                ScreenManager.screenControllers[(int)selectedScreen].videoIndex++;
-
-                // does not account for lists with 0 members ... should make a call to UpdateVideoTitle and let it do the heavy lifting ...
-
-                if (ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.threesixty)
-                {
-                    if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex > VideoLoader.numberOf360Videos - 1) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = last360VideoIndex = 0;
-                    ScreenManager.screenControllers[(int)selectedScreen].videoURL = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].videoPath;
-                }
-                else
-                {
-                    if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex > VideoLoader.numberOfCustomVideos - 1) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex = 0;
-                }
-            }
-
-            if (!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal)
             {
-                if (ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
-                    lastPrimaryVideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
-                else last360VideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+                if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex > VideoLoader.numberOfCustomVideos - 1) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = lastPrimaryVideoIndex = 0;
             }
+
+
+
+            if (ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
+                lastPrimaryVideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+            else last360VideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+
 
             LoadVideoSettings(null);   
 
@@ -3506,8 +3231,12 @@ namespace CustomVideoPlayer
             {
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
-             ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
+
+                // songPreviewPlayer.volume = 1;
+
+                /// SongPreviewPlayer.CrossfadeTo(audioClip, -5f, startTime, _currentLevel.songDuration, null);
+                /// Cinema uses harmony patch and new controller class ...
+                /// songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0.28f, 0, selectedLevel.songDuration);
             }
         }
 
@@ -3518,46 +3247,28 @@ namespace CustomVideoPlayer
 
             if (selectedLevel == null) return;
 
-            VideoDatas vids;
+            // VideoDatas vids;
             
-            if(VideoLoader.levelsVideos.TryGetValue(selectedLevel, out vids) && ScreenManager.screenControllers[(int)selectedScreen].localVideosFirst)
-            { 
-                if (vids.activeVideo <= 0)
-                {
-                    vids.activeVideo = vids.Count - 1;
-                }
-                else
-                {
-                    --vids.activeVideo;
-                }
+             
+            ScreenManager.screenControllers[(int)selectedScreen].videoIndex--;
 
-                ScreenManager.screenControllers[(int)selectedScreen].localVideoIndex = vids.activeVideo;
-                ScreenManager.screenControllers[(int)selectedScreen].localLevel = selectedLevel;
+            if(ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.threesixty)
+            {
+                if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex < 0) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = VideoLoader.numberOf360Videos - 1;
+                ScreenManager.screenControllers[(int)selectedScreen].videoURL = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].videoPath;
 
-                Save();
             }
             else
-            { 
-                ScreenManager.screenControllers[(int)selectedScreen].videoIndex--;
-
-                if(ScreenManager.screenControllers[(int)selectedScreen].screenType == ScreenManager.ScreenType.threesixty)
-                {
-                    if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex < 0) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = VideoLoader.numberOf360Videos - 1;
-                    ScreenManager.screenControllers[(int)selectedScreen].videoURL = VideoLoader.custom360Videos[ScreenManager.screenControllers[(int)selectedScreen].videoIndex].videoPath;
-
-                }
-                else
-                {
-                    if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex < 0) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = VideoLoader.numberOfCustomVideos - 1;
-                }
-            }
-
-            if(!ScreenManager.screenControllers[(int)selectedScreen].videoIsLocal)
             {
-                if(ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
-                    lastPrimaryVideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
-                else last360VideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+                if (ScreenManager.screenControllers[(int)selectedScreen].videoIndex < 0) ScreenManager.screenControllers[(int)selectedScreen].videoIndex = VideoLoader.numberOfCustomVideos - 1;
             }
+            
+
+
+            if(ScreenManager.screenControllers[(int)selectedScreen].screenType != ScreenManager.ScreenType.threesixty)
+                lastPrimaryVideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+            else last360VideoIndex = ScreenManager.screenControllers[(int)selectedScreen].videoIndex;
+
             
 
             LoadVideoSettings(null);   
@@ -3565,9 +3276,9 @@ namespace CustomVideoPlayer
             if (isPreviewing)
             {
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
-                ScreenManager.Instance.PlayPreviewVideo();   // this is now done from
-             ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
+                ScreenManager.Instance.PlayPreviewVideo(); 
+                // songPreviewPlayer.volume = 1;
+                // songPreviewPlayer.CrossfadeTo(selectedLevel.g.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0.28f, 0, selectedLevel.songDuration);
             }
         }
 
@@ -3584,8 +3295,8 @@ namespace CustomVideoPlayer
 
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
                 ScreenManager.Instance.PlayPreviewVideo();
-                ///   songPreviewPlayer.volume = 1;
-                songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0, selectedLevel.songDuration);
+                //   songPreviewPlayer.volume = 1;
+                //   songPreviewPlayer.CrossfadeTo(selectedLevel.GetPreviewAudioClipAsync(new CancellationToken()).Result, 0.28f, 0, selectedLevel.songDuration);
             }
 
             SetPreviewButtonText();
@@ -3648,7 +3359,7 @@ namespace CustomVideoPlayer
             else if(selectedLevel != null)
             {
                // ScreenManager.Instance.PrepareNonPreviewScreens();
-                selectedVideo = VideoLoader.Instance.GetVideo(selectedLevel);  
+                selectedVideo = VideoLoader.Instance.GetVideoCV(selectedLevel);  
                 ScreenManager.Instance.PreparePreviewScreen(selectedVideo);
 
                 // let ScreenManager take over

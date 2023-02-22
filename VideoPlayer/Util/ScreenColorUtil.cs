@@ -47,7 +47,7 @@ namespace CustomVideoPlayer.Util
 
             if (colorSchemesSettings == null) return;
 
-            ColorScheme curColorScheme = colorSchemesSettings.GetSelectedColorScheme();
+            ColorScheme curColorScheme = colorSchemesSettings.overrideDefaultColors ? colorSchemesSettings.GetSelectedColorScheme() : colorSchemesSettings.GetColorSchemeForId("TheFirst"); 
 
             if (curColorScheme == null) return;
 
