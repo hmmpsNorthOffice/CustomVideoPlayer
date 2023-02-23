@@ -54,7 +54,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 
 1. **Ensure CVP is enabled.**  (Enabled by default.  Button on bottom right.)
 
-2. **Select a screen using (-/+).**  Options include any of the six primary screens, any of the 3 MSP screens, or 1 of the two 360 screens. 
+2. **Select a screen using (-/+).**  Options include any of the six primary screens, any of the three MSP screens, or one of the two 360 screens. 
 
 3. **Enable that screen.**  (The screen button should be highlighted.)
 
@@ -137,32 +137,36 @@ Each of the six primary screens can be cloned and represented across one of the 
 
 There is currently two screens dedicated to 360 videos.  Only monoscopic equirectangular type videos will work.  I have been using the youtube-dl.exe utility in a DOS command shell to get these from Youtube.  Here is the structure of that command:
 
-*C:\temp>youtube-dl.exe -f bestvideo[ext=mp4] --user-agent '' URL*
+    C:\temp>youtube-dl.exe -f bestvideo[ext=mp4] --user-agent '' URL
 
 The videos need to be of type .mp4 and should be placed in the following directory:
 
-*Beat Saber/CustomVideos/360*
+    Beat Saber/CustomVideos/360
 
-2023 note : add ffmpeg batch to convert youtube cube format to equirectangular.
+If you need to convert from YouTube cubemap format to equirectangular format, use the following ffmpeg command.
+
+    ffmpeg -i input.mp4 -vf "v360=eac:equirect" output.mp4
+
 
 **Beat Saber/CustomVideos/VideoSets directory:**
 
-For typical use, .mp4 videos should be put into the *Beat Saber/CustomVideos* directory.  For purposes of library management it may sometimes be useful to move around entire folders of video files in and out of the CustomVideos directory.  This can be by moving folders into the *Beat Saber/CustomVideos/VideoSets* directory.  When the mod initializes it does a recursive search in this directory to import all .mp4 files, including subdirectories.
+For typical use, .mp4 videos should be put into the *Beat Saber/CustomVideos* directory.  For purposes of library management it may sometimes be useful to move around entire folders of video files in and out of the CustomVideos directory.  This can be done by moving folders into the *Beat Saber/CustomVideos/VideoSets* directory.  When the mod initializes it does a recursive search in this directory to import all .mp4 files, including subdirectories.
 
- *Beat Saber/CustomVideos/VideoSets/AnyName1*
-
- *Beat Saber/CustomVideos/VideoSets/AnyName2*
+    Beat Saber/CustomVideos/VideoSets/AnyName1
+    Beat Saber/CustomVideos/VideoSets/AnyName2
 
 **Caveats**
 
 * Does not import map's local video.  This feature was removed to make it less dependent on other mods and more future proof.
 * The preset called "P4\_4x4" uses more screens than the MSP controller has access to. It must be only used on MSP\_A and it will disable MSP\_B. 
 * Placement editing for MSP screens is not possible.
+* Recommend using 1080p videos.  4K videos may cause stuttering due to their file size and the amount of encoding that is necessary.
 
 ** Version History **
 
 **Added to Version 2.40**  February, 2023
 
+* Tested on Beat Saber 1.27.
 * Major cleanup of source code.
 * Offset timing is now associated to each screen, before it was to each video.
 * Screen color bug has been fixed for default color palettes.
