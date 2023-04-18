@@ -44,6 +44,9 @@ namespace CustomVideoPlayer
         {
            //  White, Red, Lime, Blue, Yellow, Cyan, Majenta, Silver, Gray, Maroon, Olive, Green, Purple, Teal, Navy
 
+            ScreenColorUtil.ScreenColorEnum.LeftBoost,
+            ScreenColorUtil.ScreenColorEnum.RightBoost,
+
             ScreenColorUtil.ScreenColorEnum.LeftLight,
             ScreenColorUtil.ScreenColorEnum.RightLight,
             ScreenColorUtil.ScreenColorEnum.LeftCube,
@@ -511,9 +514,11 @@ namespace CustomVideoPlayer
             // since sliders tend to fire multiple times ... check to see if it's necc to change sphere's scale
             if (ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Screen_360_A].sphereSize != val)
             {
-                ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Screen_360_A].sphereSize = val;
-                ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Screen_360_A].videoScreen.transform.localScale = new Vector3(val, val, val);
-                ScreenManager.screenControllers[(int)ScreenManager.CurrentScreenEnum.Screen_360_B].videoScreen.transform.localScale = new Vector3(val, val, val);
+                for (int screenNumber = (int)ScreenManager.CurrentScreenEnum.Screen_360_A; screenNumber < (int)ScreenManager.CurrentScreenEnum.Screen_360_A + ScreenManager.totalNumberOf360Screens; screenNumber++)
+                {
+                    ScreenManager.screenControllers[screenNumber].sphereSize = val;
+                    ScreenManager.screenControllers[screenNumber].videoScreen.transform.localScale = new Vector3(val, val, val);
+                } 
             }
         }
 
@@ -617,7 +622,7 @@ namespace CustomVideoPlayer
         private void OnContrastDecrementAction()
         {
             // not using auto-decrement so that multiple calls to NotifyPropertyChanged do not occur, probably not a big issue ...
-            float tempScrContrast = ((ScrContrast - 0.1f) < VideoConfig.ColorCorrection.MIN_CONTRAST) ? VideoConfig.ColorCorrection.MIN_CONTRAST : ScrContrast - 0.1f;
+            float tempScrContrast = ((ScrContrast - 0.05f) < VideoConfig.ColorCorrection.MIN_CONTRAST) ? VideoConfig.ColorCorrection.MIN_CONTRAST : ScrContrast - 0.05f;
 
             if (ScreenManager.screenControllers[0].colorCorrection.contrast != tempScrContrast)
             {
@@ -630,7 +635,7 @@ namespace CustomVideoPlayer
         [UIAction("on-contrast-increment-action")]
         private void OnContrastIncrementAction()
         {
-            float tempScrContrast = ((ScrContrast + 0.1f) > VideoConfig.ColorCorrection.MAX_CONTRAST) ? VideoConfig.ColorCorrection.MAX_CONTRAST : ScrContrast + 0.1f;
+            float tempScrContrast = ((ScrContrast + 0.05f) > VideoConfig.ColorCorrection.MAX_CONTRAST) ? VideoConfig.ColorCorrection.MAX_CONTRAST : ScrContrast + 0.05f;
 
             if (ScreenManager.screenControllers[0].colorCorrection.contrast != tempScrContrast)
             {
@@ -1974,6 +1979,8 @@ namespace CustomVideoPlayer
         public static Color selectedEnvColorRight = ScreenColorUtil._WHITE;
         public static Color selectedCubeColorLeft = ScreenColorUtil._WHITE;    // need to use actual red, blue defaults
         public static Color selectedCubeColorRight = ScreenColorUtil._WHITE;
+        public static Color selectedBoostColorLeft = ScreenColorUtil._WHITE;    
+        public static Color selectedBoostColorRight = ScreenColorUtil._WHITE;
 
         // I suppose there could be maps missing colors ...
         public static bool mapHasEnvLeftColor = false;
@@ -1984,6 +1991,11 @@ namespace CustomVideoPlayer
         public static bool mapHasCubeRightColor = false;
         public static Color mapCubeColorLeft = ScreenColorUtil._WHITE;
         public static Color mapCubeColorRight = ScreenColorUtil._WHITE;
+
+        public static bool mapHasBoostLeftColor = false;
+        public static bool mapHasBoostRightColor = false;
+        public static Color mapBoostColorLeft = ScreenColorUtil._WHITE;
+        public static Color mapBoostColorRight = ScreenColorUtil._WHITE;
 
         private IPreviewBeatmapLevel selectedLevel;
 
@@ -2749,7 +2761,16 @@ namespace CustomVideoPlayer
                     break;
 
                 case ScreenManager.ScreenType.threesixty:
-                    showScreenUIBoolText.text = (selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_A) ? "Screen 360 A" : "Screen 360 B";
+
+                    // *** code will have to change if we allow variable # of 360 screens.
+
+                    if (selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_A)
+                        showScreenUIBoolText.text = "Screen 360 A";
+                    else if (selectedScreen == ScreenManager.CurrentScreenEnum.Screen_360_B)
+                        showScreenUIBoolText.text = "Screen 360 B";
+                    else
+                        showScreenUIBoolText.text = "Screen 360 C";
+
                     placementButton1.interactable = placementButton2.interactable = placementButton3.interactable = placementButton4.interactable = false;
                     break;
 
@@ -2839,17 +2860,6 @@ namespace CustomVideoPlayer
                
             currentVideoSpeedText.text = String.Format("{0:0.0}", ScreenManager.screenControllers[(int)selectedScreen].videoSpeed);
             UpdateGeneralInfoMessageText();
-        }
-
-        private void Save()
-        {
-            return; // Cancelling save to resolve resource confilct with MVP
-
-         /*   if (selectedVideo != null && selectedVideo.title != "CustomVideo Video")
-            {
-                StopPreview(false);   
-                VideoLoader.SaveVideoToDisk(selectedVideo);
-            } */
         }
 
         private void UpdateGeneralInfoMessageText()
@@ -3025,7 +3035,7 @@ namespace CustomVideoPlayer
 
             // need to add logic to skip types with 0 videos in their lists ...
             if (--selectedScreen < ScreenManager.CurrentScreenEnum.Primary_Screen_1) selectedScreen = 
-                    primaryScreensOnly ? (ScreenManager.CurrentScreenEnum)ScreenManager.totalNumberOfPrimaryScreens : ScreenManager.CurrentScreenEnum.Screen_360_B;
+                    primaryScreensOnly ? (ScreenManager.CurrentScreenEnum)ScreenManager.totalNumberOfPrimaryScreens : ScreenManager.CurrentScreenEnum.Screen_360_C;
             if(selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A && (int) selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) selectedScreen = (ScreenManager.CurrentScreenEnum) ScreenManager.totalNumberOfPrimaryScreens;
 
             // if the screen is disabled, use the proper 'lastIndex' to initialize it.
@@ -3080,7 +3090,9 @@ namespace CustomVideoPlayer
             ScreenManager.Instance.ShowPreviewScreen(displayPreview);
 
             // need to add logic to skip types with 0 videos in their lists ...
-            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen_360_B) selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
+            // logic does not allow variable # of 360 screens
+
+            if (++selectedScreen > ScreenManager.CurrentScreenEnum.Screen_360_C) selectedScreen = ScreenManager.CurrentScreenEnum.Primary_Screen_1;
             if (selectedScreen < ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A && (int)selectedScreen > ScreenManager.totalNumberOfPrimaryScreens) 
                 selectedScreen = primaryScreensOnly ? ScreenManager.CurrentScreenEnum.Primary_Screen_1 : ScreenManager.CurrentScreenEnum.Multi_Screen_Pr_A;
 

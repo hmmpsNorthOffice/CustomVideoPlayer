@@ -123,9 +123,9 @@ namespace CustomVideoPlayer
 			internal static readonly float MIN_BRIGHTNESS = 0.1f;         // parameters in bsml must be set independently if changes are made
 			internal static readonly float DEFAULT_BRIGHTNESS = 1.0f;
 			internal static readonly float MAX_BRIGHTNESS = 1.0f;
-			internal static readonly float MIN_CONTRAST = 0.1f;
+			internal static readonly float MIN_CONTRAST = 0.8f;
 			internal static readonly float DEFAULT_CONTRAST = 1.0f;
-			internal static readonly float MAX_CONTRAST = 5.0f;
+			internal static readonly float MAX_CONTRAST = 2.0f;
 			internal static readonly float MIN_SATURATION = 0.1f;
 			internal static readonly float DEFAULT_SATURATION = 1.0f;
 			internal static readonly float MAX_SATURATION = 5.0f;

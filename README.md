@@ -6,7 +6,7 @@
 **Features**
 
 * 6 primary screens: Play up to 6 videos anywhere in the game environment.
-* 2 360 screens:  Play up to 2 equirectangular 360 videos.
+* 3 360 screens:  Play up to 3 equirectangular 360 videos.
 * 3 MSP (Multi Screen Placement) presets.  Several screens can be configured using the parameters associated with a single screen.  A UI dropdown list is used to select from several preset screen arrangements. 
 
 **Screen Options**
@@ -38,10 +38,10 @@ Videos must have an .mp4 extension.  Other extensions (.mkv, .mov, avi) will not
 
 **Prerequisite Mods:**
 
-    BS Utils v1.8.0
-    BeatSaberMarkupLanguage: v1.5.2
-    BSIPA: v4.1.6
-	SongCore v3.2.2
+    BS Utils v1.12.2
+    BeatSaberMarkupLanguage: v1.6.10
+    BSIPA: v4.2.2
+	SongCore v3.10.2
 
 **Installing the mod**
 
@@ -54,7 +54,7 @@ These are the necessary steps needed to configure this mod:  (*Essential steps i
 
 1. **Ensure CVP is enabled.**  (Enabled by default.  Button on bottom right.)
 
-2. **Select a screen using (-/+).**  Options include any of the six primary screens, any of the three MSP screens, or one of the two 360 screens. 
+2. **Select a screen using (-/+).**  Options include any of the six primary screens, any of the three MSP screens, or any of the three 360 screens. 
 
 3. **Enable that screen.**  (The screen button should be highlighted.)
 
@@ -135,7 +135,7 @@ Each of the six primary screens can be cloned and represented across one of the 
 
 **360 Videos:**
 
-There is currently two screens dedicated to 360 videos.  Only monoscopic equirectangular type videos will work.  I have been using the youtube-dl.exe utility in a DOS command shell to get these from Youtube.  Here is the structure of that command:
+There is currently three screens dedicated to 360 videos.  Only monoscopic equirectangular type videos will work.  I have been using the youtube-dl.exe utility in a DOS command shell to get these from Youtube.  Here is the structure of that command:
 
     C:\temp>youtube-dl.exe -f bestvideo[ext=mp4] --user-agent '' URL
 
@@ -163,6 +163,13 @@ For typical use, .mp4 videos should be put into the *Beat Saber/CustomVideos* di
 * Recommend using 1080p videos.  4K videos may cause stuttering due to their file size and the amount of encoding that is necessary.
 
 ** Version History **
+
+**Added to Version 2.41**  February, 2023
+
+* Tested on Beat Saber 1.29.1.
+* Added third 360 screen.
+* Added boost colors to options in screen color dropdown list.
+* Minor adjustments to color attributes slider granularity.
 
 **Added to Version 2.40**  February, 2023
 

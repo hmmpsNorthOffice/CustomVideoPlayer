@@ -128,7 +128,7 @@
       
       
       <horizontal>
-        <slider-setting text='Contrast' value='ScreenContrast' on-change="change-screen-contrast" bind-value='true' apply-on-change='true' integer-only='false' min='0.1' max='5.0' increment='0.1' all-uppercase='false' font-size='3' hover-hint='Adjusts contrast of current screen' />
+        <slider-setting text='Contrast' value='ScreenContrast' on-change="change-screen-contrast" bind-value='true' apply-on-change='true' integer-only='false' min='0.8' max='2.0' increment='0.05' all-uppercase='false' font-size='3' hover-hint='Adjusts contrast of current screen' />
         <button id='contrast-decrement-button' font-size='3' text='-' pad='1' on-click='on-contrast-decrement-action'/>
         <button id='contrast-increment-button' font-size='3' text='+' pad='1' on-click='on-contrast-increment-action'/>
       </horizontal>

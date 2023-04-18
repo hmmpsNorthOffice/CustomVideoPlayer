@@ -19,7 +19,7 @@ namespace CustomVideoPlayer.Util
      //   internal static Color _screenColorOff = Color.clear;
 
         /* List of colors from : https://www.rapidtables.com/web/color/RGB_Color.html */
-        public enum ScreenColorEnum { LeftLight, RightLight, LeftCube, RightCube, White, Red, Lime, Blue, Yellow, Cyan, Majenta, Silver, Gray, Maroon, Olive, Green, Purple, Teal, Navy, screenColorOn, screenColorOff };
+        public enum ScreenColorEnum {LeftBoost, RightBoost, LeftLight, RightLight, LeftCube, RightCube, White, Red, Lime, Blue, Yellow, Cyan, Majenta, Silver, Gray, Maroon, Olive, Green, Purple, Teal, Navy, screenColorOn, screenColorOff };
 
         internal static readonly Color _WHITE = new Color32(255, 255, 255, 0);  // old _screenOn used 0 alpha ... need to test this out still
         private static readonly Color _RED = new Color32(255, 0, 0, 0);
@@ -55,6 +55,8 @@ namespace CustomVideoPlayer.Util
             VideoMenu.selectedCubeColorRight = curColorScheme.saberBColor;
             VideoMenu.selectedEnvColorLeft = curColorScheme.environmentColor0;
             VideoMenu.selectedEnvColorRight = curColorScheme.environmentColor1;
+            VideoMenu.selectedBoostColorLeft = curColorScheme.environmentColor0Boost;
+            VideoMenu.selectedBoostColorRight = curColorScheme.environmentColor1Boost;
         }
 
         public static Color ColorFromEnum(ScreenColorEnum colorEnum)
@@ -68,6 +70,9 @@ namespace CustomVideoPlayer.Util
                 case ScreenColorEnum.RightLight: screenColor = VideoMenu.mapHasEnvRightColor ? VideoMenu.mapEnvColorRight : VideoMenu.selectedEnvColorRight; break;
                 case ScreenColorEnum.LeftCube: screenColor = VideoMenu.mapHasCubeLeftColor ? VideoMenu.mapCubeColorLeft : VideoMenu.selectedCubeColorLeft; break;
                 case ScreenColorEnum.RightCube: screenColor = VideoMenu.mapHasCubeRightColor ? VideoMenu.mapCubeColorRight : VideoMenu.selectedCubeColorRight; break;
+                case ScreenColorEnum.LeftBoost: screenColor = VideoMenu.mapHasBoostLeftColor ? VideoMenu.mapBoostColorLeft : VideoMenu.selectedBoostColorLeft; break;
+                case ScreenColorEnum.RightBoost: screenColor = VideoMenu.mapHasBoostRightColor ? VideoMenu.mapBoostColorRight : VideoMenu.selectedBoostColorRight; break;
+
 
                 case ScreenColorEnum.White: screenColor = _WHITE; break;
                 case ScreenColorEnum.Red: screenColor = _RED; break;

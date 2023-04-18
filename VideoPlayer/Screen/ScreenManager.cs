@@ -4,6 +4,7 @@ using CustomVideoPlayer.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -31,12 +32,13 @@ namespace CustomVideoPlayer
             ScreenMSPA_5, ScreenMSPA_6, ScreenMSPA_7, ScreenMSPA_8, ScreenMSPA_9, ScreenMSPB_1, ScreenMSPB_2, ScreenMSPB_3, ScreenMSPB_4, ScreenMSPB_5, ScreenMSPB_6, ScreenMSPB_7, 
             ScreenMSPB_8, ScreenMSPB_9, ScreenMSPC_1, ScreenMSPC_2, ScreenMSPC_3, ScreenMSPC_4, ScreenMSPC_5, ScreenMSPC_6, ScreenMSPC_7, ScreenMSPC_8, ScreenMSPC_9,
             ScreenMirror_1, ScreenMirror_2, ScreenMirror_3, ScreenMirror_4, ScreenMirror_5, ScreenMirror_6,
-            Multi_Screen_Pr_A, Multi_Screen_Pr_B, Multi_Screen_Pr_C, Screen_360_A, Screen_360_B
+            Multi_Screen_Pr_A, Multi_Screen_Pr_B, Multi_Screen_Pr_C, Screen_360_A, Screen_360_B, Screen_360_C
         };
 
         public static readonly int totalNumberOfPrimaryScreens = 6;
         public static readonly int totalNumberOfMSPControllers = 3;
-        public static readonly int totalNumberOfScreens = 45;
+        public static readonly int totalNumberOf360Screens = 3;
+        public static readonly int totalNumberOfScreens = 46;
         public static readonly int totalNumberOfMSPScreensPerController = 9;
 
         private double offsetSec = 0d;
@@ -174,27 +176,6 @@ namespace CustomVideoPlayer
             {
                 this.screen.GetRenderer().material.SetTexture(MainTex, texture);
             }
-
-
-            // this will make the ScreenPlacement call combatible with Cinemas version found in the Screen Class
-            // ... a major refactoring is due to better use classes based on the Cinema mod. 
-
-            /*
-            public void SetStaticTexture(Texture? texture)
-            {
-                if (texture == null)
-                {
-                    SetTexture(texture);
-                    return;
-                }
-
-                var width = ((float)texture.width / texture.height) * _defaultCoverHeight;
-                SetTexture(texture);
-                SetPlacement(_defaultCoverPosition, _defaultCoverRotation, width, _defaultCoverHeight);
-                ScreenColor = _screenColorOn;
-            }
-
-            */
 
             internal void ComputeAspectRatioFromDefault()
             {
@@ -351,7 +332,7 @@ namespace CustomVideoPlayer
             screenControllers = new List<ScreenController>();
 
             // Initialize traditional 2d screens
-            for (int screenNumber = 0; screenNumber < totalNumberOfScreens - 2; screenNumber++)
+            for (int screenNumber = 0; screenNumber < totalNumberOfScreens - totalNumberOf360Screens; screenNumber++)
             {
                 ScreenController scrControl = new ScreenController();
 
@@ -359,7 +340,16 @@ namespace CustomVideoPlayer
                 screenControllers[screenNumber].screen.Hide();
             }
 
-            // create and initialize 360 screen and add it to controller array
+            // Initialize 360 screens
+            for (int screenNumber = (int)CurrentScreenEnum.Screen_360_A; screenNumber < (int)CurrentScreenEnum.Screen_360_A + totalNumberOf360Screens; screenNumber++)
+            {
+                ScreenController scrControl360 = new ScreenController();
+
+                screenControllers.Add(InitController360(scrControl360, screenNumber));
+                screenControllers[screenNumber].screen.Hide();
+            }
+
+            /* create and initialize 360 screen and add it to controller array     // xxx March22 2023
             ScreenController scrControl360a = new ScreenController();
             screenControllers.Add(InitController360(scrControl360a, 1));
             screenControllers[(int)CurrentScreenEnum.Screen_360_A].screen.Hide();
@@ -367,7 +357,7 @@ namespace CustomVideoPlayer
             ScreenController scrControl360b = new ScreenController();
             screenControllers.Add(InitController360(scrControl360b, 2));
             screenControllers[(int)CurrentScreenEnum.Screen_360_B].screen.Hide();
-
+            */
         }
 
         private ScreenController InitController(ScreenController scrControl, int screenNumber)
@@ -600,7 +590,7 @@ namespace CustomVideoPlayer
             //  screenControllers[0].vsRenderer.material.color = Color.clear;
             screenControllers[0].screen.Hide();
 
-            // Since each Primary screen has an associated reflection screen and MSPControllers handle multiple screens,
+            // Since each Primary screen has an associated mirror screen and MSPControllers handle multiple screens,
             // I chose to handle them as distinct groups when it comes to dealing with offsets.
 
             for (int screenNumber = 1; screenNumber <= totalNumberOfPrimaryScreens; screenNumber++)
@@ -618,7 +608,17 @@ namespace CustomVideoPlayer
                 }
             }
 
-            if(screenControllers[(int)CurrentScreenEnum.Screen_360_A].enabled)
+
+            for (int screenNumber = (int)CurrentScreenEnum.Screen_360_A; screenNumber < (int)CurrentScreenEnum.Screen_360_A + totalNumberOf360Screens; screenNumber++)
+            {
+                if (screenControllers[screenNumber].enabled)
+                {
+                    StartCoroutine(Play360ScreenWithOffset(screenNumber));
+                }
+            }
+            // xxx march22 2023
+            /*
+            if (screenControllers[(int)CurrentScreenEnum.Screen_360_A].enabled)
             {
                 StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen_360_A));
             }
@@ -627,6 +627,7 @@ namespace CustomVideoPlayer
             {
                 StartCoroutine(Play360ScreenWithOffset((int)CurrentScreenEnum.Screen_360_B));
             }
+            */
 
             screenControllers[0].videoPlayer.Pause();
             screenControllers[0].screen.Hide();
@@ -1123,16 +1124,21 @@ namespace CustomVideoPlayer
 
                 if (screenControllers[screenNumber].enabled)
                 {
+                    // for 360 screens, just set active and give url
+                    if (screenControllers[screenNumber].screenType == ScreenType.threesixty)
+                    {
+                        screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
+                        screenControllers[screenNumber].videoPlayer.url = VideoLoader.custom360Videos[screenControllers[screenNumber].videoIndex].videoPath;
+                    }
 
-                    if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(true);   //  videoScreen != screen issue on 360
-                    else screenControllers[screenNumber].screen.Hide(); //2023
-
-                    if (screenControllers[screenNumber].screenType != ScreenType.threesixty)      // Set Placement
+                    else // set 2d screen placement
                     {
                         Vector3 posVector = new Vector3(1.0f, 1.0f, 1.0f);
                         Vector3 rotVector = new Vector3(1.0f, 1.0f, 1.0f); 
                         float scrScalefloat = 1.0f;
-                     
+
+                        screenControllers[screenNumber].screen.Hide();
+
                         // process primary screen mirroring placement based on 'mirrorType'
                         if (screenNumber >= (int)CurrentScreenEnum.ScreenMirror_1 && screenNumber <= (int)CurrentScreenEnum.ScreenMirror_6)
                         {
@@ -1186,10 +1192,6 @@ namespace CustomVideoPlayer
                         screenControllers[screenNumber].videoPlayer.url = VideoLoader.customVideos[screenControllers[screenNumber].videoIndex].videoPath;
                         // Plugin.Logger.Debug("db018 ... and the filepath is ... " + screenControllers[screenNumber].videoURL);
                     }
-                    else if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B)
-                    {
-                        screenControllers[screenNumber].videoPlayer.url = VideoLoader.custom360Videos[screenControllers[screenNumber].videoIndex].videoPath;
-                    }
 
                     //   screenControllers[screenNumber].videoPlayer.url = screenControllers[screenNumber].videoURL;      // this would work if we initialized values properly, 
                     // but the videoIndex will always be valid.
@@ -1211,7 +1213,7 @@ namespace CustomVideoPlayer
                 {
                     screenControllers[screenNumber].SetScreenColor(ScreenColorUtil._SCREENOFF);
 
-                    if (screenNumber == (int)CurrentScreenEnum.Screen_360_A || screenNumber == (int)CurrentScreenEnum.Screen_360_B) screenControllers[screenNumber].videoScreen.gameObject.SetActive(false);   //  videoScreen != screen issue on 360
+                    if (screenControllers[screenNumber].screenType == ScreenType.threesixty) screenControllers[screenNumber].videoScreen.gameObject.SetActive(false);   //  videoScreen != screen issue on 360
                     else screenControllers[screenNumber].screen.Hide();
                 }
             }
@@ -1298,16 +1300,15 @@ namespace CustomVideoPlayer
             ShowPreviewScreen(LeavePreviewScreenOn);
             if (screenControllers[0].videoPlayer.isPlaying) screenControllers[0].videoPlayer.Stop();
 
-            for (int screenNumber = 1; screenNumber < totalNumberOfScreens-2; screenNumber++)
+            for (int screenNumber = 1; screenNumber < totalNumberOfScreens; screenNumber++)
             {
-                screenControllers[screenNumber].screen.Hide();
-                if (screenControllers[screenNumber].videoPlayer.isPlaying) screenControllers[screenNumber].videoPlayer.Stop();
-            }
-            screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoScreen.SetActive(false);
-            screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoScreen.SetActive(false);
-            if (screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen_360_A].videoPlayer.Stop();
-            if (screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoPlayer.isPlaying) screenControllers[(int)CurrentScreenEnum.Screen_360_B].videoPlayer.Stop();
+                if (screenControllers[screenNumber].screenType == ScreenType.threesixty)
+                    screenControllers[screenNumber].videoScreen.SetActive(false); 
+                else screenControllers[screenNumber].screen.Hide();
 
+                if (screenControllers[screenNumber].videoPlayer.isPlaying) screenControllers[screenNumber].videoPlayer.Stop();
+                
+            }
         }
 
 
