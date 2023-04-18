@@ -164,7 +164,7 @@ For typical use, .mp4 videos should be put into the *Beat Saber/CustomVideos* di
 
 ** Version History **
 
-**Added to Version 2.41**  February, 2023
+**Added to Version 2.41**  April, 2023
 
 * Tested on Beat Saber 1.29.1.
 * Added third 360 screen.
