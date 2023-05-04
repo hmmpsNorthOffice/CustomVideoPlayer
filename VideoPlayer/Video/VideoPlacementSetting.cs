@@ -15,6 +15,7 @@ namespace CustomVideoPlayer.Util
         PreviewScreenInMenu, PreviewScreenLeft,
         MVP_Background, MVP_BackgroundLow, Cinema,                                                      // MVP, Cinema compatible
         Center, Back_Medium, Back_Huge,                                                                 // vertical
+        BoxN, BoxS, BoxW, BoxE,                                                                         // Boxed in MSP
         Slant_Small, Slant_Large,                                                                       // slanted
         Left_Small, Right_Small,                                                                        // left/right small
         Left_Medium, Right_Medium,                                                                      // left/right medium
@@ -74,6 +75,15 @@ namespace CustomVideoPlayer.Util
 
                 case VideoPlacement.Cinema:
                     return new Vector3(0, 12.4f, 67.8f);
+
+                case VideoPlacement.BoxN:
+                    return new Vector3(0, 13.5f, 143);
+                case VideoPlacement.BoxW:
+                    return new Vector3(-195, 18, 0);
+                case VideoPlacement.BoxE:
+                    return new Vector3(195, 18, 0);
+                case VideoPlacement.BoxS:
+                    return new Vector3(0, 13.5f, -143);
 
                 case VideoPlacement.Center:
                     return new Vector3(0, 5, 75);   
@@ -317,6 +327,16 @@ namespace CustomVideoPlayer.Util
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Cinema:
                     return new Vector3(-8, 0, 0);
+
+                case VideoPlacement.BoxS:
+                    return new Vector3(0, 180, 0);
+                case VideoPlacement.BoxN:
+                    return new Vector3(0, 0, 0);
+                case VideoPlacement.BoxW:
+                    return new Vector3(0, -90, 0);
+                case VideoPlacement.BoxE:
+                    return new Vector3(0, 90, 0);
+
                 case VideoPlacement.Center:
                     return new Vector3(0, 0, 0);
                 case VideoPlacement.Back_Medium:
@@ -540,6 +560,13 @@ namespace CustomVideoPlayer.Util
                     return 200;
                 case VideoPlacement.Back_Huge:
                     return 900;
+
+                case VideoPlacement.BoxS:
+                case VideoPlacement.BoxN:
+                    return 160;
+                case VideoPlacement.BoxW:
+                case VideoPlacement.BoxE:
+                    return 220;
 
                 case VideoPlacement.Slant_Small:
                     return 2;

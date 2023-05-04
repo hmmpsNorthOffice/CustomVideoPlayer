@@ -125,7 +125,7 @@ namespace CustomVideoPlayer
             public IPreviewBeatmapLevel localLevel;
             public string title;
             public string videoURL;
-            public int timingOffset = 0;
+            public int timingOffset = -1000;
             
 
             public object instance { get; internal set; }
@@ -495,7 +495,7 @@ namespace CustomVideoPlayer
             scrControl.videoPlayer.targetMaterialRenderer = scrControl.vsRenderer;
 
             scrControl.videoPlayer.playbackSpeed = 1f;
-            scrControl.videoPlayer.time = 0d;
+            scrControl.videoPlayer.time = -1000d;
             scrControl.videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
             scrControl.videoPlayer.SetDirectAudioMute(0, true);
             scrControl.videoPlayer.SetDirectAudioMute(1, true);
@@ -517,7 +517,7 @@ namespace CustomVideoPlayer
                 screenControllers[screenNumber].MirrorType = VideoMenu.MirrorScreenType.Mirror_Off;
                 screenControllers[screenNumber].videoSpeed = 1f;
                 screenControllers[screenNumber].videoIndex = 0;
-                screenControllers[screenNumber].timingOffset = 0;
+                screenControllers[screenNumber].timingOffset = -1000; // Since Beat Sage has default 1 sec map offset
                 screenControllers[screenNumber].title = "not set";
                 screenControllers[screenNumber].videoURL = "not set";
             }
@@ -823,6 +823,35 @@ namespace CustomVideoPlayer
                     case VideoMenu.MSPreset.MSP_Off:
                         break;
 
+                    case VideoMenu.MSPreset.P1_Box3:
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.BoxN);
+                        screenControllers[firstMSPScreen].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen].aspectRatio = 16f / 10f;
+                        screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.BoxW);
+                        screenControllers[firstMSPScreen + 1].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen + 1].aspectRatio = 16f / 10f;
+                        screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.BoxE);
+                        screenControllers[firstMSPScreen + 2].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen + 2].aspectRatio = 16f / 10f;
+                        numPresetScreens = 3;
+                        break;
+
+                    case VideoMenu.MSPreset.P1_Box4:
+                        screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.BoxN);
+                        screenControllers[firstMSPScreen].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen].aspectRatio = 16f / 10f;
+                        screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.BoxW);
+                        screenControllers[firstMSPScreen + 1].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen + 1].aspectRatio = 16f / 10f;
+                        screenControllers[firstMSPScreen + 2].InitPlacementFromEnum(VideoPlacement.BoxE);
+                        screenControllers[firstMSPScreen + 2].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen + 2].aspectRatio = 16f / 10f;
+                        screenControllers[firstMSPScreen + 3].InitPlacementFromEnum(VideoPlacement.BoxS);
+                        screenControllers[firstMSPScreen + 3].aspectRatioDefault = ScreenAspectRatio._16x10;
+                        screenControllers[firstMSPScreen + 3].aspectRatio = 16f / 10f;
+                        numPresetScreens = 4;
+                        break;
+
                     case VideoMenu.MSPreset.P1_FOB:
                         screenControllers[firstMSPScreen].InitPlacementFromEnum(VideoPlacement.Cinema);
                         screenControllers[firstMSPScreen + 1].InitPlacementFromEnum(VideoPlacement.Left_Small);
@@ -1058,8 +1087,8 @@ namespace CustomVideoPlayer
 
                 }
 
-                if((numPresetScreens > 0) && (numPresetScreens < 10)) 
-                { 
+                if ((numPresetScreens > 0) && (numPresetScreens < 10))
+                {
                     for (int screenNumber = 0; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
                     {
                         if (screenNumber < numPresetScreens && screenControllers[mspControllerNumber].enabled)
@@ -1079,6 +1108,13 @@ namespace CustomVideoPlayer
                         }
                         else screenControllers[firstMSPScreen + screenNumber].enabled = false;
                     }
+
+                    // Ensure unused MSP screens are inactive.
+                    for (int screenNumber = numPresetScreens; screenNumber <= totalNumberOfMSPScreensPerController - 1; screenNumber++)
+                    {
+                        screenControllers[firstMSPScreen + screenNumber].enabled = false;
+                    }
+
                 }
             }
            

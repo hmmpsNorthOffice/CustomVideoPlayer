@@ -208,7 +208,7 @@ namespace CustomVideoPlayer
 
 
 
-        public enum MSPreset { MSP_Off, P1_FOB, P1_FOBH, P1_4ScreensA, P1_4ScreensB, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
+        public enum MSPreset { MSP_Off, P1_Box3, P1_Box4, P1_FOB, P1_FOBH, P1_4ScreensA, P1_4ScreensB, P2_1x3, P3_2x2_Medium, P3_2x2_Large, P3_2x2_Huge, P4_3x3,
             P4_4x4, P5_2x2_Slant, P6_2x2_Floor_M, P6_2x2_Ceiling_M, P6_2x2_Floor_H90, P6_2x2_Floor_H360, P6_2x2_Ceiling_H90, P6_2x2_Ceiling_H360,
             P7_Octagon, P8_360_Cardinal_H, P8_360_Ordinal_H, P7_Hexagon
         };
@@ -218,6 +218,8 @@ namespace CustomVideoPlayer
         private List<object> multiScreenModes = (new object[]
         {
             MSPreset.MSP_Off,
+            MSPreset.P1_Box3,
+            MSPreset.P1_Box4,
             MSPreset.P1_FOB,
             MSPreset.P1_FOBH,
             MSPreset.P1_4ScreensA,
@@ -2144,7 +2146,7 @@ namespace CustomVideoPlayer
                 previousVideoButton.gameObject.SetActive(false);
                 previewButton1.interactable = false;
 
-                currentVideoOffsetText.text = String.Format("{0:0.00}", 0d);
+                currentVideoOffsetText.text = String.Format("{0:0.00}", -1d);
             }
             else if (numberOfVideos == 1)
             {
@@ -2831,7 +2833,7 @@ namespace CustomVideoPlayer
             magnitude = isDecreasing ? magnitude * -1 : magnitude;
 
             ScreenManager.screenControllers[(int)selectedScreen].timingOffset += magnitude;
-            if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].timingOffset = 0;
+            if (resetToZero) ScreenManager.screenControllers[(int)selectedScreen].timingOffset = -1000;
 
             currentVideoOffsetText.text = String.Format("{0:0.00}", ScreenManager.screenControllers[(int)selectedScreen].timingOffset / 1000f);            
             UpdateGeneralInfoMessageText();  
@@ -2920,6 +2922,10 @@ namespace CustomVideoPlayer
             {
                 case MSPreset.MSP_Off:      
                     multiScreenInfo = "Multi-Screen Placement is disabled";
+                    break;
+
+                case MSPreset.P1_Box3:
+                    multiScreenInfo = "Large Box with 3 sides (North, East, West)";
                     break;
 
                 case MSPreset.P1_FOB:

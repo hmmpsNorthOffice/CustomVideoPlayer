@@ -23,7 +23,7 @@
         <horizontal horizontal-fit='PreferredSize' align='left'>
           <text id='offset-text' text='Offset' align='Left' font-size='3'></text>
           <button id='offset-decrease-button' font-size='3' hover-hint='Starts Video Later' text='-' pad='1' on-click='on-offset-decrease-action'/>
-          <text id='current-video-offset' text='0.00' align='Center'></text>
+          <text id='current-video-offset' text='-1.00' align='Center'></text>
           <button id='offset-increase-button' font-size='3' hover-hint='Starts Video Earlier' text='+' pad='1' on-click='on-offset-increase-action' all-uppercase='false'/>
           <button id='offset-magnitude-button' text=' 1 ' on-click='on-offset-magnitude-action' pad='1' font-size='3'/>
           <button id='offset-reset-button' hover-hint='Resets offset to zero' text='R' pad='1' on-click='on-offset-reset-action' all-uppercase='false' font-size='3'/> 
@@ -52,8 +52,7 @@
     
     <horizontal  pad='2' font-size='3' preferred-width='80' horizontal-fit='PreferredSize'>
        <vertical  pad-top='22'>
-         <horizontal pad-right='4' child-control-width='true' spacing='1' pad-top='3'>
-             <button id='video-source-priority-button' active='false' text='Local' hover-hint='Choose video source location priority' on-click='on-video-source-priority-action' all-uppercase='false' pad='1' pref-width='18' preferred-height='7' font-size='3'/> 
+         <horizontal pad-right='4' child-control-width='true' spacing='1' pad-top='3'>          
             <button id='previous-screen-button' font-size='3' hover-hint='Select Previous Screen' text='-' pad='1' on-click='on-previous-screen-action-preview-on'/>
             <vertical preferred-width='25' pad-top='2'>
               <modifier id='showSelectedScreenCheck' text="Primary Screen 1" value="showSelectedScreenValue" on-change="show-selected-screen"  bind-value='true' hover-hint="Show/Hide Current Video Screen" align='Right' source="CustomVideoPlayer.Resources.power button white.png" preferred-height='3' />

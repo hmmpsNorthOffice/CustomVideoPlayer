@@ -111,7 +111,9 @@ There are six primary screens which can be configured with their own set of para
 The idea of ‘multi-screen placement’ presets began when I wanted to create arrangements of videos exclusively for 90/360 maps.  In the beginning there were just two presets; one with four screens (90) and one with eight (360).  I then started playing with 4K videos cropped into 4 parts and then played back as one.  The idea evolved to include 3k videos (5760 x 1080) which I created from slideshows of desktop wallpaper associated with 3 monitor setups.  Although it is a bit over the top, I included 6k and 8k videos as well.  I’ve found that if the videos were 30fps, my older 6700k/2070s setup could handle up to around 20 videos before they would begin to lag. 
 
 *Available Multi Screen Placement Presets:*
-  
+ 
+**P1\_Box3, P1\_Box4** *3/4 screens - Creates a box around player.  North, East, West (Box4 adds South)*
+ 
 **P1\_4Screens\_A, P1\_4Screens\_B** *4 screens - Center, Slant\_Small, NorthWest, NorthEast*
 
 **P2\_1x3** *3K videos (5760x1080) - Front facing orientation. 3 screens - Center\_Left, Center, Center\_Right*
@@ -163,6 +165,12 @@ For typical use, .mp4 videos should be put into the *Beat Saber/CustomVideos* di
 * Recommend using 1080p videos.  4K videos may cause stuttering due to their file size and the amount of encoding that is necessary.
 
 ** Version History **
+
+**Added to Version 2.42**  May, 2023
+
+* Changed default screen timing offset to -1 seconds.  This is the default for maps made using Beat Sage.
+* Added Box3 and Box4 MSP presets.
+* Fixed MSP bug that could leave unused screens visible.
 
 **Added to Version 2.41**  April, 2023
 
